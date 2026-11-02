@@ -7,6 +7,17 @@ beforeEach(() => localStorage.clear());
 afterEach(cleanup);
 
 describe('learning journey smoke', () => {
+  it('shows a safe fallback rather than clamping an invalid generated rate', () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: /08.*GenAI/ }));
+    fireEvent.click(screen.getByRole('tab', { name: /Explore/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Run sanitize_llm_draft/ }));
+    expect(screen.getByText(/Rejected.*stub_fallback/)).toBeTruthy();
+    fireEvent.change(screen.getByRole('slider'), { target: { value: '0.03' } });
+    fireEvent.click(screen.getByRole('button', { name: /Run sanitize_llm_draft/ }));
+    expect(screen.getByText(/Accepted.*0.030/)).toBeTruthy();
+  });
+
   it('navigates lesson tabs by keyboard and opens progress details', () => {
     render(<App />);
     const learn = screen.getByRole('tab', { name: /Learn & predict/ });

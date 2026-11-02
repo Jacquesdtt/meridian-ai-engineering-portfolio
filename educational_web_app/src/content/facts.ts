@@ -209,11 +209,11 @@ export const CATWOE: CatwoeItem[] = [
     summary: 'What real-world limitations and policy constraints must be respected?',
     details: [
       'AppLocker enterprise policy: Blocks local .venv wrappers and native C++ vector DBs like Chroma.',
-      'Zero Data Retention (ZDR) & financial privacy: No customer PII sent to external LLMs.',
+      'Financial privacy: Filter customer PII before draft calls. Pattern-based filtering does not guarantee no PII exposure or provider zero retention.',
       'Responsible AI & Banking guardrails: Offered interest rate hard-capped at ≤3.5%; fairness EOD disclosed.',
       'Timeline: Compressed 10-day sprint cycle requiring pragmatic, committed model artifacts.',
     ],
-    meridianImpact: 'Forced global py -3.13 -m launcher, SQLite WAL, pure-Python RAG, and Pydantic rate clamping.',
+    meridianImpact: 'Forced global py -3.13 -m launcher, SQLite WAL, pure-Python RAG, and Pydantic offer validation.',
   },
 ];
 
@@ -269,8 +269,8 @@ export const POPIT: PopitDimension[] = [
     name: 'Information',
     summary: 'Data assets, security, knowledge representation, and audit trails.',
     points: [
-      'Zero Data Retention (ZDR): Sensitive account numbers, balances, and PII are scrubbed prior to any LLM prompt evaluation.',
-      'Structured intelligence: Deriving calibrated churn risk scores, global SHAP drivers, and guardrailed draft copy.',
+      'PII filtering drops blocked identity fields and redacts common text patterns. Selected numeric balances can remain in draft context; provider retention settings need separate validation.',
+      'Structured intelligence: Uncalibrated churn ranking scores, global draft drivers, separate per-customer SHAP explanations, and validated draft copy.',
       'Immutable audit logging: SQLite WAL database records every review action, role header, timestamp, and attention checkbox state.',
     ],
     meridianImpact: 'Strict Pydantic schemas (ADR 002) with extra="forbid" guarantee predictable, typed data interchange between serving and frontend.',
@@ -341,7 +341,7 @@ export const RASCI_MATRIX: RasciStream[] = [
     deliverable: 'Zero Data Retention scrubbing, rate cap (≤3.5%), Friction-Gate HITL, Glass-Box RBAC, Model Card disclosure',
     accountable: 'Jamie (Risk & Compliance / Arvind)',
     assignments: [
-      { role: 'R', party: 'AI Engineer', title: 'Solo AI Engineer', why: 'Implements PII scrubbing, Pydantic clamping, audit logging, and RBAC middleware.' },
+      { role: 'R', party: 'AI Engineer', title: 'Solo AI Engineer', why: 'Implements PII scrubbing, Pydantic offer validation, audit logging, and RBAC middleware.' },
       { role: 'A', party: 'Jamie', title: 'Risk & Compliance', why: 'Sole sign-off on anti-predatory rate compliance, HITL enforcement, and fairness disclosures.' },
       { role: 'S', party: 'Automated Pytest Suite', title: 'pytest suite & SQLite WAL', why: 'Hand-run regression suite (no CI for pytest yet) and tamper-evident review audit trails.' },
       { role: 'C', party: 'Sam', title: 'Head of Data Science', why: 'Consulted on Equalized Odds difference calculations and SHAP glass-box integration.' },
@@ -399,8 +399,8 @@ export const GENAI = {
   ragNote: 'No Chroma/FAISS — BM25 + Azure dense embeddings fused with RRF, then LLM rerank; all pure-Python, in-memory (ADR 010 + ADR 015).',
   /** rag_engine.py corpus: the Official report only (Methodology Q&A tab). Drafter uses no RAG. */
   ragCorpus: 'Docs/Final_Report_Official.md',
-  /** sanitize_llm_draft clamps min(rate, 0.035); Pydantic rejects only unclamped values. */
-  rateCapBehaviour: 'Clamped to 3.5% by sanitize_llm_draft; Pydantic is the backstop that rejects anything unclamped.',
+  /** Pydantic rejects excess rates and numeric percentage claims above the validated offer. */
+  rateCapBehaviour: 'Rates above 3.5% and numeric percentage claims above the offer are rejected. Invalid Azure output uses stub_fallback. Human review still checks wording and unsupported claims.',
   /** Tenacity retries transient Azure errors, then the stub drafts instead. No redraft loop. */
   retryAttempts: 5,
   fastDecideSeconds: 8,
@@ -592,7 +592,7 @@ export const ANTI_CLAIMS = [
   'dtreeviz diagrams produced (attempted, skipped: Lag3 NaNs)',
   'Drafter grounded by RAG over past retention emails',
   'Per-customer SHAP in drafts (they carry frozen global drivers)',
-  'Rate above 3.5% “rejected” (it is clamped)',
+  'Clamping the numeric rate makes every promise in the email safe',
   'Fast approval is blocked (it is a logged soft warning)',
   'Fairness is a release gate (measured + disclosed only)',
   'CI gating the model / API tests (only the teaching app has a workflow; pytest is run by hand)',

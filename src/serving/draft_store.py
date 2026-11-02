@@ -15,6 +15,7 @@ import json
 import logging
 import sqlite3
 import uuid
+from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
@@ -73,7 +74,7 @@ def _connect(db_path: Path | None = None) -> sqlite3.Connection:
 
 def init_db(db_path: Path | None = None) -> None:
     """Create draft + audit tables if missing."""
-    with _connect(db_path) as conn:
+    with closing(_connect(db_path)) as conn, conn:
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS drafts (
@@ -149,7 +150,7 @@ def record_audit(
 ) -> dict[str, Any]:
     """Append one audit row (Jamie glass-box trail)."""
     init_db(db_path)
-    with _connect(db_path) as conn:
+    with closing(_connect(db_path)) as conn, conn:
         event = _insert_audit_row(
             conn,
             action=action,
@@ -179,7 +180,7 @@ def list_audit_events(
         List of plain dicts with parsed ``detail`` JSON (not sqlite Rows).
     """
     init_db(db_path)
-    with _connect(db_path) as conn:
+    with closing(_connect(db_path)) as conn, conn:
         if draft_id is None:
             rows = conn.execute(
                 "SELECT * FROM audit_events ORDER BY created_at DESC LIMIT ?",
@@ -246,7 +247,9 @@ def insert_draft(
     now = _utc_now()
     # Re-validate bounds before persist
     draft = RetentionDraftBody.model_validate(draft.model_dump())
-    with _connect(db_path) as conn:
+    with closing(_connect(db_path)) as conn, conn:
+        # Reserve the writer before counting so concurrent inserts cannot exceed the cap.
+        conn.execute("BEGIN IMMEDIATE")
         n = conn.execute(
             "SELECT COUNT(*) AS n FROM drafts WHERE status = ?",
             (DraftStatus.pending_review.value,),
@@ -298,7 +301,7 @@ def get_draft(draft_id: str, db_path: Path | None = None) -> DraftRecord:
         KeyError: If no row exists (API maps this to HTTP 404).
     """
     init_db(db_path)
-    with _connect(db_path) as conn:
+    with closing(_connect(db_path)) as conn, conn:
         row = conn.execute(
             "SELECT * FROM drafts WHERE id = ?", (draft_id,)
         ).fetchone()
@@ -321,7 +324,7 @@ def list_drafts(
         db_path: Override for tests.
     """
     init_db(db_path)
-    with _connect(db_path) as conn:
+    with closing(_connect(db_path)) as conn, conn:
         if status is None:
             rows = conn.execute(
                 "SELECT * FROM drafts ORDER BY created_at DESC LIMIT ?",
@@ -395,15 +398,20 @@ def update_draft(
     if audit_extra:
         detail.update(audit_extra)
 
-    with _connect(db_path) as conn:
-        conn.execute(
+    with closing(_connect(db_path)) as conn, conn:
+        updated = conn.execute(
             """
             UPDATE drafts
             SET status = ?, draft_json = ?, updated_at = ?
-            WHERE id = ?
+            WHERE id = ? AND status = ? AND updated_at = ?
             """,
-            (new_status.value, new_draft.model_dump_json(), now, draft_id),
+            (
+                new_status.value, new_draft.model_dump_json(), now, draft_id,
+                DraftStatus.pending_review.value, current.updated_at.isoformat(),
+            ),
         )
+        if updated.rowcount != 1:
+            raise ValueError("Draft changed during review; reload it before editing or deciding.")
         action = "edit"
         if status is not None and status != current.status:
             action = status.value  # approved | rejected
@@ -422,7 +430,7 @@ def update_draft(
 def pending_count(db_path: Path | None = None) -> int:
     """How many drafts are still ``pending_review`` (used by soft-cap checks / UI)."""
     init_db(db_path)
-    with _connect(db_path) as conn:
+    with closing(_connect(db_path)) as conn, conn:
         row = conn.execute(
             "SELECT COUNT(*) AS n FROM drafts WHERE status = ?",
             (DraftStatus.pending_review.value,),

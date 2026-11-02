@@ -79,4 +79,4 @@ Cross-modal eval (skillify item 3) **waived for v1** — process skill, no deter
 - Execution story: [walkthrough.md](walkthrough.md)
 - Debrief (delivery): [sprint_debrief.md](sprint_debrief.md)
 - Process deep-dive: [ai_engineering_learnings.md](ai_engineering_learnings.md)
-- New skill: [docs-before-code/SKILL.md](../../.agents/skills/docs-before-code/SKILL.md)
+- New skill: docs-before-code/SKILL.md (private development note; omitted from this public snapshot)

@@ -464,7 +464,7 @@ export const QUESTIONS: Question[] = [
     explain: 'The distinction between an enforced control (attention ack) and an observed signal (fast_decide_warn) is the heart of "friction as a feature".',
   },
   // 08 GenAI
-  { id: 'g1', moduleId: 'genai', kind: 'numeric', prompt: 'Maximum offered_interest_rate, in %?', answer: 3.5, tolerance: 0, unit: '%', explain: 'Clamped with min(rate, 0.035).' },
+  { id: 'g1', moduleId: 'genai', kind: 'numeric', prompt: 'Maximum offered_interest_rate, in %?', answer: 3.5, tolerance: 0, unit: '%', explain: 'Pydantic rejects a numeric offer above 0.035; invalid Azure output uses the safe stub.' },
   {
     id: 'g2', moduleId: 'genai', kind: 'mcq',
     prompt: 'Azure is configured but the call fails after retries. drafter_source is…',
@@ -504,21 +504,21 @@ export const QUESTIONS: Question[] = [
   { id: 'g5', moduleId: 'genai', kind: 'numeric', prompt: 'Maximum Tenacity retry attempts against Azure (ADR 013)?', answer: AZURE_RESILIENCE.maxAttempts, tolerance: 0, explain: `Exponential backoff, max ${AZURE_RESILIENCE.maxAttempts} attempts, on ${AZURE_RESILIENCE.retryOn.join(' / ')}. Then the stub drafts instead — there is no redraft loop.` },
   {
     id: 'g6', moduleId: 'genai', kind: 'justify',
-    prompt: 'Why clamp an over-cap interest rate to 3.5% rather than reject the draft outright?',
+    prompt: 'Why reject an invalid generated offer rather than clamp only its numeric rate?',
     choices: [
-      'Rejecting would consume the retry budget, and ADR 013 caps Azure attempts at five.',
-      'A rejection hands the reviewer nothing and pushes them to regenerate until the model complies, which is slower and teaches nobody anything. Clamping produces a compliant draft deterministically — and Pydantic still rejects anything that reaches it unclamped, so the ≤3.5% invariant holds either way. The reviewer, not the model, stays the control.',
-      'Pydantic cannot express an upper bound on a float field, so validation has to happen before the model.',
-      'The LLM has never returned a rate above the cap in testing, so the clamp is defensive dead code.',
+      'Clamping the numeric field also rewrites every promise in the email.',
+      'The email can still promise an excessive rate after its numeric field is clamped. Validate both the field and numeric percentage claims, then use the safe stub if validation fails.',
+      'Pydantic cannot express an upper bound on a float field.',
+      'Every invalid offer must trigger another live Azure call.',
     ],
     correctIndex: 1,
     whyWrong: [
-      'The retry cap is real, but it governs transient transport failures — rate limits, timeouts, connection errors. An over-cap rate is a successful response with bad content, so it never enters the retry path.',
+      'Changing one JSON field does not change the subject or body.',
       '',
-      'Pydantic expresses upper bounds easily, and it does so here. That bound is the backstop the clamp sits in front of, not a capability the design had to work around.',
-      'You cannot know that about a model’s output, and a guardrail justified by "it never fires" stops being a guardrail the moment the prompt or the deployment changes.',
+      'Pydantic enforces an upper bound and a cross-field text check here.',
+      'The existing local stub keeps the review workflow available without another provider call.',
     ],
-    explain: 'Anti-claim #22: rates above 3.5% are clamped, not rejected. The Pydantic bound is the backstop, not the primary mechanism.',
+    explain: 'Reject inconsistent output. The numeric offer and explicit percentage claims must pass validation; a human must still review the wording.',
   },
   {
     id: 'g7', moduleId: 'genai', kind: 'justify',

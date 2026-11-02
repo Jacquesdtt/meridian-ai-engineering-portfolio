@@ -127,8 +127,8 @@ export function FrictionModule() {
           <div className="px-4 pb-4 font-mono text-xs text-slate-400 space-y-2 border-t border-slate-800 pt-3">
             <p>Drivers (frozen global mean |SHAP|, same for every customer): {drivers.join(' · ')}</p>
             <p className="text-slate-500">
-              Not a per-customer explanation — no SHAP is computed at serving time. Useful context, but a reviewer should not
-              read it as “why this customer”.
+              These draft drivers are global context. Per-customer TreeSHAP is available separately through the
+              explanation API and Prediction browser. Do not read the draft drivers as “why this customer”.
             </p>
             <p>Policy: offered_interest_rate ≤ 3.5% · PII scrubbed before LLM · no /send</p>
           </div>

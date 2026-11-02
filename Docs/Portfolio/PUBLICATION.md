@@ -6,8 +6,10 @@ Source: employer package from development commit
 `18566aea5df9ea8f3c318a7e714c52dbc4dd71e2`.
 
 This repository is a fresh public snapshot. The original development repository
-and its history remain private. Application code, the serving model, fixture
-inputs, and dependency files are unchanged from the validated package.
+and its history remain private. The initial snapshot preserved application code, model artifacts, fixtures, and
+dependencies from that package. The later [cleanup](CLEANUP_2026-11-02.md) records
+code, dependency, documentation, and generated-report corrections. The model and
+its evaluation results are unchanged.
 
 Public preparation:
 

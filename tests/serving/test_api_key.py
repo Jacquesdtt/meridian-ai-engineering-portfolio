@@ -1,6 +1,11 @@
 """X-API-Key gate for the cloud deploy (ADR 016)."""
 from __future__ import annotations
 
+import shlex
+import urllib.request
+from pathlib import Path
+from types import SimpleNamespace
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -52,3 +57,30 @@ def test_client_sends_key_when_configured(keyed: TestClient, monkeypatch: pytest
     assert exc.value.status_code == 401
     monkeypatch.setattr(cfg_mod.config, "friction_gate_api_key", KEY)
     assert api.health().status == "ok"
+
+
+@pytest.mark.parametrize("access_key", [None, KEY])
+def test_docker_health_command_works_with_optional_key(client, monkeypatch, access_key):
+    """Run the real Docker probe command against the ASGI health route."""
+    from src.core.config import config
+
+    monkeypatch.setattr(config, "api_access_key", access_key)
+    if access_key:
+        monkeypatch.setenv("API_ACCESS_KEY", access_key)
+    else:
+        monkeypatch.delenv("API_ACCESS_KEY", raising=False)
+
+    def open_health(request, timeout):
+        assert timeout == 4
+        headers = dict(request.header_items()) if isinstance(request, urllib.request.Request) else {}
+        return SimpleNamespace(status=client.get("/health", headers=headers).status_code)
+
+    monkeypatch.setattr(urllib.request, "urlopen", open_health)
+    dockerfile = Path(__file__).resolve().parents[2] / "Dockerfile"
+    command = next(
+        line.strip() for line in dockerfile.read_text().splitlines()
+        if line.strip().startswith("CMD python -c")
+    )
+    with pytest.raises(SystemExit) as exit_status:
+        exec(shlex.split(command)[3], {})
+    assert exit_status.value.code == 0

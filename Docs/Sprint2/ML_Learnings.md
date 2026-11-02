@@ -29,7 +29,7 @@
 
 Evidence: MLflow run `7134cee0`, test months **2017-09 → 2020-04**, threshold frozen from **validation F1**.
 
-> **Where the v1 code lives:** re-running the notebook replaced the `xgb_temporal_v1` cell with the ops-cut version. The original max-F1 training code now survives only in [`.agents/scratch/build_sprint2_modeling_nb.py`](../../.agents/scratch/build_sprint2_modeling_nb.py) (`run_name="xgb_temporal_v1"`).
+> **Where the v1 code lives:** re-running the notebook replaced the `xgb_temporal_v1` cell with the ops-cut version. The original max-F1 training code now survives only in `.agents/scratch/build_sprint2_modeling_nb.py` (private development note; omitted from this public snapshot) (`run_name="xgb_temporal_v1"`).
 
 ### 1.1 Ranking (the DoD we cared about)
 

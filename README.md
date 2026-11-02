@@ -101,7 +101,8 @@ covers expected outputs, review steps, and the API-only Docker option.
 
 From the configured Python environment, run `python -m pytest tests -q`.
 From `educational_web_app/`, run `npm run lint`, `npm test`, and `npm run build`.
-See the dated [evidence record](Docs/Portfolio/EVIDENCE.md) for check results.
+See the dated [evidence record](Docs/Portfolio/EVIDENCE.md) and
+[public cleanup validation](Docs/Portfolio/CLEANUP_2026-11-02.md) for check results.
 
 - Azure Container Apps was deployed and checked on 24 September 2026, then
   removed. There is no standing URL. The later API-key gate has local tests;

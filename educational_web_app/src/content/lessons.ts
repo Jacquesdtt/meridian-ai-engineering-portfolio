@@ -696,7 +696,7 @@ export const LESSONS: Lesson[] = [
     moduleId: 'genai',
     estMinutes: 12,
     objectives: [
-      'Trace a draft: scrub context → prompt → LLM → scrub output → clamp rate → store for review.',
+      'Trace a draft: scrub context → prompt → LLM → scrub output → validate offer → store for review.',
       'Explain why LLM output is validated with a schema rather than trusted.',
       'Say what the PII scrubber catches and what it misses.',
       `Explain why the code picks request parameters per model since the move to ${GENAI.chatModel}.`,
@@ -706,7 +706,7 @@ export const LESSONS: Lesson[] = [
         title: 'Structured output',
         body: [
           'The LLM is asked for JSON (subject, body, offered_interest_rate). Pydantic parses it into a typed model. Anything that does not fit is rejected before it reaches a person.',
-          `Business rules are enforced in code, not in the prompt: the rate is clamped to ${GENAI.rateCapDisplay} with min(rate, ${GENAI.rateCap}), and the driver list is replaced with the server’s own SHAP names.`,
+          `Business rules are enforced in code, not in the prompt: rates above ${GENAI.rateCapDisplay} and numeric percentage claims above the offer are rejected, and the driver list is replaced with the server’s own SHAP names.`,
         ],
       },
       {
@@ -740,7 +740,7 @@ export const LESSONS: Lesson[] = [
           choices: [
             'Whether the PII scrubber removed the whole prompt',
             'Whether the request uses parameters the new model rejects, such as max_tokens',
-            'Whether the 3.5% rate clamp is failing validation',
+            'Whether a numeric offer above 3.5% is being rejected',
           ],
           correctIndex: 1,
           explain:
@@ -768,22 +768,22 @@ export const LESSONS: Lesson[] = [
     ],
     predict: {
       prompt: 'The LLM returns offered_interest_rate = 0.05. What is stored?',
-      choices: ['The draft is rejected and the LLM is asked again', '0.035 — the rate is clamped', '0.05 with a warning for the reviewer'],
+      choices: ['The LLM is always asked again', 'The invalid Azure output is rejected; a safe stub draft is stored', '0.05 with a warning for the reviewer'],
       correctIndex: 1,
-      reveal: 'sanitize_llm_draft clamps it. Pydantic only rejects values that somehow arrive unclamped. There is no redraft loop.',
+      reveal: 'Pydantic rejects the excessive offer. create_draft uses stub_fallback with a compliant numeric rate. There is no redraft loop.',
     },
     cloze: {
       sentence:
-        `The offered rate is ___ in code rather than requested in the prompt, so no wording the model produces can raise it above ${GENAI.rateCapDisplay}.`,
-      choices: ['clamped', 'logged', 'renegotiated'],
+        `The offered rate is ___ in code against the ${GENAI.rateCapDisplay} cap; a human still checks the wording.`,
+      choices: ['validated', 'logged', 'renegotiated'],
       correctIndex: 0,
-      explain: 'A prompt is a request; the clamp is the rule, with Pydantic as the backstop behind it.',
+      explain: 'A prompt is a request. Pydantic enforces the numeric bound and checks explicit percentage claims before storage.',
     },
-    elevator: `The drafter scrubs the context before anything leaves the building, asks the model for JSON, and parses the reply into a typed Pydantic model, so anything malformed is rejected before a person ever sees it. The business rules live in code rather than in the prompt: the offered rate is clamped to ${GENAI.rateCapDisplay} and the driver names are replaced with the server’s own SHAP list. The output is scrubbed again, then it sits in the queue for a human to approve. The prompt itself is a versioned template file with its model settings, not a Python string.`,
+    elevator: `The drafter scrubs the context before anything leaves the building, asks the model for JSON, and parses the reply into a typed Pydantic model, so anything malformed is rejected before a person ever sees it. The business rules live in code rather than in the prompt: rates above ${GENAI.rateCapDisplay} and numeric percentage claims above the offer are rejected and the driver names are replaced with the server’s own SHAP list. The output is scrubbed again, then it sits in the queue for a human to approve. The prompt itself is a versioned template file with its model settings, not a Python string.`,
     takeaways: [
       'Azure when configured; stub offline; stub_fallback after retries fail — recorded on every draft.',
       'The drafter uses frozen global SHAP driver names and no RAG.',
-      'Scrub in, scrub out, clamp, then a human approves.',
+      'Scrub in, scrub out, validate the offer, then a human reviews.',
       `A fallback that always works can hide a real outage: after the move to ${GENAI.chatModel}, read drafter_source, not "the queue still fills".`,
     ],
     codeRefs: [

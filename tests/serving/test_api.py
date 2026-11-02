@@ -256,6 +256,32 @@ def test_missing_features_422(client: TestClient):
     assert r.status_code == 422
 
 
+@pytest.mark.parametrize("patch", [
+    {"body": "We promise 9.5% interest."},
+    {"subject": "A 9.5 percent loyalty offer"},
+    {"body": "We offer 3.5% interest.", "offered_interest_rate": 0.02},
+    {"body": "We offer 1,000% interest."},
+    {"body": "We offer 9.5e0% interest."},
+    {"body": "We offer 1 000% interest."},
+    {"body": "We offer nine percent interest."},
+    {"body": "We offer 1\u202f000% interest."},
+    {"body": "We offer 1\n000% interest."},
+])
+def test_edit_rejects_text_above_numeric_offer(client: TestClient, patch):
+    draft = _flagged_create(client)
+    response = client.patch(f"/drafts/{draft['id']}", json=patch, headers=AGENT)
+    assert response.status_code == 422
+    stored = client.get(f"/drafts/{draft['id']}", headers=AGENT).json()
+    assert stored["draft"] == draft["draft"]
+
+
+def test_edit_accepts_text_matching_offer(client: TestClient):
+    draft = _flagged_create(client)
+    response = client.patch(f"/drafts/{draft['id']}", headers=AGENT,
+                            json={"body": "We can offer 3.5% interest.", "offered_interest_rate": 0.035})
+    assert response.status_code == 200
+
+
 def test_api_compliance_cannot_approve(client: TestClient):
     draft = _flagged_create(client)
     draft_id = draft["id"]

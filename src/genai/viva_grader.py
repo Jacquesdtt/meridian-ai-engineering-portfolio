@@ -252,7 +252,7 @@ def _verdicts_from_payload(payload: Any, points: list[str]) -> GradeResult:
             RubricVerdict(
                 index=i,
                 point=point,
-                covered=bool(item.get("covered")),
+                covered=item.get("covered") is True,
                 evidence=str(item.get("evidence") or "")[:400],
                 comment=str(item.get("comment") or "")[:300],
             )

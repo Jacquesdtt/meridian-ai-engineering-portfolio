@@ -13,7 +13,7 @@
 
 | | |
 |---|---|
-| **Skill** | [`.agents/skills/docs-before-code/SKILL.md`](../../.agents/skills/docs-before-code/SKILL.md) |
+| **Skill** | `.agents/skills/docs-before-code/SKILL.md` (private development note; omitted from this public snapshot) |
 | **Triggers** | “docs before code”, “/docs-before-code”, “red-team then revise”, revising an *implemented* artifact after critique |
 | **Contract** | Attack note → signed checklist (implement / investigate / defer + label-unlock gates) → code → doc cascade (`MEMORY`, walkthrough, PRD/ADR only if decision or $ method changed) |
 | **Not for** | Greenfield ambiguity (`/grill-me`) or obvious one-line bugfixes |

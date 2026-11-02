@@ -21,7 +21,7 @@ Meridian Savings faces approximately **$7.3M in historical Assets Under Manageme
 
 1. **Scores are ranks, not calibrated probabilities.** Training used `scale_pos_weight`; a score of 0.75 means “very high in the portfolio,” not a 75% actuarial churn chance.
 2. **Aspirational ROC-AUC > 0.85 (PRD) was not achieved.** Shipped Definition of Done was **beat the `gone_this_month` heuristic** on PR-AUC and ROC-AUC, plus a reviewable contact queue — not the old AUC target.
-3. **Azure Container Apps hosting was proven, then torn down; it is not production-live.** Local FastAPI + Streamlit are DoD-complete, and the FastAPI Docker image is built and smoke-tested locally (2026-09-24). On 2026-09-24 the `azd` project (`azure.yaml`, `infra/*.bicep`, one replica) deployed the API to Azure Container Apps and passed live checks (Azure drafts, hybrid RAG, RBAC). It was then removed with `azd down` to stop charges, so there is no standing URL. Redeploy with `azd up` ([ADR 016](Architecture/ADRs/016-azure-container-apps-via-azd.md)).
+3. **Azure Container Apps hosting was proven, then torn down; it is not production-live.** Local FastAPI + Streamlit are DoD-complete, and the FastAPI Docker image is built and smoke-tested locally (2026-09-24). On 2026-09-24 the `azd` project (`azure.yaml`, `infra/*.bicep`, one replica) deployed the API to Azure Container Apps and passed live checks (Azure drafts, hybrid RAG, RBAC). It was then removed with `azd down` to stop charges, so there is no standing URL. Redeploy with `azd up` ([ADR 016](https://github.com/Jacquesdtt/meridian-ai-engineering-portfolio/blob/main/Docs/Architecture/ADRs/016-azure-container-apps-via-azd.md)).
 4. **Fairness gaps remain and are disclosed.** Equalized Odds at the ops cut is ≈ **0.16** (age) and ≈ **0.32** (state, filtered). We did not ship an automated fairness remediator.
 
 ---
@@ -161,7 +161,7 @@ Schema validation: `py -3.13 .cursor/skills/validate-csv-schema/scripts/validate
 
 ### 5.3 Assumptions and Limitations
 
-* **Uncalibrated probabilities:** `scale_pos_weight` inflates raw scores. Do not interpret 0.70 as a 70% churn probability without separate calibration (Platt/isotonic not applied — would disturb rank order needed for the capacity dial).
+* **Uncalibrated probabilities:** `scale_pos_weight` inflates raw scores. Do not interpret 0.70 as a 70% churn probability without separate calibration (calibration was not implemented; it needs a separate calibration slice and validation).
 * **Macro stationarity:** Model trained on 2007–2020 patterns; material regime change requires retrain.
 * **Precision ceiling:** Validation precision tops ~**0.23–0.24** even at top 1%; Morgan’s aspirational 40% precision ∩ 5% contact was **infeasible** on these scores without model lift.
 * **Geographic encoding noise:** Duplicate state spellings (e.g. `California` vs `CALIFORNIA`) inflate cardinality — documented technical debt, not a fairness fix.
@@ -220,7 +220,7 @@ Portable serving bundle — **`Models/ops/`** (committed, single source of truth
 
 **Authentication (demo):** `X-Demo-Role` header required on mutating routes; Compliance viewer receives **403** on Approve (ADR 007).
 
-**Docker:** `Dockerfile` + `docker-compose.yml` run the **FastAPI service only** (Streamlit stays on the host, ADR 008), with a named volume for the SQLite draft queue and a `/health` `HEALTHCHECK`. The image installs pinned serving-only dependencies (`requirements.serving.txt`, same versions that exported `Models/ops/`). Local build + smoke test passed on 2026-09-24 ([checklist](Sprint5/docker_smoke_checklist.md)). An Azure Developer CLI project (`azure.yaml` + `infra/main.bicep`, `infra/resources.bicep`) now describes the Azure Container Apps target: one replica (**min = max = 1**, ADR 008), image built in Azure Container Registry, pulled with a managed identity, Azure OpenAI key read from the existing AI Services resource at deploy time, ingress limited to one IP range, and every request must carry a secret `X-API-Key` ([ADR 016](Architecture/ADRs/016-azure-container-apps-via-azd.md)). Deployed and verified live on 2026-09-24, then torn down with `azd down`; there is no standing URL.
+**Docker:** `Dockerfile` + `docker-compose.yml` run the **FastAPI service only** (Streamlit stays on the host, ADR 008), with a named volume for the SQLite draft queue and a `/health` `HEALTHCHECK`. The image installs pinned serving-only dependencies (`requirements.serving.txt`, same versions that exported `Models/ops/`). Local build + smoke test passed on 2026-09-24 ([checklist](https://github.com/Jacquesdtt/meridian-ai-engineering-portfolio/blob/main/Docs/Sprint5/docker_smoke_checklist.md)). An Azure Developer CLI project (`azure.yaml` + `infra/main.bicep`, `infra/resources.bicep`) now describes the Azure Container Apps target: one replica (**min = max = 1**, ADR 008), image built in Azure Container Registry, pulled with a managed identity, Azure OpenAI key read from the existing AI Services resource at deploy time, ingress limited to one IP range, and every request must carry a secret `X-API-Key` ([ADR 016](https://github.com/Jacquesdtt/meridian-ai-engineering-portfolio/blob/main/Docs/Architecture/ADRs/016-azure-container-apps-via-azd.md)). Deployed and verified live on 2026-09-24, then torn down with `azd down`; there is no standing URL.
 
 ### 6.2 How to Run (Handover)
 
@@ -267,7 +267,7 @@ Below-threshold customers (e.g. score ≈ 0.21) are **not flagged** — the capa
 | **Prompt-as-code** | Versioned `src/genai/prompts/retention_draft.prompty` supplies the system and user messages; the call requests a JSON object response. Token limits are set per model by `chat_limit_params()` (`max_completion_tokens` for reasoning deployments such as `gpt-5-mini`, which reject `max_tokens` and custom `temperature`) |
 | **ZDR** | PII scrubber strips emails, phones, SSN/long-digit patterns, DOB-like fields before any LLM call; blocked keys dropped from context |
 | **Hallucination bounds** | Prompt forbids inventing PII/names and rates above cap; output must be JSON with keys `subject`, `body`, `offered_interest_rate`, `drivers` |
-| **Pydantic hard stop** | `offered_interest_rate ≤ 0.035` validated on create **and** PATCH (ADR 002) — LLM clamp alone is not trusted |
+| **Pydantic hard stop** | `offered_interest_rate ≤ 0.035` validated on create **and** PATCH (ADR 002) and numeric percentage claims in subject/body must not exceed the validated offer |
 | **Server-side re-score** | `POST /drafts` re-scores from raw features and rejects client-supplied scores (`extra="forbid"`); the Streamlit UI calls this API for every score, draft and decision, so it cannot bypass `t ≈ 0.70055`. Only on AppLocker machines with `FRICTION_GATE_MODE=inprocess` does it drive the same app without a socket (ADR 006 follow-on) |
 | **Path cascade** | `stub` (offline demo) → `azure` (the configured `AZURE_OPENAI_DEPLOYMENT`, currently `gpt-5-mini`; it replaced `gpt-4o-mini` in September 2026) when configured → `stub_fallback` on Azure/prompty failure (`drafter_source` recorded) |
 | **Telemetry** | Stdlib logs `prompt_tokens` / `completion_tokens` / `total_tokens` per completion (ADR 013); retries on 429/5xx via Tenacity |
@@ -320,7 +320,7 @@ Ranking metrics are **unchanged** across threshold policies — only the operati
 
 We report calibration **honestly:** scores are **ranks, not calibrated probabilities.** Training used `scale_pos_weight`, which shifts the score distribution upward relative to the 11.8% base rate. A score of `0.70` means “top of the portfolio ranking,” not a 70% actuarial chance of churn.
 
-**Brier score was not computed** and is not reported here. The brief lists Brier as a reasonable default for probability quality; we deliberately prioritised **PR-AUC / ROC-AUC ranking** and a capacity-limited operating point because Friction-Gate selects a top-k queue. Applying Platt scaling or isotonic regression was **not** shipped — recalibrating absolute levels can disturb the monotonic order the capacity dial depends on. If Sam later requires actuarial probabilities (e.g. for expected-loss pricing), calibration becomes a follow-on workstream, not a silent claim of this release.
+**Brier score was not computed** and is not reported here. The brief lists Brier as a reasonable default for probability quality; we deliberately prioritised **PR-AUC / ROC-AUC ranking** and a capacity-limited operating point because Friction-Gate selects a top-k queue. Applying Platt scaling or isotonic regression was **not** shipped — sigmoid/Platt calibration preserves ranking, while isotonic calibration can introduce ties. Calibration needs separate validation before probability claims are made. If Sam later requires actuarial probabilities (e.g. for expected-loss pricing), calibration becomes a follow-on workstream, not a silent claim of this release.
 
 ### 7.4 Sensitivity — Threshold Policy (Capacity Dial)
 

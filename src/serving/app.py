@@ -581,4 +581,4 @@ def list_audit_endpoint(
 
 def jsonable_validation(exc: ValidationError) -> list:
     """Turn Pydantic ``ValidationError`` into a JSON-serializable error list for 422 bodies."""
-    return exc.errors()
+    return exc.errors(include_context=False)

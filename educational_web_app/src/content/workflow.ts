@@ -81,7 +81,7 @@ export const SYSTEM_FLOW: WorkflowDiagram = {
       id: 'sf-pydantic',
       label: 'Pydantic validation',
       caption:
-        'Schema gate (ADR 002): sanitize_llm_draft clamps offered_interest_rate to 3.5% and re-scrubs the text; Pydantic rejects anything unclamped. The slide draws a loop-back arrow, but the code has no redraft loop: Azure errors are retried, then the stub drafts (stub_fallback).',
+        'Schema gate (ADR 002): sanitize_llm_draft re-scrubs the text. Pydantic rejects rates above 3.5% and numeric percentage claims above the offer. The slide draws a loop-back arrow, but the code has no redraft loop: Transient Azure errors are retried; failed calls or invalid output use the stub (stub_fallback).',
       top: 52,
       left: 64,
       width: 14,

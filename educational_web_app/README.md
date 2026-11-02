@@ -4,11 +4,11 @@ Interactive, **offline-first** teaching site for the Meridian Savings Churn proj
 
 Everything runs offline except one feature: **Explain-it answers are marked by Meridian's own FastAPI service** rather than by you ([ADR-EDU-003](docs/ADR-EDU-003-llm-marked-viva.md)). The SPA holds no API key and never calls a cloud LLM directly. With the API down the app still works — you get a self-check list that is clearly labelled as not counting toward the Mastery gate.
 
-This folder is self-contained. Educational ADRs and the fact sheet live under [`docs/`](docs/).
+The build also reads architecture records from the parent `Docs/` directory; keep the repository layout intact. Educational ADRs and the fact sheet live under [`docs/`](docs/).
 
 ## Prerequisites
 
-- Node.js 20+ (or current LTS)
+- Node.js 24
 
 ## Run locally
 

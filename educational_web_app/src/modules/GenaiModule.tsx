@@ -39,7 +39,7 @@ export function GenaiModule() {
   const [scrubbed, setScrubbed] = useState('');
   const [parseError, setParseError] = useState('');
   const [llmRate, setLlmRate] = useState(0.042);
-  const [validated, setValidated] = useState<null | { stored: number; clamped: boolean }>(null);
+  const [validated, setValidated] = useState<null | { stored: number; rejected: boolean }>(null);
   const [source, setSource] = useState<'stub' | 'azure' | 'stub_fallback'>('azure');
 
   const scrub = () => {
@@ -59,8 +59,8 @@ export function GenaiModule() {
   };
 
   const sanitize = () => {
-    const stored = Math.min(llmRate, GENAI.rateCap);
-    setValidated({ stored, clamped: llmRate > GENAI.rateCap });
+    const rejected = llmRate > GENAI.rateCap;
+    setValidated({ stored: rejected ? GENAI.rateCap : llmRate, rejected });
     if (scrubbed) setInteraction('validatedDraftWithScrub');
   };
 
@@ -127,12 +127,12 @@ export function GenaiModule() {
           </button>
           {validated && (
             <div className="bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-300 space-y-1">
-              <div>
-                offered_interest_rate = min({llmRate.toFixed(3)}, {GENAI.rateCap}) ={' '}
-                <span className={validated.clamped ? 'text-amber-300' : 'text-emerald-300'}>{validated.stored.toFixed(3)}</span>
-                {validated.clamped && ' ← clamped'}
+              <div className={validated.rejected ? 'text-amber-300' : 'text-emerald-300'}>
+                {validated.rejected
+                  ? `Rejected ${llmRate.toFixed(3)} → stub_fallback with a safe ${validated.stored.toFixed(3)} offer`
+                  : `Accepted offered_interest_rate = ${validated.stored.toFixed(3)}`}
               </div>
-              <div>subject, body → scrub_text() again (outbound ZDR)</div>
+              <div>subject, body → scrub_text(), then check numeric percentage claims against the offer</div>
               <div>drivers → [{TOP_DRIVERS.slice(0, 3).join(', ')}, …] (server list, LLM drivers ignored)</div>
               {!scrubbed && <div className="text-amber-300">Scrub the context first to complete this step.</div>}
             </div>
@@ -164,7 +164,7 @@ export function GenaiModule() {
             `Used when Azure is configured: .prompty template, JSON response format. Tenacity retries 429/5xx/timeouts up to ${GENAI.retryAttempts} attempts with exponential backoff; on a 401 it tries key 2 (ADR 013).`}
           {source === 'stub' && 'Used when Azure is not configured at all: a deterministic local draft for offline demos and tests.'}
           {source === 'stub_fallback' &&
-            'Used when Azure is configured but the call still fails after retries. The queue keeps working, and drafter_source is saved on the draft so reviewers know.'}
+            'Used when Azure is configured but the call fails or its output fails validation. The queue keeps working, and drafter_source is saved on the draft so reviewers know.'}
         </p>
         <Callout tone="info" title="What the drafter sees">
           The score, the scrubbed context and the frozen global SHAP driver names from{' '}
@@ -175,7 +175,7 @@ export function GenaiModule() {
       <CodeBlock>{`# ${GENAI.promptyPath}   (pinned prompty<2: 2.x cannot render it)
 def create_draft(...):
     if config.azure_configured:
-        try:    return azure_draft(...), "azure"          # scrub in → LLM → scrub out + clamp
+        try:    return azure_draft(...), "azure"          # scrub in → LLM → scrub out + validate
         except Exception: return stub_draft(...), "stub_fallback"
     return stub_draft(...), "stub"`}</CodeBlock>
     </div>

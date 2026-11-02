@@ -2,6 +2,10 @@
 
 **Packaging date: 2 November 2026.**
 
+The initial packaging checks below predate the later public cleanup. See the
+[cleanup validation](CLEANUP_2026-11-02.md) for the corrected code, dependency
+update, 159 backend tests, and 27 frontend tests.
+
 This record separates saved model results, earlier runtime checks, and checks
 run during packaging. Code tests do not establish model quality, customer
 impact, or production readiness.

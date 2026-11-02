@@ -8,7 +8,7 @@ const BUILT = [
   'Top-5% capacity threshold frozen in Models/ops/',
   'FastAPI as the single enforcement point; Streamlit calls it',
   'Friction-Gate: roles, attention ack, audit, Approve ≠ Sent',
-  'Azure OpenAI drafter (gpt-5-mini) with scrubbing, clamping and stub fallback',
+  'Azure OpenAI drafter (gpt-5-mini) with scrubbing, offer validation and stub fallback',
   'AppLocker-safe hybrid RAG over the Official report (BM25 + embeddings, RRF, LLM rerank)',
   'Fairness measured and disclosed (ADR 012)',
   'Docker image of the API, built and smoke-tested locally (2026-09-24)',

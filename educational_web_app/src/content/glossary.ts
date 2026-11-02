@@ -53,7 +53,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   { term: 'HITL', def: 'Human in the loop: a person must approve before anything consequential happens.', moduleId: 'friction' },
   { term: 'Automation bias', def: 'The tendency to accept machine output without checking it.', moduleId: 'friction' },
   { term: 'RBAC', def: 'Role-based access control. Here a demo X-Demo-Role header, not real identity.', moduleId: 'friction' },
-  { term: 'ZDR', def: 'Zero data retention: keep customer PII out of LLM calls (scrub in and out).', moduleId: 'genai' },
+  { term: 'ZDR', def: 'Zero data retention is a provider policy. Meridian filters PII before and after draft calls; that filtering does not establish a provider retention guarantee.', moduleId: 'genai' },
   { term: '.prompty', def: 'Versioned prompt template file with model settings; pinned prompty<2.', moduleId: 'genai' },
   { term: 'Structured output', def: 'Asking the LLM for JSON and validating it against a schema before use.', moduleId: 'genai' },
   { term: 'Tenacity', def: 'Retry library: exponential backoff on transient Azure errors, up to 5 attempts.', moduleId: 'genai' },

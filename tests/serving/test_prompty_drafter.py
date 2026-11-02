@@ -25,6 +25,49 @@ def test_stub_draft_rate_capped_and_offline():
     assert "human review" in draft.body.lower() or "retention" in draft.body.lower()
 
 
+@pytest.mark.parametrize("text", ["9.5% loyalty rate", "We offer 9,5 percent interest.", "Rate: 9.5 per cent"])
+def test_generated_rate_promises_above_cap_are_rejected(text):
+    """The email text must not contradict the validated numeric offer."""
+    with pytest.raises(ValueError):
+        drafter_mod.sanitize_llm_draft(
+            {"subject": text, "body": text, "offered_interest_rate": 0.035},
+            fallback_drivers=[],
+        )
+
+
+@pytest.mark.parametrize("text", [
+    "1,000% interest", "9.5e0% interest", "1 000% interest", "nine percent interest",
+    "1\u202f000% interest", "1\n000% interest",
+])
+def test_ambiguous_percentage_claims_are_rejected(text):
+    with pytest.raises(ValueError):
+        drafter_mod.sanitize_llm_draft(
+            {"subject": "Loyalty offer", "body": text, "offered_interest_rate": 0.035},
+            fallback_drivers=[],
+        )
+
+
+@pytest.mark.parametrize("text", ["3% interest", "3,0 percent interest", ".5% interest", "3e0% interest"])
+def test_valid_percentage_claims_within_offer_are_accepted(text):
+    draft = drafter_mod.sanitize_llm_draft(
+        {"subject": "Loyalty offer", "body": text, "offered_interest_rate": 0.03},
+        fallback_drivers=[],
+    )
+    assert draft.body == text
+
+
+def test_invalid_generated_rate_uses_safe_fallback(monkeypatch):
+    monkeypatch.setattr(type(drafter_mod.config), "azure_configured", property(lambda self: True))
+    monkeypatch.setattr(drafter_mod, "azure_draft", lambda **kwargs: drafter_mod.sanitize_llm_draft(
+        {"subject": "Loyalty offer", "body": "We guarantee 9.5% interest.", "offered_interest_rate": 0.095},
+        fallback_drivers=[],
+    ))
+    draft, source = drafter_mod.create_draft(drivers=[], churn_probability=0.9)
+    assert source == "stub_fallback"
+    assert "9.5" not in draft.body
+    assert draft.offered_interest_rate <= MAX_RATE
+
+
 def test_prompty_build_messages_uses_prompty_asset():
     clear_prompty_cache()
     messages = build_azure_chat_messages(

@@ -79,7 +79,7 @@
 | Approve | Ready for human outbound **outside** system — **Approve ≠ Sent** |
 | Ops drafts | Drafts only on request and only if `p ≥ ~0.701`; nothing auto-drafts |
 | Friction | `attention_ack` required on Approve; approvals < 8 s logged as `fast_decide_warn` (soft warning, not a block) |
-| Rate cap | `offered_interest_rate` **clamped** to 0.035 by `sanitize_llm_draft`; Pydantic rejects only unclamped values; no redraft loop |
+| Rate cap | `offered_interest_rate` must be at most 0.035; numeric percentage claims in subject/body cannot exceed that offer; invalid Azure output uses the safe stub; no redraft loop |
 | Drafter | Azure (`.prompty`, `prompty<2` pinned) → tenacity retries (5) → `stub_fallback`; `stub` when Azure unconfigured. Inputs: score, scrubbed context, frozen global SHAP names. **No RAG** |
 | PII scrub | Blocked keys + regex (email, phone, SSN, ISO date, 8+ digits), in and out. No free-text name detection |
 | RAG | Methodology Q&A only, via FastAPI `POST /rag/ask`; corpus `Docs/Final_Report_Official.md`; no Chroma/FAISS. In-memory BM25 and Azure dense ranking fuse with RRF when Azure is configured; offline uses BM25 alone. Best-effort Azure LLM reranking falls back to the fused order if it fails. ATX `#`–`######` chunks ≤1200 chars; `top_k=3` (ADR 015). |
@@ -113,7 +113,7 @@
 19. dtreeviz diagrams produced
 20. Drafter grounded by RAG over past retention emails
 21. Per-customer SHAP in drafts
-22. Rate above 3.5% “rejected” (it is clamped)
+22. Clamping the numeric rate makes every promise in the email safe
 23. Fast approval is blocked (soft warning)
 24. Fairness is a release gate
 25. CI gating the model / API tests (only the teaching app has a workflow)

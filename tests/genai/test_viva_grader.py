@@ -102,6 +102,14 @@ def test_omitted_point_defaults_to_not_covered(monkeypatch):
     assert result.cleared is False
 
 
+@pytest.mark.parametrize("malformed", ["false", "true", 1, [True], {"value": True}])
+def test_malformed_covered_value_cannot_award_credit(monkeypatch, malformed):
+    _patch_azure(monkeypatch, _completion({"points": [{"index": 0, "covered": malformed}]}))
+    result = grade_answer(prompt="Leakage?", rubric=[RUBRIC[0]], answer=ANSWER)
+    assert result.covered_count == 0
+    assert result.cleared is False
+
+
 def test_unconfigured_azure_is_unavailable_not_failed(monkeypatch):
     _set_azure_configured(monkeypatch, False)
 

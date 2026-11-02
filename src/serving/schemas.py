@@ -10,6 +10,12 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 # Opaque actor reference only — never an email / free-text PII (Jamie RT-J2-05).
 _REVIEW_KEY_RE = re.compile(r"^[A-Za-z0-9_.:-]{1,64}$")
+# Check explicit percentage claims in both generated text and human edits.
+_PERCENT_RE = re.compile(
+    r"(?<![\w.,])([+-]?(?:\d[\d.,\s]*|[.,]\d+)(?:[eE][+-]?\d+)?)"
+    r"\s*(?:[%％]|per[\s-]*cent\b)",
+    re.IGNORECASE,
+)
 
 
 def normalize_review_key(value: Optional[str]) -> Optional[str]:
@@ -100,12 +106,33 @@ class RetentionDraftBody(BaseModel):
     )
     drivers: list[str] = Field(default_factory=list, max_length=10)
 
-    @field_validator("offered_interest_rate")
-    @classmethod
-    def _cap_rate(cls, v: float) -> float:
-        if v > 0.035:
-            raise ValueError("offered_interest_rate must be <= 0.035 (3.5%)")
-        return v
+    @model_validator(mode="after")
+    def _check_text_rates(self) -> RetentionDraftBody:
+        """Reject numeric percentage claims above the validated offer.
+
+        This conservative check also applies to edited drafts. Human review is
+        still required for rates written in words and other unsupported claims.
+        """
+        for text in (self.subject, self.body):
+            matches = list(_PERCENT_RE.finditer(text))
+            markers = re.findall(r"[%％]|per[\s-]*cent\b", text, re.IGNORECASE)
+            if len(matches) != len(markers):
+                raise ValueError("Percentage claims must use unambiguous numeric values")
+            for match in matches:
+                number = match.group(1).strip()
+                # A comma followed by three digits could mean a thousands group.
+                # Reject it and spaced groups rather than silently reducing the offer.
+                if re.search(r"\s", number) or re.fullmatch(
+                    r"[+-]?\d{1,3},\d{3}(?:[eE][+-]?\d+)?", number
+                ):
+                    raise ValueError("Percentage claims must use unambiguous numeric values")
+                rate = float(number.replace(",", ".")) / 100
+                if rate < 0 or rate > self.offered_interest_rate + 1e-12:
+                    raise ValueError(
+                        "Percentage claims must be non-negative and no higher "
+                        "than offered_interest_rate"
+                    )
+        return self
 
 
 class DraftCreateRequest(ScoreRequest):

@@ -780,7 +780,7 @@ const AIE_TRACK = {
     ['FastAPI serving contract', 'Single enforcement point: role check, re-score from raw features, threshold gate, audit row.'],
     ['SQLite WAL', 'One writer, many readers, one replica — the audit trail cannot fork.'],
     ['Friction Gate', 'Attention acknowledgement, fast-decide warning, no /send route. Approve ≠ Sent.'],
-    ['Prompty + Pydantic', `Versioned prompt template; structured output clamped to the ${GENAI.rateCapDisplay} rate cap.`],
+    ['Prompty + Pydantic', `Versioned prompt template; structured output validated against the ${GENAI.rateCapDisplay} rate cap and numeric text claims.`],
     ['RAG', 'Methodology Q&A over one report — grounded answers, not an email generator.'],
     ['ZDR PII scrub', 'Blocked keys dropped and regex redaction before anything reaches Azure.'],
     ['Human review', 'A person reads, edits and approves. The queue is a proposal, not a decision.'],

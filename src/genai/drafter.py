@@ -68,15 +68,15 @@ def sanitize_llm_draft(
     """Validate + ZDR-scrub LLM JSON before it becomes a persisted draft.
 
     Scrubs **subject and body** (Azure may invent emails/phones in either field).
-    Clamps ``offered_interest_rate`` to the bank cap; Pydantic still hard-rejects
-    values above 3.5% if somehow passed unclamped.
+    Rejects numeric rates above the cap and percentage claims above the offer.
+    The caller uses the safe stub when generated output fails validation.
     """
     rate = float(data.get("offered_interest_rate", MAX_RATE))
     # Never trust LLM-returned drivers — freeze to server SHAP names (Jamie RT-J2-09).
     return RetentionDraftBody(
         subject=scrub_text(str(data.get("subject", "Retention offer")))[:120],
         body=scrub_text(str(data.get("body", "")))[:4000],
-        offered_interest_rate=min(rate, MAX_RATE),
+        offered_interest_rate=rate,
         drivers=list(fallback_drivers)[:5],
     )
 
