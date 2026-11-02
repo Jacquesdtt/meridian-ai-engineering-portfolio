@@ -11,7 +11,7 @@ and stakeholder roles provide project context. It has no production customers
 and makes no claim of measured retention gains.
 
 **Start here:** [Case study](Docs/Portfolio/CASE_STUDY.md) ·
-[Five-minute demo](Docs/Portfolio/DEMO_GUIDE.md) ·
+[Application guide](Docs/Portfolio/DEMO_GUIDE.md) ·
 [Evidence and validation](Docs/Portfolio/EVIDENCE.md)
 
 **Project page:** [Meridian in plain language](https://meridian-ai-engineering.vercel.app).

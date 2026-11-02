@@ -1,4 +1,4 @@
-# Demo guide
+# Application guide
 
 Use the committed illustrative fixtures. They are not an evaluation set.
 No training data or Azure account is required for the local path.
@@ -48,23 +48,44 @@ existing configuration intact. Run `docker compose up -d --build` and open
 `http://127.0.0.1:8000/docs`. Docker starts only the API. Streamlit and the tour
 are separate. Docker and Azure deployment checks are historical; see the evidence record.
 
-## Five-minute walkthrough
+## Explore the review workflow
 
-| Time | Action | Expected result and explanation |
-|---|---|---|
-| 0:00–0:45 | Explain the problem and open API health | Rank next-month churn for a team with limited review capacity. Show model and threshold provenance. |
-| 0:45–1:30 | As Retention agent, score **Below threshold (capacity gate)** | Score about 0.207; not flagged. A draft request is refused by the API. |
-| 1:30–2:30 | Select **Flagged (create draft)** and create a draft | Score about 0.751; flagged. Draft enters `pending_review`. Identify its source: stub, Azure, or fallback. |
-| 2:30–3:30 | Open Review queue; inspect/edit, acknowledge review, and approve | Rate is bounded at 3.5%. Approval requires acknowledgement and records a decision. It does not send email. |
-| 3:30–4:15 | Open Audit trail; switch to Compliance viewer | Decision history is visible. Compliance cannot change a decision. Roles demonstrate permissions, not identity. |
-| 4:15–5:00 | As Data scientist, inspect Prediction browser and an explanation | Two fixtures appear without a cohort file. TreeSHAP explains the served model in log-odds. State the precision/recall limits. |
+### Score a customer
 
-Create a new draft for each decision demonstration. Approved and rejected drafts
-are immutable. Do not delete the queue to reset a demo.
+In the Retention agent view, select **Below threshold (capacity gate)**. The
+illustrative case scores about 0.207 and is not flagged. The API refuses a draft
+request for this case.
 
-Optional Q&A: ask which threshold policy was used. Offline mode retrieves report
-excerpts using BM25. Azure can add dense retrieval, reranking, and answer
-generation. Report Q&A is separate from draft generation.
+Select **Flagged (create draft)** for the second case. It scores about 0.751 and
+qualifies for a draft. These two cases illustrate application behavior; they do
+not measure model accuracy.
+
+### Review a draft
+
+Create a draft for the flagged case, then open the Review queue. Its source
+indicates whether it came from Azure, the local stub, or a fallback. The offered
+rate is bounded at 3.5%.
+
+A reviewer can inspect and edit a pending draft. Approval requires review
+acknowledgement and records a decision. It does not send an email. Approved and
+rejected drafts cannot be changed; use a new draft to try another decision.
+
+### Inspect the decision record
+
+The Audit trail records the decision. The Compliance viewer can inspect the
+history but cannot change it. The role picker demonstrates permissions; it does
+not authenticate a user's identity.
+
+The Data scientist view provides the Prediction browser and per-customer
+explanations. Without a cohort file, it contains the two illustrative fixtures.
+TreeSHAP explains the model's score in log-odds rather than probability changes.
+
+### Ask about the methodology
+
+The report assistant can retrieve evidence about the threshold policy and other
+project methods. Local mode returns report excerpts using BM25 search. Azure can
+add dense retrieval, reranking, and answer generation. This question-answering
+path is separate from draft generation.
 
 ## Direct API example
 
@@ -76,8 +97,8 @@ $body = @{ features = $fixture.features } | ConvertTo-Json -Depth 10
 Invoke-RestMethod -Uri http://127.0.0.1:8000/score -Method Post -ContentType 'application/json' -Headers @{ 'X-Demo-Role' = 'retention_agent' } -Body $body
 ```
 
-If `API_ACCESS_KEY` is configured, add the matching `X-API-Key` header. Keep real
-keys out of recordings and portfolio files.
+If `API_ACCESS_KEY` is configured, add the matching `X-API-Key` header. Keep API
+keys out of source files and shared output.
 
 ## Limitations
 

@@ -17,7 +17,7 @@ uv pip install -r requirements.serving.txt streamlit pytest
 
 Activate the environment with `.venv/Scripts/Activate.ps1` in PowerShell or
 `source .venv/bin/activate` in Bash. Then run `python -m pytest tests -q` and
-follow the [five-minute demo](Docs/Portfolio/DEMO_GUIDE.md). The pinned
+follow the [application guide](Docs/Portfolio/DEMO_GUIDE.md). The pinned
 scikit-learn version matches the saved preprocessor. Full notebook reproduction
 needs the broader dependencies and original course data described below.
 

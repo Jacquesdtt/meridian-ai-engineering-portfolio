@@ -51,10 +51,10 @@ The API was deployed to Azure Container Apps and checked on 24 September 2026,
 then removed. There is no standing cloud service. Local fixtures support
 scoring and review without the original course data.
 
-## Review in five minutes
+## Explore the project
 
 1. Read the [README](../../README.md) for the system flow.
-2. Follow the [demo guide](DEMO_GUIDE.md): score two fixtures, create a draft,
+2. Follow the [application guide](DEMO_GUIDE.md): score two fixtures, create a draft,
    approve it with acknowledgement, and inspect the audit history.
 3. Inspect the [evidence record](EVIDENCE.md) for dated checks and their limits.
 
