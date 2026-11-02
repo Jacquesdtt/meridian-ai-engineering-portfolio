@@ -1,5 +1,8 @@
 # Azure OpenAI & RAG Red Team Revision Plan
 
+> **Status clarification, 2 November 2026:** This dated record describes the earlier retrieval implementation. ADR 015 later replaced the sparse path with BM25 and added optional dense fusion and LLM reranking. A dedicated cross-encoder and measured retrieval/answer-quality gates remain open. The API label tfidf is retained for compatibility, not as the algorithm name.
+
+
 **Date:** 2026-07-17
 **Context:** Red-teaming the new Azure OpenAI configuration (sharing `gpt-4o-mini` and `text-embedding-3-large` on the same resource) and the proposed pure-Python RAG and Container Apps hosting setup.
 

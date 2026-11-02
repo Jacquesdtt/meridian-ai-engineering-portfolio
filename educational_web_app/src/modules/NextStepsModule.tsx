@@ -18,20 +18,6 @@ const BUILT = [
 
 const GUIDES_AND_APPS = [
   {
-    title: 'AI-901 Interview Prep Guide',
-    href: '/guides/interview_prep_ai901.html',
-    desc: 'Self-test quizzes, predict-then-reveal sections, SVG architecture diagrams, and spoken interview soundbites.',
-    badge: 'HTML Guide',
-    badgeColor: 'bg-blue-500/20 text-blue-300',
-  },
-  {
-    title: 'Foundry Design Edition (Interview Prep)',
-    href: '/guides/interview_prep_ai901_foundry_design.html',
-    desc: 'The interview guide plus the designed production path: keyless access to Microsoft Foundry through the Foundry SDK, Entra ID tokens and managed identity. Designed, not built.',
-    badge: 'HTML Guide',
-    badgeColor: 'bg-purple-500/20 text-purple-300',
-  },
-  {
     title: 'Official Final Report (Print Edition)',
     href: '/guides/Final_Report_Official_print.html',
     desc: 'Complete project report with methodology, data exploration, validation metrics, and governance registers.',
@@ -59,7 +45,7 @@ export function NextStepsModule() {
     <div className="flex flex-col gap-6 pb-12">
       <ModuleHeader
         title="Next Steps & Built Ecosystem"
-        subtitle="Access all live companion applications, HTML study guides, and future roadmap items."
+        subtitle="Explore the project report, local applications, and planned work."
       />
 
       <section className="bg-slate-900 border border-blue-900/40 rounded-2xl p-5">
@@ -67,10 +53,10 @@ export function NextStepsModule() {
           <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">
             Interactive Ecosystem
           </span>
-          Live Companion Apps & HTML Guides
+          Project report and local applications
         </h3>
         <p className="text-xs text-slate-400 mb-4">
-          All services are running locally and ready for interactive exploration:
+          The report is available here. Start the local services separately to use the application links:
         </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {GUIDES_AND_APPS.map((item) => (
@@ -113,8 +99,7 @@ export function NextStepsModule() {
       </section>
 
       <Callout tone="warn" title="Rule">
-        Everything below is future work from <code className="font-mono">{CORRECTIONS_REGISTER}</code>. Say “the next step
-        would be…”, never “we have…”.
+        The items below are planned work from <code className="font-mono">{CORRECTIONS_REGISTER}</code>. They are not implemented capabilities.
       </Callout>
 
       <div className="grid md:grid-cols-2 gap-4">

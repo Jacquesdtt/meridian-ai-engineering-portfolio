@@ -4,9 +4,13 @@
 >
 > This file lists places where the **documentation does not match the code**, **stale or missing items**, and **future work**. It does not replace [Technical_Debt_and_Limitations.md](Technical_Debt_and_Limitations.md). Items stay here until fixed; tick the box and add the commit or date when done.
 >
-> **Reconciled 2026-10-20:** Remaining: A7 (spoken talk track), B1 (conditional registry requirement), B2 backup, B3 (next training run), B11 cloud key verification / real cohort / regression automation. B10 cleanup and WS-2 deployment documentation are complete. Learning-app technical validation is recorded in `educational_web_app/docs/validation_2026-10-20.md`; real learner trial and live marker revalidation remain open (no participants; Azure HTTP 401 respectively).
+> **Reconciled 2026-10-20:** Remaining: B1 (conditional registry requirement), B2 backup, B3 (next training run), B11 cloud key verification / real cohort / regression automation. B10 cleanup and WS-2 deployment documentation are complete. Learning-app technical validation is recorded in `educational_web_app/docs/validation_2026-10-20.md`; real learner trial and live marker revalidation remain open (no participants; Azure HTTP 401 respectively).
 
 **Legend**
+
+The dated correction entries retain their original file references. Some refer
+to preparation documents held in the private working copy and not included in
+this public checkout. Those paths are historical evidence, not navigation links.
 
 | Marker | Meaning |
 |---|---|
@@ -21,9 +25,7 @@
 
 ### A1. Model selection talk track — overstates what was done · **P1**
 
-- [x] Replace any use of the following wording in the presentation, report or interview prep. *(2026-09-15: the wording does not appear in any repo file — it was a verbal talk track. Use the approved replacement below when presenting.)*
-
-> ~~"I wouldn't simply choose the run with the highest AUC. I'd treat model selection as a constrained multi-objective optimisation problem. First I'd define non-negotiable governance thresholds, such as fairness and calibration requirements. Among the models that pass those gates, I'd compare the Pareto frontier across predictive performance, latency, cost and business value…"~~
+- [x] Recorded 15 September 2026: the model-selection description overstated the implemented comparison. The evidence below defines the actual scope.
 
 **Why it is wrong (evidence):**
 
@@ -34,13 +36,7 @@
 | Calibration requirement | Scores are **deliberately uncalibrated** (`scale_pos_weight`) and treated as ranks. | `Docs/Sprint2/ML_Learnings.md` §2.4a, `red_team_sprint2_plan.md` #2 |
 | Pareto across latency / cost / business value | **Not measured.** Business value entered only as a **capacity cap** (top 5%). | Notebook cell `a4cc443a` |
 
-**Approved replacement wording:**
-
-> "I didn't just take the run with the best AUC, and I didn't use F1 either. I separated two questions. First, does the model rank customers better than a realistic baseline? On a time-based holdout, XGBoost beat the 'gone this month' rule on PR-AUC (0.219 vs 0.151) and ROC-AUC (0.723 vs 0.551). Second, who should actually be contacted? I treated that as a constrained optimisation on validation data only: maximise recall subject to a 40% precision floor and a 5% contact cap. The precision floor turned out to be impossible to reach on these scores (the top 1% was only about 24% precise), so rather than fake it, I documented that and set the threshold by team capacity: the top 5% of scores (t ≈ 0.701). That cut false positives from 249k to 20k without changing ranking quality. Fairness by age and state, plus SHAP, was reported to Risk for periodic review rather than used as an automatic gate, and every flagged customer still goes through human approval."
-
-Optional forward-looking tail (label as next steps, see F1–F3):
-
-> "…For production I'd extend this to a proper model comparison: calibrate the probabilities, make fairness limits a hard release gate once Risk agrees on thresholds, and compare candidate models on ranking quality, calibration, latency and serving cost before picking one with stakeholders."
+The implemented work evaluated one XGBoost recipe and compared threshold policies. Multi-model selection and production governance gates remain future work (F1–F3).
 
 ### A2. "MLflow tracks temporal cross-validation folds" — false · **P1**
 
@@ -84,11 +80,9 @@ dtreeviz **is attempted** in Sprint 2 notebook §10, but it **fails and is skipp
 - [x] `Docs/Presentations/project_crash_course.md:43` — rewrite as: "RAG grounds the Methodology Q&A bot on the official report (Azure embeddings + cosine, TF-IDF fallback; ADR 010). Retention drafts are not RAG-grounded; they are constrained by `.prompty`, PII scrubbing, a 3.5% rate cap and server-side SHAP drivers." *(2026-09-15)*
 - [x] *(found 2026-09-15)* `.agents/AGENTS.md:72` / `.cursorrules:72` — the "RAG Context Injection" rule told agents to retrieve Morgan's past emails; now states what is built and marks email retrieval as future work.
 
-### A7. MLflow one-liner for presentations (approved wording) · **P2**
+### A7. MLflow provenance description · **P2**
 
-- [ ] Use this wording wherever MLflow is described. *(2026-09-15: crash course, AGENTS.md, README and model card now match these facts; adopt the spoken wording when presenting.)*
-
-> "I used MLflow, with a SQLite backend because of corporate antivirus limits (ADR 009), to track my XGBoost runs. Each run holds the hyperparameters, the time-based split, the metrics against the baseline, the threshold rule, and the SHAP, fairness and drift reports. The served model is exported from a specific run into a portable folder (ADR 005), and that run ID is returned by the API and saved on every draft, so any score traces back to its training run. Registering the model with promotion stages would be the next MLOps step."
+MLflow tracks the XGBoost runs with a SQLite backend (ADR 009). The API and each draft record the exported run ID (ADR 005). Model registration and promotion remain future work.
 
 ### A8. Further mismatches found during the 2026-09-15 corrections pass
 
@@ -226,7 +220,7 @@ Historical snapshot checked on 2026-09-15 (user `jacqu`); not current runtime st
 
 Build what the A1 statement described, so it becomes true: compare several candidate models under stakeholder-agreed gates, keep the Pareto frontier, choose with agreed weights, test once, and promote through the Model Registry after human review.
 
-**Full design → [MLflow_Model_Selection_Roadmap.md](../Architecture/MLflow_Model_Selection_Roadmap.md)** (run structure, scorecard, gates, frontier, rules, registry, serving change, open decisions, before/after talk track). No MLflow endpoint is needed: local SQLite supports the registry (roadmap §1.1).
+**Full design → [MLflow_Model_Selection_Roadmap.md](../Architecture/MLflow_Model_Selection_Roadmap.md)** (run structure, scorecard, gates, frontier, rules, registry, serving change, open decisions, implementation scope). No MLflow endpoint is needed: local SQLite supports the registry (roadmap §1.1).
 
 - [ ] Restore data + MLflow store (B2 / B12)
 - [ ] Selection script: parent run, nested candidates, `log_input`, validation scorecard (roadmap §3.1–3.2)
@@ -238,9 +232,9 @@ Build what the A1 statement described, so it becomes true: compare several candi
 
 *Prerequisite for the calibration gate in the [MLflow roadmap](../Architecture/MLflow_Model_Selection_Roadmap.md) §3.3.*
 
-- [ ] Isotonic (or Platt) calibration fitted on an early validation window. Isotonic is monotonic, so the top-5% queue and PR-AUC are unchanged, but scores become meaningful.
+- [ ] Isotonic (or Platt) calibration fitted on an early validation window. An increasing Platt mapping preserves ordering and precision for the same top-k cases. Isotonic calibration can introduce ties, so ranking metrics and boundary selection need rechecking. Probability reliability must be measured on a separate time slice; fitting a calibrator alone does not establish it.
 - [ ] Enables Morgan's **High / Medium / Low** buckets (brief `banking-churn-genai-project.md:99`) and expected-value maths.
-- [ ] Revisit the unreachable 40% precision floor after calibration and/or model lift (`ML_Learnings.md` §2.4a).
+- [ ] Investigate improved ranking before revisiting the unreachable 40% precision floor at fixed review capacity; calibration alone does not improve precision for unchanged membership (`ML_Learnings.md` §2.4a).
 
 ### F3. Fairness limits as an agreed gate · **P2**
 

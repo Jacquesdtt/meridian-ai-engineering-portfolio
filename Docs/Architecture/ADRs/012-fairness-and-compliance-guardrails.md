@@ -1,5 +1,8 @@
 # ADR 012: Fairness, Approval, and Compliance Guardrails (Risk Sign-off)
 
+> **Status clarification, 2 November 2026:** Acceptance below applies to the course prototype and its scenario stakeholder review. It is not bank adoption or production compliance approval. Age/state checks leave other attributes unassessed; the current model has residual disparities. Review, explanation and PII filtering do not establish nondiscrimination. See the [current fairness record](../../Sprint5/fairness_anti_discrimination_narrative.md).
+
+
 ## Date
 2026-07-17
 

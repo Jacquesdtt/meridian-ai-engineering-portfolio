@@ -1,6 +1,9 @@
 # Machine Learning Learnings — Sprint 2
 
-**Purpose of this file:** Single place to look back for the **final presentation** — what the first modeling run showed, what we changed (and why), and the ML lessons worth saying out loud.
+> **Status clarification, 2 November 2026:** Calibration concerns probability reliability. An increasing Platt mapping preserves ranking and precision for the same top-k cases; isotonic calibration can introduce ties. Neither provides demonstrated precision lift here. Fairness numbers below are aggregate records; the detailed slice CSV is not public.
+
+
+This record describes the first model run, the threshold change, and the evaluation evidence.
 
 | | |
 |---|---|
@@ -12,16 +15,6 @@
 | **Anti-patterns (defensive)** | [../Sprint1/ML_Anti_Patterns.md](../Sprint1/ML_Anti_Patterns.md) |
 | **Debrief / walkthrough** | [sprint_debrief.md](sprint_debrief.md) · [walkthrough.md](walkthrough.md) |
 | **Ops threshold policy (locked)** | §2 below — tried prec ≥ 0.40 ∩ selection ≤ 5%; **fallback** = val top-5% quantile (`t≈0.701`) |
-
----
-
-## 0. Final presentation — 90-second talk track
-
-1. **Setup:** Sprint 1 locked ADR 004 churn and exported a leakage-safe customer×month table. Sprint 2 trained XGBoost with a **time split** (train past → test future), not a random shuffle.
-2. **Bar to beat:** Not accuracy. Always-negative is ~87% accurate and useless. We beat a real heuristic (`gone_this_month`) on **PR-AUC 0.219 vs 0.151** and **ROC-AUC 0.723 vs 0.551**.
-3. **First-run surprise:** Ranking worked, but max-F1 (`t=0.475`) flooded ops (~21% precision, **~249k** false positives — ~62% of the test table).
-4. **What we changed:** On validation we tried precision ≥ 40% with a ≤5% contact cap — that floor is **unreachable** on these scores (even top 1% only ≈24% precise; see §2.4a). We shipped **capacity** instead: top **5%** (`t≈0.701`). FPs **248k → 20k**; PR-AUC/ROC-AUC unchanged. Run `3f575754`.
-5. **Explainability / fairness:** SHAP still balance-led. With min group **n ≥ 500**, state Equalized Odds dropped from a misleading **1.0** to **~0.32** (38 of 55 states kept).
 
 ---
 
@@ -87,12 +80,11 @@ These are worth one slide as “how we got the run to finish,” not as model sc
 
 ## 2. What we changed in the *decision policy* (not the ranking story)
 
-> **Stakeholder slide:** Same ranking story. Different rule for *who enters the retention queue*.  
 > **Status:** Applied and **confirmed by notebook Run All** (2026-07-14). Canonical ops run: MLflow `3f575754…`. Numbers in §2.5 and `reports/sprint2_run_summary_v2.json`.
 
-### 2.1 One-liner for the jury
+### 2.1 Decision summary
 
-*“First run proved the model ranks better than a strong heuristic; it also proved max-F1 is the wrong ops dial — so we separate ranking success from contact policy.”*
+The first run improved ranking over the heuristic. The max-F1 cut created too many review cases, so the contact policy was evaluated separately.
 
 ### 2.2 What stayed (so we are not “moving the goalposts”)
 
@@ -128,10 +120,8 @@ On validation probabilities `val_prob` only, grid-search
 - Rule logged: `fallback_quantile_top5pct`
 - Val @ cut: selection 5.0%, precision ≈ 0.228, recall ≈ 0.091
 
-### 2.4a Why we could not hit 40% precision *(say this on the slide)*
+### 2.4a Why we could not hit 40% precision
 
-**Jury one-liner:**  
-*“We can rank better than the heuristic, but we can’t promise a 40% hit rate from raw scores without calibration or a stronger model — so we dialed capacity (top 5%) instead.”*
 
 **What we measured (validation — never tuned on test):**
 
@@ -164,7 +154,7 @@ On validation probabilities `val_prob` only, grid-search
 | Capacity (top 5%) | **Shipped** — test FPs **248k → 20k**; queue Friction-Gate-sized |
 | Ranking DoD | **Unchanged** — PR-AUC / ROC-AUC still beat the heuristic |
 
-**If Sam later needs ≫23% precision:** that is a **new work item** (probability calibration, different objective, or more signal) — not another max-F1 threshold hunt on the same scores.
+**If Sam later needs ≫23% precision:** that is a **new work item** (a different objective, better features, or a stronger model) — not another max-F1 threshold hunt on the same scores.
 
 ### 2.5 Before / after (notebook Run All)
 
@@ -180,8 +170,6 @@ On validation probabilities `val_prob` only, grid-search
 | Beats heuristic (PR / ROC) | Yes / Yes | **Yes / Yes** |
 | MLflow run | `7134cee0…` | `3f575754…` |
 
-**How to say this out loud:**  
-*“PR-AUC and ROC-AUC stay — those measure ranking. False positives collapsed because we stopped contacting most of the book — that is contact policy.”*
 
 ### 2.6 Fairness follow-up (Jamie) — notebook Run All at ops threshold
 
@@ -193,7 +181,7 @@ At `t≈0.701`, 100k test sample, Equalized Odds **only for groups with n ≥ 50
 | Age selection-rate gap | ≈ 0.049 | ≈ **0.099** |
 | State EOD | **1.0** (artifact) | ≈ **0.318** (38/55 states kept; 3,548 sparse rows excluded) |
 
-Board language: use the filtered state EOD (~0.32), **not** 1.0. Age gap widened vs the near-universal-recall first cut — expected when selection is sparse; still flag for Jamie if automating volume by age band.
+Interpretation: use the filtered state EOD (~0.32), **not** 1.0. Age gap widened vs the near-universal-recall first cut — expected when selection is sparse; still flag for Jamie if automating volume by age band.
 
 ### 2.7 What we deliberately did *not* change
 
@@ -211,7 +199,7 @@ Board language: use the filtered state EOD (~0.32), **not** 1.0. Age gap widened
 * **F1-max ≠ ops-ready:** Ranking DoD and operating policy are different questions.
 * **Heuristic bar matters:** Always-negative accuracy is a trap; beat `gone_this_month` on PR-AUC/ROC-AUC.
 * **`scale_pos_weight` skew:** Treat outputs as ranking scores unless you calibrate probabilities separately.
-* **Precision floor can be infeasible:** A 40% target is not “failed tuning” if the PR curve never reaches it — measure precision@k on val, then choose capacity or invest in calibration/model lift (see §2.4a).
+* **Precision floor can be infeasible:** A 40% target is not “failed tuning” if the PR curve never reaches it — measure precision@k on val, then choose capacity or investigate a better ranking (see §2.4a).
 
 ### Features / trees
 * **Native NaNs (Lag3):** Prefer tree missing handling over arbitrary impute in the training path.
@@ -223,22 +211,6 @@ Board language: use the filtered state EOD (~0.32), **not** 1.0. Age gap widened
 
 ---
 
-## 4. Slide checklist (copy into deck)
-
-> **Live handover deck:** [../Presentations/generate_presentation.py](../Presentations/generate_presentation.py) (dual PPTX). **Legacy Marp (Sprint 4):** [../Sprint4/presentation.md](../Sprint4/presentation.md) — checklist covered there (plus Friction-Gate Act C). Do **not** put threshold-dependent accuracy beside PR/ROC on the ranking slide.
-
-- [x] Temporal split diagram (fit / val / test months)
-- [x] Table: heuristic vs XGBoost PR-AUC & ROC-AUC (ranking DoD — **unchanged**)
-- [x] Confusion / FP cost at first-run **0.475** (~249k FP)
-- [x] Before/after (§2.5): FP **248k → 20k**, same PR-AUC; `t` 0.475 → 0.701 (run `3f575754`) + TP/FN
-- [x] **Why not 40% precision?** (§2.4a) — ranks ≠ probs; PR-AUC modest; base rate ~12%; table top 5%/1% still ~23–24%
-- [x] What we shipped instead: capacity dial, not a fake precision claim
-- [x] SHAP top-5 (balance story ↔ ADR 004) — embedded in Sprint 4 deck
-- [x] State EOD: 1.0 artifact → ~0.32 with min-n ≥ 500
-- [x] Optional: MLflow SQLite / AppLocker one-liner for AI-engineering competency
-
----
-
 ## 5. Pointers to artifacts
 
 | Artifact | Path |
@@ -246,7 +218,7 @@ Board language: use the filtered state EOD (~0.32), **not** 1.0. Age gap widened
 | First-run summary | `Docs/Sprint2/reports/sprint2_run_summary.json` |
 | Ops-threshold summary | `Docs/Sprint2/reports/sprint2_run_summary_v2.json` |
 | SHAP / Yellowbrick PNGs | `Docs/Sprint2/reports/` |
-| Fairlearn | `reports/fairlearn_age_state_slices.csv`, `fairlearn_equalized_odds.json` |
+| Fairlearn | [Committed aggregate summary](reports/fairlearn_equalized_odds.json); detailed slice CSV is generated by the notebook but absent from this public checkout |
 | Drift (Morgan) | [`data_drift_report.html`](data_drift_report.html) |
 | Outcomes canvas (interactive) | Cursor canvas `sprint2-modeling-outcomes.canvas.tsx` |
-| Final presentation / demo | Live: [../Presentations/generate_presentation.py](../Presentations/generate_presentation.py) (dual PPTX) · legacy Marp [../Sprint4/presentation.md](../Sprint4/presentation.md) · [../Sprint4/demo_runbook.md](../Sprint4/demo_runbook.md) · [../Sprint4/fixtures/](../Sprint4/fixtures/) |
+| Application workflow | [Application guide](../Portfolio/DEMO_GUIDE.md) · [Fixtures](../Sprint4/fixtures/) |

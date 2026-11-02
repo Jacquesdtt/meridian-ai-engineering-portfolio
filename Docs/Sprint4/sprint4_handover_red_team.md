@@ -13,7 +13,7 @@
 | ID | Severity | Finding | Evidence | Falsifier |
 |----|----------|---------|----------|-----------|
 | RT-S4-01 | **High** | Act C demo step 3 (“flagged draft”) is not reliably executable — runbook punts to “optional polish” | [demo_runbook.md](demo_runbook.md) §3; Streamlit default JSON scores ~0.21 | A committed fixture that scores ≥ `t≈0.701` + UI/runbook wiring |
-| RT-S4-02 | **High** | Ranking slide shows XGBoost **accuracy 0.508** next to PR/ROC without making clear that is **max-F1** accuracy; ops accuracy ≈0.841 — assessor trap | [presentation.md](presentation.md) ranking table | Remove or dual-label accuracy; ranking DoD = PR/ROC only |
+| RT-S4-02 | **High** | Ranking slide shows XGBoost **accuracy 0.508** next to PR/ROC without making clear that is **max-F1** accuracy; ops accuracy ≈0.841 | Historical Sprint 4 Marp ranking table; the working document is not included in this public checkout | Remove or dual-label accuracy; ranking DoD = PR/ROC only |
 | RT-S4-03 | **Medium** | Absolute machine path in demo runbook breaks other clones | `cd /d C:\Users\JacquesduToit\…` | Repo-root-relative instructions |
 | RT-S4-04 | **Medium** | ML_Learnings §4 optional AppLocker / MLflow engineering beat missing from deck | Checklist item “Optional: MLflow SQLite / AppLocker” | One short engineering slide |
 | RT-S4-05 | **Medium** | ADR 003/004/005/006 cited by title only — weak audit trail | [final_report.md](final_report.md) §6; presentation handover map | Deep links to ADR files |

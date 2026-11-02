@@ -91,6 +91,9 @@ img { max-width: 100%; }
 </div>
 </nav>
 <h1 id="final-report-meridian-savings-churn-prediction-retention-system">Final Report: Meridian Savings Churn Prediction &amp; Retention System</h1>
+<blockquote>
+<p><strong>Status clarification, 2 November 2026:</strong> This course prototype has no production customers or measured retention gains. The original report date is retained; fairness, calibration, retrieval and deployment statements below were reconciled against committed code and records on this date.</p>
+</blockquote>
 <p><strong>Project:</strong> InnovatorProjectDF14<br />
 <strong>Date:</strong> 2026-09-24<br>
 <strong>Primary Stakeholders:</strong> Morgan (Product), Sam (Data Science), Jamie (Risk &amp; Compliance)<br />
@@ -148,7 +151,7 @@ img { max-width: 100%; }
 <li><strong>Autonomous execution</strong> — no <code>/send</code> endpoint; Approved ≠ Sent (ADR 003).</li>
 <li><strong>Dormant high-balance accounts</strong> — inactive but still holding AUM are not labelled churn.</li>
 <li><strong>Non-retail products</strong> — commercial, mortgage, credit excluded.</li>
-<li><strong>Probability calibration / model lift</strong> — deferred unless Sam requires ≫23% precision inside the top-5% budget.</li>
+<li><strong>Probability calibration</strong> — not implemented; needed before interpreting scores as churn probabilities. <strong>Model improvement</strong> is separate work if higher precision is required at the same review capacity.</li>
 <li><strong>Production Entra ID RBAC</strong> — demo Glass-Box roles only (ADR 007).</li>
 </ul>
 <hr />
@@ -188,7 +191,7 @@ img { max-width: 100%; }
 <p><em>Context for Morgan:</em> Heavy class imbalance means accuracy is misleading (an always-negative classifier reaches ~87% accuracy while catching zero churners). The business value is in <strong>ranking</strong> the right customers into a finite review queue, not maximising headline accuracy.</p>
 <hr />
 <h2 id="4-data-processing">4. Data Processing</h2>
-<p>Data integrity and leakage prevention were the highest priorities (Sprint 1). All steps are reproducible from <code>Code/Sprint1/01_data_integrity_and_eda.ipynb</code> and <code>Code/Sprint1/02_feature_engineering.ipynb</code>.</p>
+<p>Data integrity and leakage prevention were the highest priorities (Sprint 1). The steps are recorded in <code>Code/Sprint1/01_data_integrity_and_eda.ipynb</code> and <code>Code/Sprint1/02_feature_engineering.ipynb</code>. Reproduction requires the original course CSVs, which are absent from this public checkout.</p>
 <h3 id="41-data-quality-issues-and-resolutions">4.1 Data Quality Issues and Resolutions</h3>
 <table>
 <thead>
@@ -267,7 +270,7 @@ img { max-width: 100%; }
 </tr>
 <tr>
 <td><strong>Population scored</strong></td>
-<td>Eligible customer-months (<code>Months_Since_Creation ≥ 2</code>); production submission targets active accounts at <strong>2020-05-31</strong></td>
+<td>Eligible customer-months (<code>Months_Since_Creation ≥ 2</code>); course submission targets active accounts at <strong>2020-05-31</strong></td>
 </tr>
 <tr>
 <td><strong>Ops flag</strong></td>
@@ -445,8 +448,8 @@ img { max-width: 100%; }
 </tr>
 </tbody>
 </table>
-<p><strong>Authentication (demo):</strong> <code>X-Demo-Role</code> header required on mutating routes; Compliance viewer receives <strong>403</strong> on Approve (ADR 007).</p>
-<p><strong>Docker:</strong> <code>Dockerfile</code> + <code>docker-compose.yml</code> run the <strong>FastAPI service only</strong> (Streamlit stays on the host, ADR 008), with a named volume for the SQLite draft queue and a <code>/health</code> <code>HEALTHCHECK</code>. The image installs pinned serving-only dependencies (<code>requirements.serving.txt</code>, same versions that exported <code>Models/ops/</code>). Local build + smoke test passed on 2026-09-24 (<a href="https://github.com/Jacquesdtt/meridian-ai-engineering-portfolio/blob/main/Docs/Sprint5/docker_smoke_checklist.md">checklist</a>). An Azure Developer CLI project (<code>azure.yaml</code> + <code>infra/main.bicep</code>, <code>infra/resources.bicep</code>) now describes the Azure Container Apps target: one replica (<strong>min = max = 1</strong>, ADR 008), image built in Azure Container Registry, pulled with a managed identity, Azure OpenAI key read from the existing AI Services resource at deploy time, ingress limited to one IP range, and every request must carry a secret <code>X-API-Key</code> (<a href="https://github.com/Jacquesdtt/meridian-ai-engineering-portfolio/blob/main/Docs/Architecture/ADRs/016-azure-container-apps-via-azd.md">ADR 016</a>). Deployed and verified live on 2026-09-24, then torn down with <code>azd down</code>; there is no standing URL.</p>
+<p><strong>Demo permissions (not authentication):</strong> <code>X-Demo-Role</code> header required on protected routes; Compliance viewer receives <strong>403</strong> on Approve (ADR 007).</p>
+<p><strong>Docker:</strong> <code>Dockerfile</code> + <code>docker-compose.yml</code> run the <strong>FastAPI service only</strong> (Streamlit stays on the host, ADR 008), with a named volume for the SQLite draft queue and a <code>/health</code> <code>HEALTHCHECK</code>. The image installs pinned serving-only dependencies (<code>requirements.serving.txt</code>, same versions that exported <code>Models/ops/</code>). Local build + smoke test passed on 2026-09-24 (<a href="https://github.com/Jacquesdtt/meridian-ai-engineering-portfolio/blob/main/Docs/Sprint5/docker_smoke_checklist.md">checklist</a>). An Azure Developer CLI project (<code>azure.yaml</code> + <code>infra/main.bicep</code>, <code>infra/resources.bicep</code>) now describes the Azure Container Apps target: one replica (<strong>min = max = 1</strong>, ADR 008), image built locally, pushed to Azure Container Registry and pulled with a managed identity, Azure OpenAI key read from the existing AI Services resource at deploy time, ingress limited to one IP range, and the later API-key middleware requires a secret <code>X-API-Key</code> except on CORS preflights (<a href="https://github.com/Jacquesdtt/meridian-ai-engineering-portfolio/blob/main/Docs/Architecture/ADRs/016-azure-container-apps-via-azd.md">ADR 016</a>). The earlier image was deployed and checked on 2026-09-24, then removed with <code>azd down</code>; there is no standing URL. That live check preceded the API-key middleware. The key gate has local tests, but its Azure check remains open. Cloud SQLite used ephemeral container disk; the local Compose volume does not establish cloud durability.</p>
 <h3 id="62-how-to-run-handover">6.2 How to Run (Handover)</h3>
 <p>From repository root (<code>cmd.exe</code>, AppLocker-safe <code>py -3.13 -m …</code>):</p>
 <pre><code class="language-cmd">set PYTHONPATH=%CD%
@@ -527,12 +530,12 @@ py -3.13 -m streamlit run Code\Sprint3\friction_gate_app.py
 <td>Versioned <code>src/genai/prompts/retention_draft.prompty</code> supplies the system and user messages; the call requests a JSON object response. Token limits are set per model by <code>chat_limit_params()</code> (<code>max_completion_tokens</code> for reasoning deployments such as <code>gpt-5-mini</code>, which reject <code>max_tokens</code> and custom <code>temperature</code>)</td>
 </tr>
 <tr>
-<td><strong>ZDR</strong></td>
-<td>PII scrubber strips emails, phones, SSN/long-digit patterns, DOB-like fields before any LLM call; blocked keys dropped from context</td>
+<td><strong>PII filtering</strong></td>
+<td>Blocked keys and common email, phone, SSN, long-digit and date patterns are filtered before draft calls. This is not full name/entity detection or a provider data-retention guarantee; numeric account context can remain.</td>
 </tr>
 <tr>
-<td><strong>Hallucination bounds</strong></td>
-<td>Prompt forbids inventing PII/names and rates above cap; output must be JSON with keys <code>subject</code>, <code>body</code>, <code>offered_interest_rate</code>, <code>drivers</code></td>
+<td><strong>Prompt instructions and output checks</strong></td>
+<td>Prompt instructs the model not to invent names or rates. JSON parsing and Pydantic validate structure and numeric rate limits; they do not establish factual accuracy. Rates written in words and other unsupported claims still need human review.</td>
 </tr>
 <tr>
 <td><strong>Pydantic hard stop</strong></td>
@@ -709,17 +712,17 @@ py -3.13 -m streamlit run Code\Sprint3\friction_gate_app.py
 </tr>
 </tbody>
 </table>
-<p>An earlier unfiltered state EOD of <strong>1.0</strong> was <strong>rejected</strong> as a sparse-slice artifact — Jamie’s register requires honest group sizes, not alarming noise.</p>
-<p><strong>Six prevention layers (how discrimination is constrained):</strong></p>
+<p>The earlier unfiltered state EOD of <strong>1.0</strong> used the first operating cut and included sparse groups. The later filtered result uses the ops cut; it does not establish fairness for the excluded groups. The committed <a href="Sprint2/reports/fairlearn_equalized_odds.json">JSON summary</a> records aggregate gaps and exclusions. The notebook exports a detailed slice CSV, but that CSV is absent from this public checkout; per-group rates and uncertainty cannot be checked from the summary alone.</p>
+<p><strong>Measurement and review controls (not proof of nondiscrimination):</strong></p>
 <ol>
 <li><strong>Measure at the serving cut</strong> — Fairlearn EO at <code>t ≈ 0.701</code> so board numbers match the contact policy customers experience (<code>Docs/Sprint2/reports/fairlearn_equalized_odds.json</code>).</li>
-<li><strong>Filter noise</strong> — Slices with <strong>n &lt; 500</strong> excluded from EO reporting; prevents fake “perfect unfairness” from tiny states.</li>
-<li><strong>Limit harm</strong> — Top ~<strong>5%</strong> capacity dial caps how many customers in any demographic enter outreach regardless of model zeal.</li>
-<li><strong>Explain with behaviour</strong> — SHAP shows balance/withdrawal/activity dominate; the model is not optimising a protected-class rule (consistent with ADR 004).</li>
+<li><strong>Report sample limits</strong> — Groups with <strong>n &lt; 500</strong> are excluded from the reported comparison. This reduces sparse-group instability but leaves those groups unassessed; it does not remove their risk.</li>
+<li><strong>Target overall capacity</strong> — The fixed threshold is the validation top-5% quantile. It sets no per-demographic limit and does not guarantee a 5% queue on later data. Group selection rates can differ.</li>
+<li><strong>Inspect model drivers</strong> — SHAP attributes model output to inputs; balance-related features dominate the saved summary. Age and state are also model inputs (<code>Models/ops/serving_meta.json</code>). SHAP does not prove absence of discrimination, proxy effects, or causal bias.</li>
 <li><strong>Govern with humans</strong> — Friction-Gate HITL: drafts only, <strong>Approve ≠ Sent</strong>, no <code>/send</code>, Compliance role cannot Approve (ADR 003, ADR 007), attention acknowledgement before Approve (JR-REQ-19).</li>
-<li><strong>Disclose residual gaps</strong> — Age EOD ≈ 0.16 and state EOD ≈ 0.32 are on the model card and in this report; Risk agreed periodic review and disclosure is sufficient for now and may still impose a hard EOD release gate later (JR-OPEN-01 — resolved in ADR 012).</li>
+<li><strong>Disclose residual gaps</strong> — Age EOD ≈ 0.16 and state EOD ≈ 0.32 are on the model card and in this report. The project risk-review decision accepts periodic review and disclosure for this prototype; a production owner would need to set acceptance limits and may impose a hard EOD release gate (JR-OPEN-01 — resolved in ADR 012).</li>
 </ol>
-<p><strong>What we did not claim:</strong> no Fairlearn <code>ThresholdOptimizer</code>, no production EOD blocker, demo RBAC ≠ Entra ID, and ZDR scrubbing addresses <strong>PII to the LLM</strong> — a separate control from demographic parity.</p>
+<p><strong>What we did not claim:</strong> no Fairlearn <code>ThresholdOptimizer</code>, no production EOD blocker, demo RBAC ≠ Entra ID, and PII filtering addresses selected keys and patterns in LLM payloads. It does not establish provider retention terms or demographic fairness.</p>
 <p><strong>Drift monitoring:</strong> Evidently train-vs-test report at <code>Docs/Sprint2/data_drift_report.html</code> (Morgan macro/context).</p>
 <hr />
 <h2 id="8-references">8. References</h2>
@@ -750,7 +753,7 @@ py -3.13 -m streamlit run Code\Sprint3\friction_gate_app.py
 </tr>
 <tr>
 <td>Model card</td>
-<td><code>Docs/Model_Card_Template.md</code></td>
+<td><a href="Model_Card.md">Current model card</a></td>
 </tr>
 <tr>
 <td>Ops run summary</td>
@@ -842,8 +845,8 @@ py -3.13 -m streamlit run Code\Sprint3\friction_gate_app.py
 <td>Pydantic validation tests in <code>tests/serving</code></td>
 </tr>
 <tr>
-<td>ZDR / PII scrub</td>
-<td><code>tests/genai/test_pii_scrubber.py</code></td>
+<td>PII filtering</td>
+<td><code>tests/genai/test_pii_scrubber.py</code>; key/pattern checks, not a provider retention agreement</td>
 </tr>
 <tr>
 <td>No <code>/send</code></td>
@@ -858,12 +861,12 @@ py -3.13 -m streamlit run Code\Sprint3\friction_gate_app.py
 <td><code>tests/genai/test_azure_retries.py</code>, <code>test_rag_engine.py</code> (ADR 013)</td>
 </tr>
 <tr>
-<td>RAG grounding</td>
-<td>Retrieve + cache tests; offline TF-IDF fallback</td>
+<td>RAG retrieval</td>
+<td>Retrieve + cache tests; BM25 offline, optional dense fusion and LLM reranking (ADR 015). The legacy API mode label <code>tfidf</code> names the BM25-only path. Tests do not establish answer accuracy.</td>
 </tr>
 <tr>
-<td><strong>Regression suite</strong></td>
-<td><strong>47 passed</strong> (<code>pytest tests/serving tests/genai -q</code>, 2026-07-17)</td>
+<td><strong>Historical regression suite</strong></td>
+<td><strong>47 passed</strong> (<code>pytest tests/serving tests/genai -q</code>, 2026-07-17). Later local checks are dated in the <a href="Portfolio/EVIDENCE.md">validation record</a>; no fresh runtime or cloud check is claimed by this documentation revision.</td>
 </tr>
 </tbody>
 </table>
@@ -879,7 +882,7 @@ py -3.13 -m streamlit run Code\Sprint3\friction_gate_app.py
 <tbody>
 <tr>
 <td>SQLite on Azure</td>
-<td>Requires shared volume + <code>maxReplicas: 1</code>; migrate to PostgreSQL for HA multi-node</td>
+<td>One replica; demo database is on ephemeral container disk and is lost on a new revision (ADR 016). Local Compose uses a named volume. Durable cloud storage and multi-replica service require a database migration.</td>
 </tr>
 <tr>
 <td>RAG index</td>
@@ -887,7 +890,7 @@ py -3.13 -m streamlit run Code\Sprint3\friction_gate_app.py
 </tr>
 <tr>
 <td>ACA deployment</td>
-<td>Scaffold only — WS-2 open pending hosting confirm</td>
+<td>API deployed and checked on 2026-09-24, then removed; no standing endpoint. The API-key gate was added later and has local tests only; Azure verification remains open (ADR 016).</td>
 </tr>
 <tr>
 <td>Submission CSV</td>
@@ -895,7 +898,7 @@ py -3.13 -m streamlit run Code\Sprint3\friction_gate_app.py
 </tr>
 <tr>
 <td>PDF export</td>
-<td>Assessor copy: <code>scripts/export_document_pack.py</code> renders this markdown to <code>Docs/Final_Report_Official_print.html</code> and <code>churn_report_df14.pdf</code>, and refreshes the teaching-app and interview-prep copies</td>
+<td><a href="https://github.com/Jacquesdtt/meridian-ai-engineering-portfolio/blob/main/churn_report_df14.pdf">Report PDF</a></td>
 </tr>
 </tbody>
 </table>

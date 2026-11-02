@@ -29,11 +29,6 @@ This is a **client-resilience** decision, not a monitoring-platform decision.
 ## Trade-offs
 We accept **extra latency under sustained 429s** in exchange for **demo survivability** and a single, explainable retry policy. We accept **stdlib logs** instead of a metrics backend so we do not invent cloud ops we have not deployed.
 
-## Stakeholder defenses (say this out loud)
-*   **Jamie:** “A rate-limit blip does not force a silent bad draft or a crashed review UI. We still never auto-send. Retries are for availability of the *drafter*, not for bypassing HITL.”
-*   **Morgan:** “We can show token usage in logs when someone asks what GenAI costs on the shared resource — without standing up a billing dashboard we do not have.”
-*   **Sam:** “Retry policy is identical for embeddings and chat; covered by unit tests that inject 429s. CI forces zero wait so the suite stays fast.”
-
 ## What would force a revisit
 *   Sustained 429s even with backoff → raise quota / split deployments / circuit-breaker UX.
 *   Jamie requires immutable audit of every token bill → export logs to a retained store (new ADR).

@@ -1,5 +1,8 @@
 # Sprint 5: Secure Cloud Deploy + GenAIOps Depth — Debrief
 
+> **Status clarification, 2 November 2026:** The earlier carry-over table in §6 is superseded by §7 and ADR 016: the API was deployed and checked on 2026-09-24, then removed. The later API-key gate has not been checked on Azure. Historical test counts refer to their stated date; no fresh cloud check is claimed.
+
+
 **2026-10-20 maintenance addendum:** reconciled stale cloud/cleanup/benchmark tracking against ADR 016 and the committed code. Learning-app release checks pass (127 Python / 26 frontend tests, typecheck/build/facts). Added a repeatable local production timing preview and browser validation report; corrected stale ACA wording in module 11. Live marker revalidation fails with Azure HTTP 401; learner trial remains open because the user has no participants. See [validation report](../../educational_web_app/docs/validation_2026-10-20.md) for method, results and limitations. No model, dependency, infrastructure or architecture decision changed; no new ADR required. Earlier sections retain their dated evidence.
 
 > **Scope:** Take the Milestone 4 FastAPI + Friction-Gate stack toward cloud hosting and GenAIOps depth without reopening the model. Started **2026-07-14**, closed **2026-09-24** with two explicit carry-overs (§6).

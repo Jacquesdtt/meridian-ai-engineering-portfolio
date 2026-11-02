@@ -1,7 +1,11 @@
 # Sprint 5: Secure Cloud Deploy + GenAIOps Depth — Plan & Goals
 
+> **Status clarification, 2 November 2026:** This dated record retains the original plan. Calibration is probability-quality work, not a demonstrated way to increase precision for unchanged top-k membership. Higher precision at fixed capacity requires ranking improvement. See the [current model card](../Model_Card.md).
+
+
 **Status:** **Closed 2026-09-24** (started 2026-07-14) — see [sprint_debrief.md](sprint_debrief.md) §6 for the DoD status; ACA deploy and `azd` carried over  
-**Progress:** [progress.md](progress.md) · **Handoff:** [continue_sprint5_prompt.md](continue_sprint5_prompt.md)  
+**Progress:** [progress.md](progress.md) · **Closeout:** [sprint_debrief.md](sprint_debrief.md)
+
 **Depends on:** Sprint 3 serve / Friction-Gate + Sprint 4 handover closed (Milestone 4 met 2026-07-14).  
 **Schedule:** [project_schedule.md](../Sprint0/project_schedule.md) — Phase 5 (post–Milestone 4 deepening)  
 **PRD:** Phase 5 — Secure Cloud Deployment + GenAIOps depth ([PRD §3](../Product/Product_Requirements_Document.md))  

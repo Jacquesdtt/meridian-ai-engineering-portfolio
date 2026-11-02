@@ -10,7 +10,7 @@
 3. Set `.agents/MEMORY.md` → Sprint 4 active.
 
 ## 2. Presentation pack (markdown)
-Built [presentation.md](presentation.md) as Marp-style slides (`---` breaks):
+Built the Sprint 4 presentation as Marp-style slides (`---` breaks). That historical working document is not included in this public checkout. The current [application guide](../Portfolio/DEMO_GUIDE.md) describes the review workflow; it is a separate document.
 
 | Act | Content |
 |-----|---------|

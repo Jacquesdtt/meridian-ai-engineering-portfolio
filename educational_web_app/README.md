@@ -55,10 +55,10 @@ The marker was checked against a small labelled set on 2026-09-24: 87.5% of 48 r
 
 CI: `.github/workflows/educational-web-app.yml` runs lint, tests and build on pushes that touch this folder.
 
-`public/guides/` holds generated copies of the Official report (with its images under `Sprint2/` and `Presentations/`) and the two AI-901 interview guides. Edit the sources in `Docs/`, then refresh the copies from the repo root:
+`public/guides/` holds generated copies of the Official report (with its images under `Sprint2/` and `Presentations/`) only. Edit the sources in `Docs/`, then refresh the copies from the repo root:
 
 ```bash
-uv run --with markdown --with beautifulsoup4 --with markdownify python scripts/export_document_pack.py --skip-export
+uv run --with markdown --with beautifulsoup4 python scripts/export_document_pack.py --skip-export
 ```
 
 Learning progress is saved in this browser. Open **Exploration · details** (or **Progress** on mobile) to see the separate exploration, prediction, recall, and marked explanation counts. The panel can export or import progress, preserve recoverable writing from older saves, and reset progress after confirmation. Editing an Explain-it answer requires a new API mark before it can count toward Mastery.

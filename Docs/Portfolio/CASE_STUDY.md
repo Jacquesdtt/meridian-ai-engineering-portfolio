@@ -19,6 +19,19 @@ human review, tests, and an Azure deployment exercise. A React teaching app
 explains the system through interactive exercises. Development used AI coding
 assistants; decisions and review work are recorded in the repository.
 
+## What one prediction means
+
+The evaluation unit is a **customer-month**: one customer in one observation
+month. For example, April inputs predict whether May has a balance that rounds
+to zero and no active transactions. Inputs stop at April; May supplies the
+outcome only. Eligible records have at least two months of tenure and a known
+following month.
+
+The same customer can appear in several months. The rule tests a state, not a
+first departure: a customer already at zero and inactive can remain positive
+in later months. Results therefore count monthly records, not unique people,
+closed accounts or customers saved. See the [target definition](../Architecture/ADRs/004-churn-target-and-predictive-window.md).
+
 ## Engineering decisions
 
 | Decision | Reason and trade-off | Evidence |
@@ -38,7 +51,9 @@ compared with **0.551**. These are historical model results, not a new training
 run or evidence of business impact.
 
 At the validation-selected threshold of **0.70055**, test precision is **22.9%**
-and recall is **9.0%**. False positives fall from 248,778 at the earlier max-F1
+and recall is **9.0%**. Of 26,091 flagged monthly records, 5,964 met the
+next-month rule. Those 5,964 represent 9.0% of the 66,502 positive records in
+the test. False positives fall from 248,778 at the earlier max-F1
 cut to 20,127. The reduction costs recall. The 40% precision goal was not met,
 and scores are not calibrated probabilities.
 
@@ -52,6 +67,12 @@ then removed. There is no standing cloud service. Local fixtures support
 scoring and review without the original course data.
 
 ## Explore the project
+
+One local example takes the committed flagged fixture through a score of about
+0.751, a pending draft, human approval and an audit entry. The score is not a
+75.1% probability. With Azure settings absent, a local template supplies the
+draft and its source is marked `stub`. Approval records the decision and sends
+no email. Follow the [worked application workflow](DEMO_GUIDE.md#one-case-from-score-to-recorded-decision).
 
 1. Read the [README](../../README.md) for the system flow.
 2. Follow the [application guide](DEMO_GUIDE.md): score two fixtures, create a draft,

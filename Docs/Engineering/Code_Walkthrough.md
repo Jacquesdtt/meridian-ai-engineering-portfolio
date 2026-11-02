@@ -16,17 +16,16 @@ This page maps the main EDA notebook, related docs, and project Python so you ca
 | `Models/ops/` | Portable booster + OHE + `serving_meta.json` (Sprint 3 serve source of truth) |
 | `src/serving/app.py` | FastAPI `/health` `/score` `/drafts` `/audit/events` — ops threshold; demo `X-Demo-Role`; no `/send` |
 | `Code/Sprint3/friction_gate_app.py` | Streamlit Friction-Gate + demo Glass-Box RBAC (ADR 007) + Methodology RAG tab |
-| `src/genai/rag_engine.py` | AppLocker-safe RAG (ADR 010): bounded markdown chunks ≤1200 · Azure embed + cosine · TF-IDF fallback · disk cache `schema_version` |
+| `src/genai/rag_engine.py` | AppLocker-safe RAG (ADR 015): bounded chunks ≤1200 · BM25 offline · optional Azure dense retrieval + RRF fusion + LLM rerank · versioned disk cache |
 | `src/genai/prompts/retention_draft.prompty` | Sprint 5 prompt-as-code for Azure drafts |
 | `Docs/Final_Report_Official.md` | Official handover report (RAG corpus for Methodology tab) |
-| `Docs/Sprint5/progress.md` | Sprint 5 mid-sprint status (active) |
+| `Docs/Sprint5/progress.md` | Sprint 5 historical progress; closed 2026-09-24 |
 | `Docs/Sprint5/rag_chunking_revision_plan.md` | Chunk granularity fix (2026-07-17) — attack → checklist → cascade |
 | `Docs/Architecture/ADRs/007-demo-glass-box-rbac.md` | Demo RBAC (UI + API); not Entra ID |
 | `Docs/Architecture/ADRs/010-applocker-safe-in-memory-rag.md` | Pure-Python RAG (no Chroma/FAISS) |
 | `Docs/Model_Card_Template.md` | Sprint 2 metrics + serving / Friction-Gate / Sprint 5 RBAC note |
 | `Docs/Sprint2/ML_Learnings.md` | **Presentation deep-dive:** first run → ops policy |
-| `Docs/Presentations/generate_presentation.py` | **Live handover deck SoT** (Kubrick → dual PPTX) |
-| `Docs/Sprint4/presentation.md` | **Legacy** Marp crib (Milestone 4 freeze; do not treat as live deck) |
+| [Standalone presentation](../Presentations/Meridian_Presentation_Standalone.pptx) | Current public slides. The presenter generator and historical Sprint 4 Marp working document are not included in this checkout. |
 | `Docs/Sprint4/final_report.md` | Final report + artifact index (Milestone 4 freeze; §9 points to Sprint 5) |
 | `Docs/Sprint4/demo_runbook.md` | Live demo script (`/health` → Below → Flagged → Approve; + role switch) |
 | `Docs/Sprint4/fixtures/` | Demo JSON presets (below ~0.21 / flagged ~0.75) |

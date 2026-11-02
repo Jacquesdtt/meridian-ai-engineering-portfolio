@@ -2,7 +2,7 @@
 
 ## Pointers
 - Plan / walkthrough / debrief: [sprint_plan.md](sprint_plan.md) · [walkthrough.md](walkthrough.md) · [sprint_debrief.md](sprint_debrief.md)
-- Deliverables: [presentation.md](presentation.md) · [final_report.md](final_report.md) · [demo_runbook.md](demo_runbook.md)
+- Deliverables: [Application guide](../Portfolio/DEMO_GUIDE.md) · [final_report.md](final_report.md) · [demo_runbook.md](demo_runbook.md)
 - ML narrative source: [../Sprint2/ML_Learnings.md](../Sprint2/ML_Learnings.md)
 - Serve evidence: [../Sprint3/ai_engineering_learnings.md](../Sprint3/ai_engineering_learnings.md)
 - Aggregate: [../AIEngineeringLearnings/ai_engineering_learning_outcomes.md](../AIEngineeringLearnings/ai_engineering_learning_outcomes.md)

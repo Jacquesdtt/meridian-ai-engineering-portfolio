@@ -1,5 +1,8 @@
 # Meeting Notes: Sam (Head of DS) - Sprint 5 Deployment & GenAIOps
 
+> **Status clarification, 2 November 2026:** This is a historical question and assumption record. Calibration alone does not increase precision for the same selected cases. The later operating decision and results are in the [current model card](../../Model_Card.md); the 40% target was not met.
+
+
 **Date:** [YYYY-MM-DD]
 **Stakeholders Present:** Jacques, Sam
 **Meeting Goal:** Review the model serving architecture, GenAIOps setup, and finalize the cloud deployment strategy for the final presentation.

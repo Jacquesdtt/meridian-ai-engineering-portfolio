@@ -1,5 +1,8 @@
 # Sprint 3: Serve + GenAI Friction-Gate — Execution Walkthrough
 
+> **Status clarification, 2 November 2026:** This dated record retains the original plan. Calibration is probability-quality work, not a demonstrated way to increase precision for unchanged top-k membership. Higher precision at fixed capacity requires ranking improvement. See the [current model card](../Model_Card.md).
+
+
 **Status:** Closed (demo smoke + dual close-out 2026-07-14)  
 **Plan:** [sprint_plan.md](sprint_plan.md)  
 **Debrief / retro:** [sprint_debrief.md](sprint_debrief.md) · [sprint_retrospective.md](sprint_retrospective.md)  

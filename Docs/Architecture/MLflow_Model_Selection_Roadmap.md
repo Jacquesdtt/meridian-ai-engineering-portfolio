@@ -4,7 +4,7 @@
 **Status:** 🔵 FUTURE WORK. **Not built.** Present only as next steps.  
 **Related:** [ADR 009](ADRs/009-sqlite-mlflow-tracking-backend.md) (SQLite tracking) · [ADR 005](ADRs/005-portable-model-export-for-serving.md) (portable export) · [ADR 012](ADRs/012-fairness-and-compliance-guardrails.md) (fairness = review + disclosure) · [Corrections register](../Engineering/Corrections_and_Future_Work.md) (A1, A3, B1–B3, F1–F6)
 
-**Context:** Sprint 2 trained **one** XGBoost recipe and chose an **operating threshold** under constraints. It did not compare several models against governance gates. This roadmap describes how to turn model selection into an auditable, constrained multi-objective process in MLflow, so that the "ideal" talk track in §9 becomes true.
+**Context:** Sprint 2 trained **one** XGBoost recipe and chose an **operating threshold** under constraints. It did not compare several models against governance gates. This roadmap describes how to turn model selection into an auditable, constrained multi-objective process in MLflow.
 
 ---
 
@@ -109,7 +109,7 @@ passing = mlflow.search_runs(
 ## 4. Rules that must hold
 
 1. **Select on validation; test once.** Test metrics are computed **only for the winner**, after selection, and logged on its child run as `test_*`.
-2. **Split validation by time.** Validation is 2016-09 → 2017-08. Proposed: an earlier window (e.g. 2016-09 → 2017-02) fits the calibrator; a later window (2017-03 → 2017-08) picks the threshold and scores the gates. Isotonic calibration is monotonic, so ranking (PR-AUC, top-5% queue) is unchanged.
+2. **Split validation by time.** Validation is 2016-09 → 2017-08. Proposed: an earlier window (e.g. 2016-09 → 2017-02) fits the calibrator; a later window (2017-03 → 2017-08) picks the threshold and scores the gates. An increasing Platt mapping preserves ordering and the same top-k membership; it does not raise precision for those cases. Isotonic calibration can introduce ties, so ranking metrics and boundary selection must be rechecked. Probability reliability needs separate validation.
 3. **Fixed split, no leakage.** Fit / validation / test dates stay as in ADR 004 / Sprint 2; the one-hot encoder is fit on fit months only.
 4. **Be honest about latency and cost.** They will barely separate tabular candidates. The real trade-off is **queue size**: business value vs contact, review and LLM cost. Say so rather than inflate the frontier.
 
@@ -156,27 +156,3 @@ passing = mlflow.search_runs(
 | 6 | Who approves `challenger` → `champion` | Sam + Jamie |
 | 7 | Contact capacity: keep 5%, or let business value set queue size? | Morgan |
 | 8 | Is a shared MLflow server needed (§1.1 option B)? If so, who provides `<REPLACE_WITH_SHARED_MLFLOW_TRACKING_URI>` and access? | Trainer / platform team |
-
-## 9. Interview statement: today vs after this roadmap
-
-### True today
-
-> "I wouldn't simply pick the run with the highest AUC. I separate *can the model rank risk* from *who should we actually contact*, and treat the second as a constrained optimisation.
->
-> First, the model had to beat a realistic baseline on a time-based holdout, not accuracy. XGBoost beat the 'gone this month' rule on PR-AUC, 0.22 against 0.15.
->
-> Then, on validation data only, I set constraints from the business: at least 40% precision, and no more than 5% of customers contacted, because every flagged customer gets a human-reviewed email. The data showed the precision target was impossible, since even the top 1% was only about 24% precise. So I documented that instead of forcing it, and let the team's capacity set the threshold at the top 5%. That cut false positives about twelvefold without changing ranking quality.
->
-> Fairness and explainability are published to Risk for review rather than used as an automatic gate, and nothing reaches a customer without human approval.
->
-> The next step is to make this a full multi-objective selection: calibrate the scores, agree hard fairness limits with Risk, and compare several candidate models on performance, latency, cost and expected assets saved before registering a champion."
-
-### True once this roadmap (and F2–F3) is built
-
-> "I wouldn't simply pick the run with the highest AUC. I treat model selection as a constrained multi-objective problem, and I run it in MLflow so every decision can be audited.
->
-> Before training, I agree the gates with stakeholders: the model must beat the business baseline, calibration error must stay under a set limit, and fairness gaps by age and state must stay within limits Risk has signed off. Those limits are logged on the selection run, so they can't quietly move afterwards.
->
-> Each candidate (the baseline rule, logistic regression, XGBoost, calibrated XGBoost) is a child run with the same time-based split and the same scorecard, all measured on validation data. Among the candidates that pass every gate, I keep the Pareto frontier across four things: precision in the contact queue, expected assets saved, scoring latency, and cost per contact, including LLM tokens and review time.
->
-> The stakeholders' agreed weights pick one model from that frontier, and I record the reasons with the run. Only the winner is scored on the test set, once. It's registered as the challenger, and promoted to champion only after Data Science and Risk review it."

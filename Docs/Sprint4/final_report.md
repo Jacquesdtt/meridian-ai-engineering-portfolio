@@ -1,5 +1,8 @@
 # Meridian Savings Churn — Final Report & Handover
 
+> **Status clarification, 2 November 2026:** This is a historical sprint summary. PII filtering is based on keys and patterns, not a guarantee of complete de-identification or provider Zero Data Retention. Retention drafts use prompts and validation; only methodology Q&A uses document retrieval. Current retrieval and hosting status are recorded in the [technical status](../Portfolio/TECHNICAL_STATUS.md).
+
+
 **Project:** InnovatorProjectDF14 · Meridian Savings retail churn ranking + GenAI Friction-Gate  
 **Report date:** 2026-07-14  
 **Status:** Sprint 0–4 **closed** — Milestone 4 handover pack complete  
@@ -21,7 +24,7 @@ Meridian needs a **leakage-safe** way to rank customers likely to enter next-mon
 | MLflow ops run | `3f575754ae9a42c5a21ea5e476c0af37` |
 | Model version | `1.1.0-sprint3-serving` |
 
-**Presentation:** [presentation.md](presentation.md) · **ML deep-dive:** [../Sprint2/ML_Learnings.md](../Sprint2/ML_Learnings.md) · **Demo:** [demo_runbook.md](demo_runbook.md) · **Fixtures:** [fixtures/](fixtures/) · **Red-team:** [sprint4_handover_red_team.md](sprint4_handover_red_team.md)
+**Application:** [Application guide](../Portfolio/DEMO_GUIDE.md) · **ML deep-dive:** [../Sprint2/ML_Learnings.md](../Sprint2/ML_Learnings.md) · **Demo:** [demo_runbook.md](demo_runbook.md) · **Fixtures:** [fixtures/](fixtures/) · **Red-team:** [sprint4_handover_red_team.md](sprint4_handover_red_team.md)
 
 ---
 
@@ -133,7 +136,7 @@ Statuses: `pending_review` | `approved` | `rejected`. **Approved ≠ Sent.**
 
 ### 5.5 Architecture commitments (Jamie)
 
-Assessor-facing slide: [presentation.md — Architecture commitments](presentation.md). Requirements: [jamie_requirements_register.md](../Sprint5/jamie_requirements_register.md).
+Application workflow: [Application guide](../Portfolio/DEMO_GUIDE.md). Requirements: [jamie_requirements_register.md](../Sprint5/jamie_requirements_register.md).
 
 | Commitment | ADR |
 |------------|-----|
@@ -187,7 +190,7 @@ AppLocker: use `py -3.13 -m …` — never `.venv\Scripts\python.exe`.
 
 **Morgan:** Queue sized to ~top 5% of scores; model routes who enters review; humans decide outreach. AUM context still ~$7.3M historical baseline.
 
-**Sam:** Ranking cleared heuristic. Ops cut is capacity, not a 40% precision promise. Scores are ranks unless calibrated. Next lift work = calibration / stronger model if ≫23% precision required inside budget.
+**Sam:** Ranking cleared heuristic. Ops cut is capacity, not a 40% precision promise. Scores are ranks unless calibrated. Higher precision inside the same budget requires ranking improvement. Calibration is separate probability-quality work; it does not improve precision for the same selected cases.
 
 **Jamie:** Human-in-the-loop is in code (status machine + no `/send` + ZDR + rate cap), not only in slides.
 
@@ -197,7 +200,8 @@ AppLocker: use `py -3.13 -m …` — never `.venv\Scripts\python.exe`.
 
 | Item | Priority | Notes |
 |------|----------|-------|
-| Probability calibration / model lift | Optional — Sam-driven | Only if ≫~23% precision needed inside top 5% |
+| Probability calibration | Future work | Needed before interpreting scores as probabilities; no promised ranking lift |
+| Model improvement | Future work | Needed to investigate higher precision at the same review capacity |
 | Live Azure `.env` draft path | Open (Sprint 5) | Stub path DoD-complete; endpoint still unset on local probe |
 | `.prompty` prompt-as-code | **Done (Sprint 5)** | `src/genai/prompts/retention_draft.prompty` |
 | Demo Glass-Box RBAC | **Done (Sprint 5)** | ADR 007 — UI roles + `X-Demo-Role` + audit (not Entra ID) |
@@ -224,7 +228,7 @@ To prevent this and elevate the AI workflow to a Systems Architect level, we imp
 
 | Artifact | Path |
 |----------|------|
-| Presentation (legacy Marp; live deck → `Docs/Presentations/`) | `Docs/Sprint4/presentation.md` |
+| Project presentation | [Standalone slides](../Presentations/Meridian_Presentation_Standalone.pptx) |
 | This report | `Docs/Sprint4/final_report.md` |
 | Demo runbook | `Docs/Sprint4/demo_runbook.md` |
 | Demo fixtures | `Docs/Sprint4/fixtures/` |

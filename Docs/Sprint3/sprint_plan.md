@@ -1,5 +1,8 @@
 # Sprint 3: FastAPI Serve + GenAI Friction-Gate — Plan & Goals
 
+> **Status clarification, 2 November 2026:** This dated record retains the original plan. Calibration is probability-quality work, not a demonstrated way to increase precision for unchanged top-k membership. Higher precision at fixed capacity requires ranking improvement. See the [current model card](../Model_Card.md).
+
+
 **Status:** **Closed** (2026-07-14) — implementation + demo smoke + dual close-out  
 **Depends on:** Sprint 2 ops-threshold lock — MLflow `3f575754ae9a42c5a21ea5e476c0af37`, `t≈0.701`, `fallback_quantile_top5pct` ([reports/sprint2_run_summary_v2.json](../Sprint2/reports/sprint2_run_summary_v2.json)).  
 **Schedule:** [project_schedule.md](../Sprint0/project_schedule.md)  

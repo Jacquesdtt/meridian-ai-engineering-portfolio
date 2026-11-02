@@ -51,6 +51,4 @@ Write-Host "  - Local Portal:        $(Join-Path $repoRoot 'meridian_portal.html
 Write-Host "  - Educational App:     http://localhost:3005" -ForegroundColor Cyan
 Write-Host "  - Friction Gate UI:    http://localhost:8501" -ForegroundColor Cyan
 Write-Host "  - FastAPI Swagger:     http://127.0.0.1:8000/docs" -ForegroundColor Cyan
-Write-Host "  - AI-901 Prep Guide:   http://localhost:3005/guides/interview_prep_ai901.html" -ForegroundColor Cyan
-Write-Host "  - Foundry Guide:       http://localhost:3005/guides/interview_prep_ai901_foundry_design.html" -ForegroundColor Cyan
 Write-Host "--------------------------------------------------------" -ForegroundColor DarkGray

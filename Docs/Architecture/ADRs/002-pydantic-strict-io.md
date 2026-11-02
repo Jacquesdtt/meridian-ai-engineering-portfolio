@@ -17,7 +17,7 @@ We will use **Pydantic v2** as the mandatory data validation and serialization l
 2.  **Marshmallow:** Rejected. Slower performance than Pydantic v2 (which uses a Rust core) and lacks seamless FastAPI integration.
 
 ## Consequences
-*   **Pros:** Total type safety at runtime. Automatic HTTP 422 errors for malformed requests. Elimination of LLM parsing logic.
+*   **Pros:** Runtime validation at declared schema boundaries. Automatic HTTP 422 errors for invalid API requests. JSON still needs parsing, and schema-valid prose can contain unsupported claims.
 *   **Cons:** Requires up-front investment in writing schema classes before building features.
 
 ## Trade-offs

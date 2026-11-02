@@ -15,6 +15,8 @@ and makes no claim of measured retention gains.
 [Evidence and validation](Docs/Portfolio/EVIDENCE.md)
 
 **Project page:** [Meridian in plain language](https://meridian-ai-engineering.vercel.app).
+The [page source](portfolio_site/) is static HTML and CSS with no build step.
+Its Vercel release is separate from this repository's GitHub push.
 
 ## What to review
 

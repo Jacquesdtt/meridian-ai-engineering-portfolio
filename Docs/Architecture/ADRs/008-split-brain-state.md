@@ -30,11 +30,6 @@ Long-term HA (Postgres + HTTP) is explicitly **out of scope** until Sam/Morgan u
 ## Trade-offs
 We trade **horizontal scale** and **multi-AZ DB HA** for **one coherent Approve/audit trail** and **zero new managed-database cost** in the prototype. That is intentional: Friction-Gate correctness beats throughput while the product is still a HITL demo.
 
-## Stakeholder defenses (say this out loud)
-*   **Jamie:** “There is one draft queue and one audit trail. We refuse to run multiple writers on a file database. Approve you see in the UI is the same record Compliance would sample.”
-*   **Morgan:** “We did not stand up Postgres for a Sprint 5 learning deploy. Shared volume + one replica keeps the demo cheap and portable; when we need scale, we graduate the store — we do not pretend SQLite is HA.”
-*   **Sam:** “WAL and busy_timeout are the standard SQLite concurrency fortifications; we assert them in tests. Scaling lock is configuration, not a hope.”
-
 ## What would force a revisit
 *   Confirmed multi-replica Container Apps requirement → new ADR: networked DB + API as system of record (Streamlit becomes HTTP client).
 *   Sustained lock errors under single replica → investigate volume type / write patterns; still do **not** raise `maxReplicas` on SQLite.
@@ -49,10 +44,10 @@ We trade **horizontal scale** and **multi-AZ DB HA** for **one coherent Approve/
 |---------|------|
 | WAL / timeout / error logs | `src/serving/draft_store.py` |
 | Compose volume + replicas | `docker-compose.yml` |
-| ACA scale lock (scaffold only) | `infra/azure-container-app.yaml` |
+| ACA scale lock (current target) | `infra/resources.bicep`; one replica, ADR 016. Earlier `infra/azure-container-app.yaml` is superseded. |
 | Tests | `tests/serving/test_sqlite_wal.py` |
 
 ## Follow-on (2026-09-24): UI is already an HTTP client; local container verified
 * Since F8 (2026-09-18, see [ADR 006 follow-on](006-sqlite-and-in-process-ui-for-friction-gate.md)) Streamlit no longer opens SQLite. It calls FastAPI through `FrictionGateClient`, so the **API is the only SQLite writer** and the "Streamlit becomes HTTP client" part of the revisit trigger above is already done. The context paragraph's "in-process Streamlit" describes the original ADR 006 choice; `FRICTION_GATE_MODE=inprocess` still exists for AppLocker machines, but it drives the same FastAPI app without a socket rather than writing SQLite itself.
 * The single-writer rule still holds: the API itself stays at one replica while the store is SQLite.
-* The FastAPI container (compose, `drafts_db_data` volume) was built and smoke-tested locally on 2026-09-24, including drafts surviving a restart — [docker_smoke_checklist.md](../../Sprint5/docker_smoke_checklist.md). Azure Container Apps is still a scaffold.
+* The FastAPI container (compose, `drafts_db_data` volume) was built and smoke-tested locally on 2026-09-24, including drafts surviving a restart — [docker_smoke_checklist.md](../../Sprint5/docker_smoke_checklist.md). The API was also deployed and checked on Azure that day, then removed (ADR 016). Cloud SQLite used ephemeral container disk, unlike the local Compose named volume. The later API-key gate remains unverified on Azure.

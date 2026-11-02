@@ -6,7 +6,7 @@
 
 **Canonical requirements:** [Docs/Sprint5/jamie_requirements_register.md](../../Sprint5/jamie_requirements_register.md) ← **source of truth for Jamie’s asks**
 
-**During the call — use:** [04_jamie_demo_cheat_sheet.md](04_jamie_demo_cheat_sheet.md) · [04_jamie_dashboard_feature_tour.md](04_jamie_dashboard_feature_tour.md)
+**During the call — use:** [Application guide](../../Portfolio/DEMO_GUIDE.md) · [04_jamie_dashboard_feature_tour.md](04_jamie_dashboard_feature_tour.md)
 
 **Roleplay map:** Arvind ↔ Jamie (docs keep persona name Jamie).
 
@@ -45,7 +45,7 @@ py -3.13 -m pytest tests\serving tests\genai -q
 
 Expect: **36 passed** (HITL, rate cap, scrubber, required-role RBAC, terminal immutability, opaque review_key, attention_ack).
 
-Demo script: [Docs/Sprint4/demo_runbook.md](../../Sprint4/demo_runbook.md) §§3–4.
+Application checks: [Docs/Sprint4/demo_runbook.md](../../Sprint4/demo_runbook.md) §§3–4.
 
 ---
 
@@ -78,7 +78,7 @@ Threshold: **≈0.701** (`fallback_quantile_top5pct`). Do **not** quote the near
 | Age (6 bands) | **≈0.156** | All bands kept (`min_group_n=500`) |
 | State | **≈0.318** | 38/55 states kept; 3,548 rows excluded for small-n |
 
-**Talk track:** Gaps are real at the **capacity-limited** cut; small-n states are filtered so we don’t invent geographic bias from noise. No automated fairness remediator ships in Sprint 5 — human review + model card disclosure.
+**Recorded fairness position:** Gaps are real at the **capacity-limited** cut; small-n states are filtered so we don’t invent geographic bias from noise. No automated fairness remediator ships in Sprint 5 — human review + model card disclosure.
 
 ---
 
@@ -91,7 +91,7 @@ Threshold: **≈0.701** (`fallback_quantile_top5pct`). Do **not** quote the near
 | Demo RBAC | [ADR 007](../../Architecture/ADRs/007-demo-glass-box-rbac.md) |
 | Split-brain SQLite if UI≠API host | [ADR 008](../../Architecture/ADRs/008-split-brain-state.md) |
 | Phrase sheet | [Sprint3 ai_bp_learnings §2](../../Sprint3/ai_bp_learnings.md) |
-| Presentation language | Live deck [Docs/Presentations/](../../Presentations/generate_presentation.py) (dual PPTX); legacy Marp [Sprint4 presentation](../../Sprint4/presentation.md) |
+| Presentation language | Live deck [Project presentation](../../Presentations/Meridian_Presentation_Standalone.pptx); [Application guide](../../Portfolio/DEMO_GUIDE.md) |
 
 ---
 
@@ -124,7 +124,6 @@ Full draft (longer): see conversation history / prior Teams draft.
 - [x] **Jacques** — Requirements register (`jamie_requirements_register.md`).
 - [x] **Jacques** — Stakeholder pack cascade (engagement plan, README index, Sam/Morgan deps, attack-note dispositions).
 - [x] **Jacques** — Follow-up message drafted: [08_jamie_followup_message.md](08_jamie_followup_message.md).
-- [ ] **Jacques** — Send follow-up to Arvind; then final deck/report rehearsal (fairness one-sentence + prevention table).
 - [ ] **Jamie (follow-up)** — Answer JR-OPEN-01…05; update register §C.
 
 ## 9. Clarifications Needed (Parking Lot)

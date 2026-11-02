@@ -34,11 +34,6 @@ Streamlit Methodology tab loads via disk cache + `@st.cache_resource`. Retries/t
 ## Trade-offs
 We trade managed-vector polish and multi-doc scale for **guaranteed local demoability** and a **single-file cache**. That is the right trade for a prototype whose binding constraint is AppLocker + one shared Azure resource — not corpus size.
 
-## Stakeholder defenses (say this out loud)
-*   **Jamie (Risk):** “Answers are grounded in the committed final report. The bot is not free-associating bank policy. If retrieval finds nothing, it says it cannot answer.”
-*   **Sam (DS):** “Dense retrieval uses the same Azure embedding deployment we already have; ranking is cosine in pure Python so we can unit-test without a vector DB. Offline TF-IDF keeps CI green.”
-*   **Morgan (Product):** “Agents get a methodology assistant in the same Streamlit app — no second product. Cache means the first question after restart is not a 30-second embed tax.”
-
 ## What would force a revisit
 *   AppLocker policy changes and a managed vector service is available → execute Phase 6.
 *   Corpus grows beyond one report and JSON cache becomes unwieldy → managed index.
@@ -49,10 +44,7 @@ We trade managed-vector polish and multi-doc scale for **guaranteed local demoab
 *   **Cons:** Not a production knowledge base; embedding quality depends on Azure; TF-IDF fallback is weaker; **no cross-encoder rerank** until Phase 6.
 
 ## Amendment (2026-09-22) — Hybrid search + reranking (ADR 015)
-"No cross-encoder rerank" and "TF-IDF only" below are superseded by
-[ADR 015](015-hybrid-rag-rerank-fairness-consolidation.md): every index now
-carries both a dense and a BM25 signal, fused with RRF, plus an optional
-LLM-scored rerank pass — still no Chroma/FAISS, still AppLocker-safe.
+The original dense-or-TF-IDF retrieval is superseded by [ADR 015](015-hybrid-rag-rerank-fairness-consolidation.md): every index has BM25; Azure configuration can add dense embeddings, RRF fusion and an optional LLM-scored rerank pass. Offline retrieval uses BM25. A dedicated cross-encoder remains unimplemented. The API retains `tfidf` as its legacy keyword-only mode label.
 
 ## Amendment (2026-07-17) — Bounded chunking
 **Problem:** H1/H2-only splits produced ~10 chapter chunks (max ~6k chars). With `top_k=3` the Streamlit expander looked like the full report ([attack note](../../Sprint5/rag_chunking_red_team.md)).

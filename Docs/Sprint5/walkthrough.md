@@ -1,5 +1,8 @@
 # Sprint 5 Walkthrough: Containerisation, GenAIOps & Close-out
 
+> **Status clarification, 2 November 2026:** Earlier sections are execution history. The current engine uses BM25 offline and optional dense fusion plus LLM reranking (ADR 015); `retrieval_mode=tfidf` is a legacy label. Azure API hosting was checked then removed on 2026-09-24, before the later API-key gate (ADR 016). No standing service or production validation is claimed.
+
+
 **2026-10-20 maintenance:** local release checks and the production browser/performance baseline are recorded in [learning-app validation](../../educational_web_app/docs/validation_2026-10-20.md). Run the normal release commands, then `node scripts/validation-preview.mjs` inside `educational_web_app` for the isolated no-store timing preview. This pass reconciles tracking and deployment wording; it does not redeploy Azure. Live marker revalidation is blocked by HTTP 401, and the participant trial remains open.
 
 > **Closed 2026-09-24.** Delivery record: [sprint_debrief.md](sprint_debrief.md) · process record: [sprint_retrospective.md](sprint_retrospective.md). Sections are in execution order; earlier sections describe the system as it was on their date.

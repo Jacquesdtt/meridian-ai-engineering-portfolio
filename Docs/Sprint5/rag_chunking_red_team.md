@@ -1,5 +1,8 @@
 # RAG Chunking Red Team (Attack Note)
 
+> **Status clarification, 2 November 2026:** This dated record describes the earlier retrieval implementation. ADR 015 later replaced the sparse path with BM25 and added optional dense fusion and LLM reranking. A dedicated cross-encoder and measured retrieval/answer-quality gates remain open. The API label tfidf is retained for compatibility, not as the algorithm name.
+
+
 **Date:** 2026-07-17  
 **Attacker:** Demo UI observation (Methodology Q&A expander) + agent diagnosis  
 **Artifact:** `src/genai/rag_engine.py` → `_chunk_markdown` · Streamlit Methodology tab  

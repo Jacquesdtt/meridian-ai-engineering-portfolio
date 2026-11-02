@@ -52,7 +52,7 @@ gantt
 | 1 | EDA + feature export | **Done** (2026-07-10) | ADR 004, `training_data.csv` (2.26M×27), Gini screen pass |
 | 2 | Modeling / RAI | **Done** (2026-07-14) | Temporal XGBoost + MLflow; ops cut `t≈0.701` |
 | 3 | GenAI + Friction-Gate | **Done** (2026-07-14) | `Models/ops/`, FastAPI, Streamlit review UI, 7 tests |
-| 4 | Handover | **Done** (2026-07-14) | [final_report.md](../Sprint4/final_report.md) · [demo_runbook.md](../Sprint4/demo_runbook.md) · [presentation.md](../Sprint4/presentation.md) *(legacy Marp)* · dual close-out filed; **live deck** → [Docs/Presentations/](../Presentations/generate_presentation.py) |
+| 4 | Handover | **Done** (2026-07-14) | [final_report.md](../Sprint4/final_report.md) · [demo_runbook.md](../Sprint4/demo_runbook.md) · [Application guide](../Portfolio/DEMO_GUIDE.md) · dual close-out filed; **live deck** → [Project presentation](../Presentations/Meridian_Presentation_Standalone.pptx) |
 | 5 | Cloud + GenAIOps | **Active** (2026-07-14) | [progress.md](../Sprint5/progress.md) · [sprint_plan.md](../Sprint5/sprint_plan.md) — `.prompty` + Glass-Box RBAC **shipped**; ACA / Foundry / live Azure **open** |
 
 ## Key Milestones

@@ -1,8 +1,7 @@
-# Sprint 4 — Live Demo Runbook
+# Sprint 4 — Application smoke checks
 
-**Purpose:** Scripted smoke path for handover / presentation.  
+**Purpose:** Check model scoring, draft review, and access controls.
 **Ops lock:** run `3f575754ae9a42c5a21ea5e476c0af37` · `t≈0.70055` · `fallback_quantile_top5pct`  
-**Talk track:** [presentation.md](presentation.md) · stakeholder lines: [../Sprint3/ai_bp_learnings.md](../Sprint3/ai_bp_learnings.md)  
 **Fixtures:** [fixtures/below_threshold_demo.json](fixtures/below_threshold_demo.json) · [fixtures/flagged_demo.json](fixtures/flagged_demo.json)
 
 ---
@@ -41,7 +40,7 @@ py -3.13 -m uvicorn src.serving.app:app
 
 Open `http://127.0.0.1:8000/health` (or `/docs`).
 
-**Say while showing `/health`:**
+**Expected health response:**
 * `status=ok`, `model_loaded=true`
 * `run_id` starts with `3f575754…`
 * threshold ≈ **0.701**, rule `fallback_quantile_top5pct`
@@ -68,7 +67,6 @@ On **Score / create draft**, leave preset **Below threshold (capacity gate)** (l
 | **Not flagged** | Capacity dial working |
 | **Create draft** → error / no draft | Gate refused GenAI side effect |
 
-**Say out loud:** *“This is not a broken model — we only draft for the top ~5% of scores so the queue stays reviewable.”*
 
 ---
 
@@ -88,9 +86,9 @@ Then:
 2. **Edit** (optional) — offered interest rate cannot exceed **3.5%** (Pydantic).
 3. Tick **attention acknowledgement**, then **Approve** or **Reject** (Approve stays disabled until the checkbox is ticked — JR-REQ-19 anti rubber-stamp).
 
-**Mandatory line:** *“Approved means ready for a human to send outside this system — Approved is not Sent. There is no `/send` API. HITL is not a rubber stamp.”*
+Approval records a decision. It does not send an email; there is no `/send` API.
 
-### 3b. Glass-Box RBAC (Sprint 5 — 60 seconds)
+### 3b. Glass-Box RBAC (Sprint 5)
 
 Sidebar **Active role (demo RBAC)** — pedagogical, not SSO (ADR 007):
 
@@ -98,11 +96,10 @@ Sidebar **Active role (demo RBAC)** — pedagogical, not SSO (ADR 007):
 2. Switch to **Compliance viewer** → Review queue is read-only; open **Audit trail** + **Glass-box** (ops `t≈0.701`, frozen SHAP). Approve buttons disabled.
 3. Optional API proof: `PATCH /drafts/{id}` with header `X-Demo-Role: compliance_viewer` → **403**; `GET /audit/events` with same header → 200. Missing header on `/score` or `/drafts` → **400** (no silent agent elevation).
 
-**Say:** *“Roles gate who can mutate drafts; glass-box shows why the contact queue exists. Still no autonomous send. Approve once — terminal drafts are immutable.”*
 
 ---
 
-## 4. Compliance checklist (Jamie — 30 seconds)
+## 4. Compliance checks
 
 | Check | Evidence |
 |-------|----------|
@@ -125,14 +122,14 @@ Draft DB path (local): `Data/processed/draft_queue.db` — safe to delete betwee
 
 ---
 
-## 6. Failure crib sheet
+## 6. Troubleshooting
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
 | `Access is denied` on python | AppLocker / `.venv` | Use `py -3.13 -m …` only |
 | Import errors in Streamlit | `PYTHONPATH` | `set PYTHONPATH=%CD%` from repo root |
 | Model not loaded | Missing `Models/ops/` | Re-export or restore committed artifacts |
-| “Model broken” at p≈0.21 | Threshold misunderstood | Rehearse §2 language |
+| “Model broken” at p≈0.21 | Threshold misunderstood | Compare the score with the threshold in §2 |
 | Flagged preset not flagged | Ops bundle drifted | Re-run fixture verify (§0); restore `Models/ops/` |
 | Fixture file missing | Wrong cwd / incomplete clone | Confirm `Docs\Sprint4\fixtures\` exists |
 | Azure errors | No `.env` | Expected — stub / stub_fallback |

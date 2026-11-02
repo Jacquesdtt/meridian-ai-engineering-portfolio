@@ -5,7 +5,7 @@
 
 ## 1. What Was Done
 - Filed Sprint 4 plan at sprint start (objectives, Acts A–C spine, risks, DoD).
-- Built markdown presentation deck: [presentation.md](presentation.md) (Marp `---` slides).
+- Built the Sprint 4 markdown presentation as Marp slides (`---` breaks). That historical working document is not included in this public checkout. The current [application guide](../Portfolio/DEMO_GUIDE.md) describes the review workflow.
 - Wrote final handover report: [final_report.md](final_report.md).
 - Wrote live demo runbook: [demo_runbook.md](demo_runbook.md).
 - Drafted then finalized Sprint 4 learnings (`ai_engineering_learnings.md`, `ai_bp_learnings.md`).
@@ -43,7 +43,7 @@
 
 | Item | Value |
 |------|-------|
-| Presentation | [presentation.md](presentation.md) |
+| Presentation | Historical Sprint 4 Marp slides; not included in this public checkout. Current [standalone slides](../Presentations/Meridian_Presentation_Standalone.pptx). |
 | Final report | [final_report.md](final_report.md) |
 | Demo runbook | [demo_runbook.md](demo_runbook.md) |
 | Ops numbers source | `sprint2_run_summary_v2.json` (v1 freeze untouched) |
@@ -53,4 +53,4 @@
 | Demo fixtures | below ≈0.21 not flagged · flagged ≈0.75 creates draft |
 | Out of scope kept out | Glass-Box RBAC, `.prompty`, Foundry, Container Apps, calibration |
 
-**Next:** New-chat handoff → [../Sprint5/continue_sprint5_prompt.md](../Sprint5/continue_sprint5_prompt.md). Early Sprint 5 reminders: re-verify demo fixtures + wire live Azure `.env`; then Container Apps / `.prompty` / Foundry (Glass-Box RBAC only if requested).
+Subsequent work is recorded in the [Sprint 5 debrief](../Sprint5/sprint_debrief.md).

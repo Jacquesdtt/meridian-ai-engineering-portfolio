@@ -50,31 +50,40 @@ are separate. Docker and Azure deployment checks are historical; see the evidenc
 
 ## Explore the review workflow
 
-### Score a customer
+### One case: from score to recorded decision
+
+This example uses [flagged_demo.json](../Sprint4/fixtures/flagged_demo.json),
+an illustrative feature record. It has no observed next-month outcome and is
+not an accuracy test. In the evaluation, one record means one customer in one
+observation month; the same customer can occur in several months. See
+[what one prediction means](CASE_STUDY.md#what-one-prediction-means).
+
+Use the local setup above with Azure settings absent and space in the pending
+queue. Select the **Retention agent** role. The role picker demonstrates
+permissions; it does not authenticate identity.
+
+| Step | Action | Expected result |
+|---|---|---|
+| 1. Score | Open **Score / create draft**, select **Flagged (create draft)** and press **Score**. | About 0.750928 (displayed as 0.7509), above the 0.700548 cut. This is a ranking score, not a 75.1% probability. |
+| 2. Draft | Press **Create draft if flagged**. | The API scores it again before admitting it. A pending draft appears with source `stub`: local template text, not a live LLM response. The rate is at most 3.5%. |
+| 3. Review | Open **Review queue**, read the draft and save any edits. Select the review acknowledgement and approve. | Status becomes `approved`. Without acknowledgement, approval is refused. Approved drafts cannot be edited or decided again. |
+| 4. Inspect | Open **Audit trail** and find the draft's creation and approval entries. | The stored history records the decision. No email is sent. Contact remains outside the application; no customer response or retention gain is demonstrated. |
+
+These are expected results from the committed implementation and the dated
+[fixture workflow check](EVIDENCE.md#initial-validation-2-november-2026).
+They are separate from the historical monthly model evaluation. With Azure
+configured, inspect the source field: Azure output and a fallback are different
+from the offline path above.
+
+### Check the rejection path
 
 In the Retention agent view, select **Below threshold (capacity gate)**. The
 illustrative case scores about 0.207 and is not flagged. The API refuses a draft
 request for this case.
 
-Select **Flagged (create draft)** for the second case. It scores about 0.751 and
-qualifies for a draft. These two cases illustrate application behavior; they do
-not measure model accuracy.
+### Inspect other views
 
-### Review a draft
-
-Create a draft for the flagged case, then open the Review queue. Its source
-indicates whether it came from Azure, the local stub, or a fallback. The offered
-rate is bounded at 3.5%.
-
-A reviewer can inspect and edit a pending draft. Approval requires review
-acknowledgement and records a decision. It does not send an email. Approved and
-rejected drafts cannot be changed; use a new draft to try another decision.
-
-### Inspect the decision record
-
-The Audit trail records the decision. The Compliance viewer can inspect the
-history but cannot change it. The role picker demonstrates permissions; it does
-not authenticate a user's identity.
+The Compliance viewer can inspect the audit history but cannot change it.
 
 The Data scientist view provides the Prediction browser and per-customer
 explanations. Without a cohort file, it contains the two illustrative fixtures.

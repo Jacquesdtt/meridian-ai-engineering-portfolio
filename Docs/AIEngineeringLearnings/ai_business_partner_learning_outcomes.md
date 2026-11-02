@@ -48,11 +48,11 @@ The Golden Sequence implemented across this project:
 
 ## Phase 5 addendum: Ranking success ≠ contact policy
 *   **Outcome:** Separate “model ranks better than heuristic” from “who enters the retention queue.”
-*   **Application:** Max-F1 (~21% precision, ~249k FP) cleared ranking DoD but failed ops. Capacity dial (top 5%) made Friction-Gate usable. Do not promise 40% precision on these scores without calibration/model lift (see `Docs/Sprint2/ML_Learnings.md` §2.4a).
+*   **Application:** Max-F1 (~21% precision, ~249k FP) cleared ranking DoD but failed ops. Capacity dial (top 5%) made Friction-Gate usable. Do not promise 40% precision on these scores without demonstrated ranking improvement at that capacity (see `Docs/Sprint2/ML_Learnings.md` §2.4a).
 
 ## Phase 5 addendum: Milestone 4 handover (Sprint 4 — 2026-07-14)
 *   **Outcome:** One assessor-ready story arc without inventing new metrics or expanding into cloud/dashboard mid-close.
-*   **Application:** Milestone 4 freeze: [../Sprint4/presentation.md](../Sprint4/presentation.md) *(legacy Marp)* · [../Sprint4/final_report.md](../Sprint4/final_report.md) · [../Sprint4/demo_runbook.md](../Sprint4/demo_runbook.md) · [../Sprint4/fixtures/](../Sprint4/fixtures/). **Live deck SoT:** [../Presentations/generate_presentation.py](../Presentations/generate_presentation.py) (dual PPTX). Ranking slides omit threshold-dependent accuracy next to PR/ROC. Stakeholder lines unchanged from Sprint 3 BP learnings. Phase 5 follow-ons that were still open at Milestone 4 (`.prompty`, Glass-Box RBAC) are now mid-sprint landed — see [../Sprint5/progress.md](../Sprint5/progress.md); Foundry / Container Apps / live Azure remain open.
+*   **Application:** Milestone 4 freeze: [Application guide](../Portfolio/DEMO_GUIDE.md) · [../Sprint4/final_report.md](../Sprint4/final_report.md) · [../Sprint4/demo_runbook.md](../Sprint4/demo_runbook.md) · [../Sprint4/fixtures/](../Sprint4/fixtures/). **Live deck SoT:** [Project presentation](../Presentations/Meridian_Presentation_Standalone.pptx). Ranking slides omit threshold-dependent accuracy next to PR/ROC. Stakeholder lines unchanged from Sprint 3 BP learnings. Phase 5 follow-ons that were still open at Milestone 4 (`.prompty`, Glass-Box RBAC) are now mid-sprint landed — see [../Sprint5/progress.md](../Sprint5/progress.md); Foundry / Container Apps / live Azure remain open.
 
 ## Phase 5 addendum: Sprint 5 close-out (2026-09-24)
 *   **Outcome:** GenAIOps depth (prompt-as-code, Glass-Box RBAC, hybrid RAG, persona dashboards, a verified API container) delivered without loosening Friction as a Feature or reopening the model.

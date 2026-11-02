@@ -1,5 +1,8 @@
 # RAG Chunking Revision Plan
 
+> **Status clarification, 2 November 2026:** This dated record describes the earlier retrieval implementation. ADR 015 later replaced the sparse path with BM25 and added optional dense fusion and LLM reranking. A dedicated cross-encoder and measured retrieval/answer-quality gates remain open. The API label tfidf is retained for compatibility, not as the algorithm name.
+
+
 **Date:** 2026-07-17  
 **Context:** Demo showed Methodology RAG expander returning near-whole-report context.  
 **Attack note:** [rag_chunking_red_team.md](rag_chunking_red_team.md)  
@@ -29,7 +32,6 @@
 | [walkthrough.md](walkthrough.md) | §3d narrative |
 | [progress.md](progress.md) | Shipped row + demo path corpus name |
 | [ai_engineering_learnings.md](ai_engineering_learnings.md) | Process + technical entry |
-| [04_jamie_demo_cheat_sheet.md](../StakeholderManagement/Meetings/04_jamie_demo_cheat_sheet.md) | Talk track |
-| [Presentations/presentation.md](../Presentations/presentation.md) + `generate_presentation.py` | Current RAG state accuracy |
+| [Application guide](../Portfolio/DEMO_GUIDE.md) | Current RAG state accuracy |
 | [Engineering/Code_Walkthrough.md](../Engineering/Code_Walkthrough.md) (+ `.agents` mirror) | RAG engine row |
 | `.agents/MEMORY.md` | Current state + next step |

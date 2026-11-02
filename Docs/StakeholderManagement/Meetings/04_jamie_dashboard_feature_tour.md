@@ -3,7 +3,7 @@
 **Audience:** Jamie (Arvind) / Risk — how the review dashboard was built and why each feature exists.  
 **Requirements IDs:** JR-REQ-03 (and standing JR-REQ-10…18) — see [jamie_requirements_register.md](../../Sprint5/jamie_requirements_register.md).  
 **Live UI:** Streamlit `Code/Sprint3/friction_gate_app.py` (Glass-box tab mirrors this).  
-**Companion:** [04_jamie_demo_cheat_sheet.md](04_jamie_demo_cheat_sheet.md) · [fairness narrative](../../Sprint5/fairness_anti_discrimination_narrative.md)
+**Companion:** [Application guide](../../Portfolio/DEMO_GUIDE.md) · [fairness narrative](../../Sprint5/fairness_anti_discrimination_narrative.md)
 
 ---
 

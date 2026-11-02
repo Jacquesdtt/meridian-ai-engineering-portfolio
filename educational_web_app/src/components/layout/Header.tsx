@@ -51,14 +51,15 @@ export function Header() {
           <span className="hidden md:inline">Glossary</span>
         </button>
         <a
-          href="/guides/interview_prep_ai901.html"
+          href="/guides/Final_Report_Official_print.html"
           target="_blank"
           rel="noreferrer"
           className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 border border-blue-500/30 hover:border-blue-400/60 bg-blue-500/10 px-3 py-2 rounded-lg transition-colors"
-          title="Open AI-901 Interview Prep HTML Guide in new tab"
+          title="Open project report in new tab"
+          aria-label="Open project report in new tab"
         >
           <ExternalLink className="w-3.5 h-3.5" />
-          <span className="hidden md:inline font-medium">Prep Guide</span>
+          <span className="hidden md:inline font-medium">Project report</span>
         </a>
       </div>
       {glossaryOpen && <GlossaryDrawer onClose={() => setGlossaryOpen(false)} />}

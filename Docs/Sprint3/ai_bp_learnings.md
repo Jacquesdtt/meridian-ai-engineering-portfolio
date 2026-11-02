@@ -1,5 +1,8 @@
 # Sprint 3: AI Business Partner Learnings
 
+> **Status clarification, 2 November 2026:** This dated record retains the original plan. Calibration is probability-quality work, not a demonstrated way to increase precision for unchanged top-k membership. Higher precision at fixed capacity requires ranking improvement. See the [current model card](../Model_Card.md).
+
+
 ## Pointers
 - PRD roadmap: [../Product/Product_Requirements_Document.md](../Product/Product_Requirements_Document.md) (Phase 3 done)
 - Model card: [../Model_Card_Template.md](../Model_Card_Template.md)
@@ -10,7 +13,7 @@
 ## 1. Contact policy is the product dial (Morgan / Sam)
 - Sprint 2 proved **ranking** (PR-AUC 0.219 vs heuristic 0.151).
 - Sprint 3 made the **top-5% / t≈0.701** cut the only path into the retention queue (~23% precision, ~20k FP on test — not the max-F1 ~249k FP flood).
-- A mid-score demo row (~0.21) correctly produces **no** draft — that is **capacity discipline**, not a broken model. Say this out loud in demos.
+- A mid-score demo row (~0.21) correctly produces **no** draft — that is **capacity discipline**, not a broken model.
 
 ## 2. Friction-Gate language for Jamie (Risk)
 | Phrase | Meaning |

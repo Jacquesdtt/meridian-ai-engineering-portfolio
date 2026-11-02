@@ -51,5 +51,5 @@ Jacques
 - [ ] Update [jamie_requirements_register.md](../../Sprint5/jamie_requirements_register.md) §C (JR-OPEN → answered)
 - [ ] Update [04_jamie_sprint5_risk_prep.md](04_jamie_sprint5_risk_prep.md) §§6–9
 - [ ] Update [stakeholder_engagement_plan.md](../stakeholder_engagement_plan.md) Jamie status
-- [ ] Reflect any hard gates in the live deck ([Docs/Presentations/](../../Presentations/generate_presentation.py)) / [final_report.md](../../Sprint4/final_report.md) if policy changes (legacy Marp: [Sprint4/presentation.md](../../Sprint4/presentation.md))
+- [ ] Reflect any hard gates in the live deck ([Project presentation](../../Presentations/Meridian_Presentation_Standalone.pptx)) / [final_report.md](../../Sprint4/final_report.md) if policy changes ([Application guide](../../Portfolio/DEMO_GUIDE.md))
 - [ ] Update `.agents/MEMORY.md`
