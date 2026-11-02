@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Meridian Savings — Final Report (DF14)</title>
+<style>
+@page { size: A4; margin: 18mm 16mm; }
+body {
+  font-family: "Segoe UI", Calibri, "Helvetica Neue", Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.45;
+  color: #1a1a1a;
+}
+h1 { font-size: 20pt; margin-top: 0; page-break-after: avoid; }
+h2 { font-size: 14pt; margin-top: 1.4em; border-bottom: 1px solid #ccc; padding-bottom: 0.2em; page-break-after: avoid; }
+h3 { font-size: 12pt; margin-top: 1.1em; page-break-after: avoid; }
+table { border-collapse: collapse; width: 100%; margin: 0.8em 0; font-size: 9.5pt; page-break-inside: avoid; }
+th, td { border: 1px solid #bbb; padding: 4px 6px; vertical-align: top; text-align: left; }
+th { background: #f0f0f0; }
+code { font-family: Consolas, "Courier New", monospace; font-size: 9.5pt; background: #f5f5f5; padding: 0 3px; }
+pre { background: #f5f5f5; padding: 8px; overflow-x: auto; font-size: 9pt; }
+blockquote { border-left: 3px solid #888; margin-left: 0; padding-left: 12px; color: #333; }
+ul, ol { padding-left: 1.4em; }
+a { color: #0645ad; text-decoration: none; }
+img { max-width: 100%; }
+.toc { page-break-after: always; }
+.toc ul { list-style: none; padding-left: 0; }
+.toc li { margin: 0.25em 0; }
+.meta { color: #444; margin-bottom: 1.5em; }
+</style>
+</head>
+<body>
+<nav class="toc"><h2>Table of Contents</h2><div class="toc">
+<ul>
+<li><a href="#1-executive-summary">1. Executive Summary</a></li>
+<li><a href="#2-scope-and-purpose">2. Scope and Purpose</a><ul>
+<li><a href="#use-case">Use Case</a></li>
+<li><a href="#in-scope">In Scope</a></li>
+<li><a href="#out-of-scope">Out of Scope</a></li>
+</ul>
+</li>
+<li><a href="#3-portfolio-description">3. Portfolio Description</a><ul>
+<li><a href="#product-context">Product Context</a></li>
+<li><a href="#data-sources-and-period">Data Sources and Period</a></li>
+<li><a href="#size-and-composition">Size and Composition</a></li>
+<li><a href="#portfolio-evolution-and-demographics">Portfolio Evolution and Demographics</a></li>
+</ul>
+</li>
+<li><a href="#4-data-processing">4. Data Processing</a><ul>
+<li><a href="#41-data-quality-issues-and-resolutions">4.1 Data Quality Issues and Resolutions</a></li>
+<li><a href="#42-target-definition-adr-004">4.2 Target Definition (ADR 004)</a></li>
+<li><a href="#43-feature-engineering-and-anti-leakage">4.3 Feature Engineering and Anti-Leakage</a></li>
+</ul>
+</li>
+<li><a href="#5-model-methodology">5. Model Methodology</a><ul>
+<li><a href="#51-model-inputs-outputs">5.1 Model Inputs / Outputs</a></li>
+<li><a href="#52-overview-algorithm-and-training">5.2 Overview — Algorithm and Training</a></li>
+<li><a href="#53-assumptions-and-limitations">5.3 Assumptions and Limitations</a></li>
+<li><a href="#54-model-interpretation">5.4 Model Interpretation</a></li>
+</ul>
+</li>
+<li><a href="#6-implementation">6. Implementation</a><ul>
+<li><a href="#61-packaging-and-architecture">6.1 Packaging and Architecture</a></li>
+<li><a href="#62-how-to-run-handover">6.2 How to Run (Handover)</a></li>
+<li><a href="#63-friction-gate-streamlit-application">6.3 Friction-Gate Streamlit Application</a></li>
+<li><a href="#64-genai-extensions-guardrails-end-to-end">6.4 GenAI Extensions — Guardrails End-to-End</a></li>
+<li><a href="#65-methodology-rag-qa-bot-sprint-5">6.5 Methodology RAG Q&amp;A Bot (Sprint 5)</a></li>
+</ul>
+</li>
+<li><a href="#7-model-testing">7. Model Testing</a><ul>
+<li><a href="#71-metrics-why-pr-auc">7.1 Metrics — Why PR-AUC?</a></li>
+<li><a href="#72-ranking-performance-test-set">7.2 Ranking Performance (Test Set)</a></li>
+<li><a href="#73-calibration">7.3 Calibration</a></li>
+<li><a href="#74-sensitivity-threshold-policy-capacity-dial">7.4 Sensitivity — Threshold Policy (Capacity Dial)</a></li>
+<li><a href="#75-fairness-and-anti-discrimination-jamie-jr-req-0102">7.5 Fairness and Anti-Discrimination (Jamie — JR-REQ-01/02)</a></li>
+</ul>
+</li>
+<li><a href="#8-references">8. References</a><ul>
+<li><a href="#external-methodology">External Methodology</a></li>
+<li><a href="#internal-provenance">Internal Provenance</a></li>
+</ul>
+</li>
+<li><a href="#appendix">Appendix</a><ul>
+<li><a href="#a1-operating-point-canonical-json">A.1 Operating Point (Canonical JSON)</a></li>
+<li><a href="#a2-threshold-sensitivity-before-after">A.2 Threshold Sensitivity (Before / After)</a></li>
+<li><a href="#a3-genai-guardrails-evaluation-notes">A.3 GenAI Guardrails — Evaluation Notes</a></li>
+<li><a href="#a4-technical-debt-and-next-work">A.4 Technical Debt and Next Work</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+<h1 id="final-report-meridian-savings-churn-prediction-retention-system">Final Report: Meridian Savings Churn Prediction &amp; Retention System</h1>
+<p><strong>Project:</strong> InnovatorProjectDF14<br />
+<strong>Date:</strong> 2026-09-24<br>
+<strong>Primary Stakeholders:</strong> Morgan (Product), Sam (Data Science), Jamie (Risk &amp; Compliance)<br />
+<strong>Model version:</strong> 1.1.0-sprint3-serving · MLflow ops run <code>3f575754ae9a42c5a21ea5e476c0af37</code></p>
+<hr />
+<h2 id="1-executive-summary">1. Executive Summary</h2>
+<p>Meridian Savings faces approximately <strong>$7.3M in historical Assets Under Management (AUM) at risk</strong> from silent retail savings churn. This project delivers a <strong>leakage-safe ranking model</strong> plus a <strong>human-in-the-loop GenAI retention workflow</strong> so Operations can prioritise outbound contact before balances drain.</p>
+<p><strong>What we built:</strong> An XGBoost classifier that ranks customer-months by next-month churn risk, served via FastAPI (<code>Models/ops/</code>) and consumed by the Friction-Gate Streamlit application. For customers above the operational contact threshold (<code>p ≥ 0.701</code>, top ~5%), the currently configured Azure OpenAI deployment (<code>gpt-5-mini</code>, which replaced <code>gpt-4o-mini</code> in September 2026) drafts personalised retention emails under strict guardrails. A RAG Q&amp;A bot grounds methodology answers in this report and related documentation.</p>
+<p><strong>Headline performance (test window 2017-09 → 2020-04):</strong> PR-AUC <strong>0.219</strong> vs heuristic <strong>0.151</strong>; ROC-AUC <strong>0.723</strong> vs <strong>0.551</strong>. At the ops cut, test precision is <strong>22.9%</strong> with <strong>20,127</strong> false positives — a <strong>12×</strong> reduction versus a max-F1 threshold that would flood the review queue.</p>
+<p><strong>Key recommendation:</strong> Hand over the portable <code>Models/ops/</code> bundle and Friction-Gate UI to Retention Operations. Keep the ops cut at <strong><code>t = 0.70055</code></strong> (validation top-5% quantile). Do not lower the threshold to chase recall without expanding human review capacity. Azure Container Apps hosting is <strong>proven but not standing</strong>: <code>azd up</code> deployed and verified the API on 2026-09-24, and it was then torn down, so there is no live ACA URL in this handover.</p>
+<p><strong>Major caveats (read before use):</strong></p>
+<ol>
+<li><strong>Scores are ranks, not calibrated probabilities.</strong> Training used <code>scale_pos_weight</code>; a score of 0.75 means “very high in the portfolio,” not a 75% actuarial churn chance.</li>
+<li><strong>Aspirational ROC-AUC &gt; 0.85 (PRD) was not achieved.</strong> Shipped Definition of Done was <strong>beat the <code>gone_this_month</code> heuristic</strong> on PR-AUC and ROC-AUC, plus a reviewable contact queue — not the old AUC target.</li>
+<li><strong>Azure Container Apps hosting was proven, then torn down; it is not production-live.</strong> Local FastAPI + Streamlit are DoD-complete, and the FastAPI Docker image is built and smoke-tested locally (2026-09-24). On 2026-09-24 the <code>azd</code> project (<code>azure.yaml</code>, <code>infra/*.bicep</code>, one replica) deployed the API to Azure Container Apps and passed live checks (Azure drafts, hybrid RAG, RBAC). It was then removed with <code>azd down</code> to stop charges, so there is no standing URL. Redeploy with <code>azd up</code> (<a href="Architecture/ADRs/016-azure-container-apps-via-azd.md">ADR 016</a>).</li>
+<li><strong>Fairness gaps remain and are disclosed.</strong> Equalized Odds at the ops cut is ≈ <strong>0.16</strong> (age) and ≈ <strong>0.32</strong> (state, filtered). We did not ship an automated fairness remediator.</li>
+</ol>
+<hr />
+<h2 id="2-scope-and-purpose">2. Scope and Purpose</h2>
+<h3 id="use-case">Use Case</h3>
+<p>This system informs <strong>outbound retention prioritisation</strong>: which retail savings customers are most likely to enter next-month left-looking churn (rounded balance <code>$0</code> <strong>and</strong> inactive). For the highest-ranked cohort, it generates <strong>draft</strong> retention emails (competitive rates capped at <strong>3.5%</strong>) for human review — never autonomous send.</p>
+<h3 id="in-scope">In Scope</h3>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Portfolio</strong></td>
+<td>US retail savings accounts, monthly customer×month grain</td>
+</tr>
+<tr>
+<td><strong>Prediction window</strong></td>
+<td>Features through month-end <strong>t</strong>; label = churn state in month <strong>t+1</strong> (ADR 004)</td>
+</tr>
+<tr>
+<td><strong>Scoring population</strong></td>
+<td>Customer-months with <code>Months_Since_Creation ≥ 2</code> (new-account grace)</td>
+</tr>
+<tr>
+<td><strong>Submission horizon</strong></td>
+<td>Predict June 2020 churn for accounts active as of <strong>2020-05-31</strong> (<code>StartingFiles/banking-churn-genai-project.md</code>)</td>
+</tr>
+<tr>
+<td><strong>Intended users</strong></td>
+<td>Retention agents (Friction-Gate queue), Morgan (portfolio/at-risk views), Sam (ML audit via MLflow/SHAP), Jamie (fairness + HITL evidence)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="out-of-scope">Out of Scope</h3>
+<ul>
+<li><strong>Autonomous execution</strong> — no <code>/send</code> endpoint; Approved ≠ Sent (ADR 003).</li>
+<li><strong>Dormant high-balance accounts</strong> — inactive but still holding AUM are not labelled churn.</li>
+<li><strong>Non-retail products</strong> — commercial, mortgage, credit excluded.</li>
+<li><strong>Probability calibration / model lift</strong> — deferred unless Sam requires ≫23% precision inside the top-5% budget.</li>
+<li><strong>Production Entra ID RBAC</strong> — demo Glass-Box roles only (ADR 007).</li>
+</ul>
+<hr />
+<h2 id="3-portfolio-description">3. Portfolio Description</h2>
+<h3 id="product-context">Product Context</h3>
+<p>Meridian Savings offers a retail savings product aimed at middle-income professionals. Interest accrues monthly only when the account shows a <strong>net positive</strong> change after deposits and withdrawals — so consistent deposit behaviour matters to both the customer and the bank’s liquidity buffer. Silent churn (balance drain to near-zero with inactivity) removes funding capacity; the historical AUM-at-risk baseline locked in Sprint 1 is <strong>≈ $7.27M / ~$7.3M</strong>.</p>
+<h3 id="data-sources-and-period">Data Sources and Period</h3>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>StartingFiles/customers_tm1_e.csv</code></td>
+<td>Demographics, <code>start_balance</code>, <code>creation_date</code></td>
+</tr>
+<tr>
+<td><code>StartingFiles/transactions_tm1_e.csv</code></td>
+<td>Cash movements aggregated to month-end</td>
+</tr>
+</tbody>
+</table>
+<p>Raw extracts span <strong>2007-01-31 to 2020-05-31</strong>. Sprint 1 aggregated transactions to a monthly panel from <strong>March 2007 to April 2020</strong>, exported as <code>Data/processed/training_data.csv</code>.</p>
+<h3 id="size-and-composition">Size and Composition</h3>
+<ul>
+<li><strong>138,640</strong> unique customers · <strong>2,263,608</strong> customer-month rows · <strong>158</strong> observation months  </li>
+<li><strong>55</strong> geographic states/territories (one-hot encoded at train time)  </li>
+<li><strong>Baseline churn rate:</strong> <strong>11.76%</strong> (positive class across eligible rows)  </li>
+<li><strong>AUM at risk:</strong> prior-3-month maximum <code>Running_Balance</code> at first left-looking exit sums to <strong>≈ $7.27M</strong> (Sprint 1 EDA — replaces earlier placeholder figures)</li>
+</ul>
+<h3 id="portfolio-evolution-and-demographics">Portfolio Evolution and Demographics</h3>
+<p>Churn-shaped behaviour is rare (~1 in 9 eligible months). Age-band churn rates cluster tightly (<strong>≈ 11.0–11.9%</strong> across bands). Geographic variation exists but is modest among high-volume states (e.g. Texas <strong>13.43%</strong>, California <strong>10.36%</strong> on eligible rows — Sprint 1 §9 crosstabs). The portfolio skews toward a mature retail demographic (<code>age_years</code> in the feature set).</p>
+<p>Approximately <strong>8.15%</strong> of raw transaction rows are system <strong>$0 placeholders</strong> (quiet months padded with zero-amount entries). This materially affects how inactivity must be measured — raw transaction counts alone cannot identify dormant months.</p>
+<p><em>Context for Morgan:</em> Heavy class imbalance means accuracy is misleading (an always-negative classifier reaches ~87% accuracy while catching zero churners). The business value is in <strong>ranking</strong> the right customers into a finite review queue, not maximising headline accuracy.</p>
+<hr />
+<h2 id="4-data-processing">4. Data Processing</h2>
+<p>Data integrity and leakage prevention were the highest priorities (Sprint 1). All steps are reproducible from <code>Code/Sprint1/01_data_integrity_and_eda.ipynb</code> and <code>Code/Sprint1/02_feature_engineering.ipynb</code>.</p>
+<h3 id="41-data-quality-issues-and-resolutions">4.1 Data Quality Issues and Resolutions</h3>
+<table>
+<thead>
+<tr>
+<th>Issue</th>
+<th>Finding</th>
+<th>Resolution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>$0 placeholder transactions</strong></td>
+<td>523,679 / 6,421,943 rows (8.15%)</td>
+<td>Exclude from activity; use <code>Monthly_Active_Txn_Count</code> (non-zero amounts only)</td>
+</tr>
+<tr>
+<td><strong>Null <code>start_balance</code></strong></td>
+<td>3 customers</td>
+<td>Sam-confirmed <strong><code>fillna(0)</code></strong></td>
+</tr>
+<tr>
+<td><strong>Extreme balance outliers</strong></td>
+<td>±1e10 present</td>
+<td>Retained; XGBoost partitions without destructive scaling</td>
+</tr>
+<tr>
+<td><strong><code>Active_Txn_Lag3</code> NaNs</strong></td>
+<td>~138k early-tenure rows</td>
+<td>Retained; tree model handles missing natively</td>
+</tr>
+<tr>
+<td><strong>Invalid / duplicate checks</strong></td>
+<td>Integrity checklist §2.1</td>
+<td>Documented pass/fail triage; 100% 1:1 account–customer mapping</td>
+</tr>
+<tr>
+<td><strong>High-balance dormancy</strong></td>
+<td>~53k streaks min balance ≥ $1,000</td>
+<td><strong>Not</strong> labelled churn — AUM preserved</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-target-definition-adr-004">4.2 Target Definition (ADR 004)</h3>
+<p>After stakeholder workshops with Sam (2026-07-10), churn at observation month <strong>t</strong> (<code>Months_Since_Creation ≥ 2</code>) is:</p>
+<pre><code class="language-text">Is_Churned = 1  iff  month t+1 has
+    Running_Balance_Rounded == 0
+    AND Monthly_Active_Txn_Count == 0
+</code></pre>
+<p>One-month forward label chosen over two-month confirmation (~2.6% positive rate) because most near-zero inactive streaks are length 1 and Operations needs actionable lead time.</p>
+<h3 id="43-feature-engineering-and-anti-leakage">4.3 Feature Engineering and Anti-Leakage</h3>
+<ul>
+<li><strong>Temporal shifting:</strong> Rolling means, lags, and activity flags use data through month <strong>t</strong> only; label is <strong>t+1</strong>. Pre-shift sanity: <code>gone_this_month</code> matched <code>Is_Churned</code> at <strong>81.75%</strong> before the forward shift — confirming the heuristic aligns with the locked label.</li>
+<li><strong>Grain:</strong> Customer × calendar month (pandas month-end timestamps).</li>
+<li><strong>Exclusions from model matrix:</strong> <code>customer_id</code>, raw <code>Month</code> strings (memorisation risk).</li>
+<li><strong>Encoding:</strong> <code>state</code> one-hot fit on <strong>train split only</strong>; 24 numeric behavioural/demographic columns → <strong>80</strong> model inputs after encoding (<code>Models/ops/serving_meta.json</code>).</li>
+</ul>
+<p>Schema validation: <code>py -3.13 .cursor/skills/validate-csv-schema/scripts/validate_schema.py</code> against <code>StartingFiles/*.csv</code>.</p>
+<hr />
+<h2 id="5-model-methodology">5. Model Methodology</h2>
+<h3 id="51-model-inputs-outputs">5.1 Model Inputs / Outputs</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Inputs</strong></td>
+<td>80 features: OHE state (55 levels + sentinels), balances, 3-month rolls, deposit/withdrawal flows, inactivity streaks, <code>age_years</code>, tenure</td>
+</tr>
+<tr>
+<td><strong>Output</strong></td>
+<td>Continuous score in <code>[0, 1]</code> from XGBoost <code>binary:logistic</code> — used as a <strong>ranking</strong> score</td>
+</tr>
+<tr>
+<td><strong>Population scored</strong></td>
+<td>Eligible customer-months (<code>Months_Since_Creation ≥ 2</code>); production submission targets active accounts at <strong>2020-05-31</strong></td>
+</tr>
+<tr>
+<td><strong>Ops flag</strong></td>
+<td><code>flagged = (score ≥ 0.701)</code> per <code>Models/ops/serving_meta.json</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-overview-algorithm-and-training">5.2 Overview — Algorithm and Training</h3>
+<p><strong>Algorithm:</strong> XGBoost (<code>binary:logistic</code>) — chosen over deep tabular models and logistic regression because it (1) handles NaNs in lag features without imputation, (2) tolerates balance outliers without scaling, and (3) integrates with SHAP for board-defensible explanations (Jamie “Glass-Box” requirement).</p>
+<p><strong>Temporal split (no shuffle):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Split</th>
+<th>Months</th>
+<th>Rows</th>
+<th>Positive rate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fit</td>
+<td>2007-03 → 2016-08</td>
+<td>1,568,631</td>
+<td>11.21%</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td>2016-09 → 2017-08</td>
+<td>189,114</td>
+<td>12.58%</td>
+</tr>
+<tr>
+<td>Test</td>
+<td>2017-09 → 2020-04</td>
+<td>505,863</td>
+<td>13.15%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Hyperparameter approach:</strong> Fixed tree hyperparameters with early stopping on validation log-loss (not exhaustive search — documented recipe from Sprint 2 notebook):</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>max_depth</code></td>
+<td>6</td>
+</tr>
+<tr>
+<td><code>learning_rate</code></td>
+<td>0.08</td>
+</tr>
+<tr>
+<td><code>subsample</code> / <code>colsample_bytree</code></td>
+<td>0.8</td>
+</tr>
+<tr>
+<td><code>n_estimators</code> (max)</td>
+<td>400</td>
+</tr>
+<tr>
+<td><code>early_stopping_rounds</code></td>
+<td>40</td>
+</tr>
+<tr>
+<td><strong>Best iteration</strong></td>
+<td>99</td>
+</tr>
+<tr>
+<td>Class imbalance</td>
+<td><code>scale_pos_weight = n_negative / n_positive</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>MLOps:</strong> Experiments logged to MLflow (SQLite <code>mlflow.db</code>, gitignored). Ranking run <code>7134cee0…</code> (max-F1 threshold); ops run <strong><code>3f575754ae9a42c5a21ea5e476c0af37</code></strong> (top-5% threshold) registered for serving export to <code>Models/ops/</code>.</p>
+<h3 id="53-assumptions-and-limitations">5.3 Assumptions and Limitations</h3>
+<ul>
+<li><strong>Uncalibrated probabilities:</strong> <code>scale_pos_weight</code> inflates raw scores. Do not interpret 0.70 as a 70% churn probability without separate calibration (Platt/isotonic not applied — would disturb rank order needed for the capacity dial).</li>
+<li><strong>Macro stationarity:</strong> Model trained on 2007–2020 patterns; material regime change requires retrain.</li>
+<li><strong>Precision ceiling:</strong> Validation precision tops ~<strong>0.23–0.24</strong> even at top 1%; Morgan’s aspirational 40% precision ∩ 5% contact was <strong>infeasible</strong> on these scores without model lift.</li>
+<li><strong>Geographic encoding noise:</strong> Duplicate state spellings (e.g. <code>California</code> vs <code>CALIFORNIA</code>) inflate cardinality — documented technical debt, not a fairness fix.</li>
+</ul>
+<h3 id="54-model-interpretation">5.4 Model Interpretation</h3>
+<p><strong>Global drivers (SHAP mean |value|, test sample):</strong></p>
+<ol>
+<li><code>Running_Balance_Rounded</code> (3.004)  </li>
+<li><code>Running_Balance</code> (0.640)  </li>
+<li><code>Monthly_Deposit_Sum</code> (0.022)  </li>
+<li><code>Balance_Roll3_Mean</code> (0.022)  </li>
+<li><code>Monthly_Withdrawal_Sum</code> (0.015)</li>
+</ol>
+<p><em>Figure 1 — SHAP summary: global feature impact on churn score. Balance-drain mechanics dominate; demographics are not primary drivers.</em></p>
+<p><img alt="SHAP Summary Plot" src="Sprint2/reports/shap_summary.png" /></p>
+<p><em>Context for Sam:</em> Driver hierarchy is <strong>consistent with ADR 004</strong> (next-month zero balance + inactivity). Sprint 1 Gini leak screen showed top feature importance ≪ 0.50 — no single feature “memorises” the label.</p>
+<p><strong>Local explanations:</strong> Per-customer waterfall plots decompose a prediction into positive (red) and negative (blue) contributions. At serve time the API computes the same decomposition for any customer on request: exact TreeSHAP from the served XGBoost booster (<code>pred_contribs</code>), in log-odds, grouped back to the 24 raw features, and verified to sum to the customer's score. Sam's <strong>Prediction browser</strong> page shows it as a bar chart for the selected customer (§6.3). The Friction-Gate <strong>Glass-box</strong> page still surfaces the frozen global SHAP metadata for audit.</p>
+<p><em>Figure 2 — SHAP waterfall for a high-risk customer: local evidence for retention agents.</em></p>
+<p><img alt="SHAP Waterfall Plot (High Risk)" src="Sprint2/reports/shap_waterfall_high_risk.png" /></p>
+<hr />
+<h2 id="6-implementation">6. Implementation</h2>
+<h3 id="61-packaging-and-architecture">6.1 Packaging and Architecture</h3>
+<p>Portable serving bundle — <strong><code>Models/ops/</code></strong> (committed, single source of truth):</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>booster.json</code></td>
+<td>Frozen XGBoost model</td>
+</tr>
+<tr>
+<td><code>preprocessor.joblib</code></td>
+<td>Train-fitted OHE + column order</td>
+</tr>
+<tr>
+<td><code>serving_meta.json</code></td>
+<td>Ops threshold, feature names, MLflow run provenance</td>
+</tr>
+</tbody>
+</table>
+<p><em>Figure 3 — System flow: scoring API, SQLite draft queue, Friction-Gate UI, optional Azure GenAI.</em></p>
+<p><img alt="System Architecture Flow" src="Presentations/assets/system_flow.png" /></p>
+<p><strong>FastAPI</strong> (<code>src/serving/app.py</code>) — key endpoints:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/health</code>, <code>/docs</code></td>
+<td>Health + OpenAPI</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/score</code></td>
+<td>Score features; returns probability + <code>flagged</code> at ops cut</td>
+</tr>
+<tr>
+<td>POST/GET/PATCH</td>
+<td><code>/drafts</code></td>
+<td>Draft queue (SQLite WAL)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/audit/events</code></td>
+<td>Demo audit trail</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/predictions</code></td>
+<td>Prediction browser: cohort re-scored server-side, ranked, filterable</td>
+</tr>
+<tr>
+<td>GET / POST</td>
+<td><code>/predictions/{id}/explain</code>, <code>/explain</code></td>
+<td>Per-customer TreeSHAP (log-odds, grouped to raw features)</td>
+</tr>
+<tr>
+<td>—</td>
+<td><code>/send</code></td>
+<td><strong>Absent by design</strong> (ADR 003)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Authentication (demo):</strong> <code>X-Demo-Role</code> header required on mutating routes; Compliance viewer receives <strong>403</strong> on Approve (ADR 007).</p>
+<p><strong>Docker:</strong> <code>Dockerfile</code> + <code>docker-compose.yml</code> run the <strong>FastAPI service only</strong> (Streamlit stays on the host, ADR 008), with a named volume for the SQLite draft queue and a <code>/health</code> <code>HEALTHCHECK</code>. The image installs pinned serving-only dependencies (<code>requirements.serving.txt</code>, same versions that exported <code>Models/ops/</code>). Local build + smoke test passed on 2026-09-24 (<a href="Sprint5/docker_smoke_checklist.md">checklist</a>). An Azure Developer CLI project (<code>azure.yaml</code> + <code>infra/main.bicep</code>, <code>infra/resources.bicep</code>) now describes the Azure Container Apps target: one replica (<strong>min = max = 1</strong>, ADR 008), image built in Azure Container Registry, pulled with a managed identity, Azure OpenAI key read from the existing AI Services resource at deploy time, ingress limited to one IP range, and every request must carry a secret <code>X-API-Key</code> (<a href="Architecture/ADRs/016-azure-container-apps-via-azd.md">ADR 016</a>). Deployed and verified live on 2026-09-24, then torn down with <code>azd down</code>; there is no standing URL.</p>
+<h3 id="62-how-to-run-handover">6.2 How to Run (Handover)</h3>
+<p>From repository root (<code>cmd.exe</code>, AppLocker-safe <code>py -3.13 -m …</code>):</p>
+<pre><code class="language-cmd">set PYTHONPATH=%CD%
+py -3.13 -m pytest tests -q
+py -3.13 -m uvicorn src.serving.app:app
+py -3.13 -m streamlit run Code\Sprint3\friction_gate_app.py
+</code></pre>
+<p>Alternatively, run the API in Docker with <code>docker compose up -d --build</code>, then start Streamlit as above (the UI calls the API on port 8000).</p>
+<p>Automated regression: <strong>127 tests passed</strong> (full <code>tests/</code> suite) as of 2026-09-24.</p>
+<h3 id="63-friction-gate-streamlit-application">6.3 Friction-Gate Streamlit Application</h3>
+<p><em>Figure 4 — Friction-Gate dashboard: business metrics, review queue, and role-gated actions.</em></p>
+<p><img alt="Friction-Gate UI Dashboard" src="Presentations/assets/friction_gate_dashboard.png" /></p>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Audience</th>
+<th>Capability</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Business View (Morgan)</strong></td>
+<td>Product</td>
+<td>Portfolio KPIs; <strong>High / Medium / Low</strong> risk buckets (see below)</td>
+</tr>
+<tr>
+<td><strong>Score / create draft</strong></td>
+<td>Retention</td>
+<td>Score customer; create draft <strong>only if flagged</strong></td>
+</tr>
+<tr>
+<td><strong>Review queue</strong></td>
+<td>Retention</td>
+<td>Approve / Edit / Reject with <strong>attention acknowledgement</strong> (<code>attention_ack=true</code>, JR-REQ-19)</td>
+</tr>
+<tr>
+<td><strong>ML View (Sam)</strong></td>
+<td>Data Science</td>
+<td>Interactive What-If: start from a demo customer, move four features (including <code>Running_Balance</code>, the top SHAP driver) and re-score live, with the edited row's per-customer SHAP; precision-recall and ROC curves</td>
+</tr>
+<tr>
+<td><strong>Prediction browser (Sam)</strong></td>
+<td>Data Science, Compliance</td>
+<td>Every customer in the cohort ranked by score, filterable (flagged only, minimum probability, id); selecting a row shows that customer's SHAP breakdown. The cohort (<code>Data/processed/prediction_cohort.csv</code>, one month of <code>training_data.csv</code>) is built locally with <code>Code/Sprint5/build_prediction_cohort.py</code>; without it the page lists the two demo fixtures and says so</td>
+</tr>
+<tr>
+<td><strong>Glass-box</strong></td>
+<td>Compliance</td>
+<td>Frozen ops threshold + SHAP drivers; demo role cannot Approve</td>
+</tr>
+<tr>
+<td><strong>Audit trail</strong></td>
+<td>Compliance</td>
+<td>Immutable status transitions (<code>X-Demo-Role</code> Glass-Box RBAC)</td>
+</tr>
+<tr>
+<td><strong>Methodology Q&amp;A Bot</strong></td>
+<td>All</td>
+<td>RAG over project documentation</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Business-readable risk buckets (brief requirement):</strong> Morgan’s view labels cohorts <strong>High / Medium / Low</strong> rather than raw probabilities. <strong>High (Tailored)</strong> maps to the ops contact policy (<code>p ≥ 0.701</code>) and is the only cohort that enters the Friction-Gate draft queue. Medium/Low are UI cohort labels for portfolio communication; <strong>outbound GenAI drafts are capacity-gated at the High cut only</strong> — there is still no <code>/send</code> and no autonomous mailer.</p>
+<p>Below-threshold customers (e.g. score ≈ 0.21) are <strong>not flagged</strong> — the capacity gate refuses GenAI side effects.</p>
+<h3 id="64-genai-extensions-guardrails-end-to-end">6.4 GenAI Extensions — Guardrails End-to-End</h3>
+<p><strong>Retention email drafting</strong></p>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Prompt-as-code</strong></td>
+<td>Versioned <code>src/genai/prompts/retention_draft.prompty</code> supplies the system and user messages; the call requests a JSON object response. Token limits are set per model by <code>chat_limit_params()</code> (<code>max_completion_tokens</code> for reasoning deployments such as <code>gpt-5-mini</code>, which reject <code>max_tokens</code> and custom <code>temperature</code>)</td>
+</tr>
+<tr>
+<td><strong>ZDR</strong></td>
+<td>PII scrubber strips emails, phones, SSN/long-digit patterns, DOB-like fields before any LLM call; blocked keys dropped from context</td>
+</tr>
+<tr>
+<td><strong>Hallucination bounds</strong></td>
+<td>Prompt forbids inventing PII/names and rates above cap; output must be JSON with keys <code>subject</code>, <code>body</code>, <code>offered_interest_rate</code>, <code>drivers</code></td>
+</tr>
+<tr>
+<td><strong>Pydantic hard stop</strong></td>
+<td><code>offered_interest_rate ≤ 0.035</code> validated on create <strong>and</strong> PATCH (ADR 002) — LLM clamp alone is not trusted</td>
+</tr>
+<tr>
+<td><strong>Server-side re-score</strong></td>
+<td><code>POST /drafts</code> re-scores from raw features and rejects client-supplied scores (<code>extra="forbid"</code>); the Streamlit UI calls this API for every score, draft and decision, so it cannot bypass <code>t ≈ 0.70055</code>. Only on AppLocker machines with <code>FRICTION_GATE_MODE=inprocess</code> does it drive the same app without a socket (ADR 006 follow-on)</td>
+</tr>
+<tr>
+<td><strong>Path cascade</strong></td>
+<td><code>stub</code> (offline demo) → <code>azure</code> (the configured <code>AZURE_OPENAI_DEPLOYMENT</code>, currently <code>gpt-5-mini</code>; it replaced <code>gpt-4o-mini</code> in September 2026) when configured → <code>stub_fallback</code> on Azure/prompty failure (<code>drafter_source</code> recorded)</td>
+</tr>
+<tr>
+<td><strong>Telemetry</strong></td>
+<td>Stdlib logs <code>prompt_tokens</code> / <code>completion_tokens</code> / <code>total_tokens</code> per completion (ADR 013); retries on 429/5xx via Tenacity</td>
+</tr>
+<tr>
+<td><strong>HITL</strong></td>
+<td>Status <code>pending_review</code> → human Approve/Edit/Reject; <strong>Approved ≠ Sent</strong>; no <code>/send</code>; terminal drafts immutable; <code>attention_ack</code> required</td>
+</tr>
+</tbody>
+</table>
+<p>Stakeholders can inspect the exact prompt file and pytest evidence (<code>tests/genai/test_pii_scrubber.py</code>, serving rate-cap tests) rather than trusting slide claims.</p>
+<h3 id="65-methodology-rag-qa-bot-sprint-5">6.5 Methodology RAG Q&amp;A Bot (Sprint 5)</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Engine</strong></td>
+<td><code>src/genai/rag_engine.py</code> — pure Python; no Chroma/FAISS (ADR 010 / AppLocker)</td>
+</tr>
+<tr>
+<td><strong>Corpus</strong></td>
+<td>Chunked markdown grounded on <code>Docs/Final_Report_Official.md</code> (Streamlit Methodology tab)</td>
+</tr>
+<tr>
+<td><strong>Chunking</strong></td>
+<td>Split on any ATX header (<code>#</code>–<code>######</code>), then paragraph-pack to ≤1200 chars (avoids whole-chapter “chunks”)</td>
+</tr>
+<tr>
+<td><strong>Retrieval</strong></td>
+<td><strong>Hybrid</strong> (ADR 015): Okapi BM25 and, when Azure is configured, <code>text-embedding-3-large</code> cosine similarity are ranked separately and fused with Reciprocal Rank Fusion; the same chat deployment then reranks the candidate pool in one call. <strong><code>top_k=3</code></strong> chunks go into the answer prompt. Offline, BM25 alone is used. Not a purpose-built cross-encoder</td>
+</tr>
+<tr>
+<td><strong>Cache</strong></td>
+<td>Disk JSON <code>Data/processed/rag_index_cache.json</code> keyed by source mtime + embedding model + <strong>schema_version</strong> (invalidates on edit or chunker upgrade)</td>
+</tr>
+<tr>
+<td><strong>Generation</strong></td>
+<td>Azure chat answering <strong>only</strong> from retrieved context; safe error string if Azure unavailable</td>
+</tr>
+<tr>
+<td><strong>Limits</strong></td>
+<td>In-memory / disk index sized for report-scale corpus — not a bank-wide knowledge base; expand corpus only with re-index</td>
+</tr>
+<tr>
+<td><strong>Resilience</strong></td>
+<td>Tenacity backoff + token usage logs (ADR 013)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Friction controls (Jamie):</strong> Drafts remain <code>pending_review</code> until human Approve; <strong>Approved ≠ Sent</strong>; terminal states immutable; demo Glass-Box RBAC (ADR 007) — Compliance viewer is read-only.</p>
+<hr />
+<h2 id="7-model-testing">7. Model Testing</h2>
+<h3 id="71-metrics-why-pr-auc">7.1 Metrics — Why PR-AUC?</h3>
+<p>With <strong>11.8%</strong> baseline churn, accuracy rewards “predict nobody churns.” <strong>PR-AUC</strong> (area under precision–recall) is the primary metric because Operations cares about <strong>precision among flagged customers</strong> at a fixed contact budget. <strong>ROC-AUC</strong> is reported secondary. Both must <strong>beat the <code>gone_this_month</code> heuristic</strong> — a real baseline that mirrors ADR 004 mechanics.</p>
+<h3 id="72-ranking-performance-test-set">7.2 Ranking Performance (Test Set)</h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>PR-AUC</th>
+<th>ROC-AUC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Always-negative</td>
+<td>0.132</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><code>gone_this_month</code> heuristic</td>
+<td>0.151</td>
+<td>0.551</td>
+</tr>
+<tr>
+<td><strong>XGBoost</strong></td>
+<td><strong>0.219</strong></td>
+<td><strong>0.723</strong></td>
+</tr>
+</tbody>
+</table>
+<p><em>Figure 5 — ROC curve: discrimination vs heuristic on chronological test split.</em></p>
+<p><img alt="ROC-AUC Curve" src="Sprint2/reports/yellowbrick_rocauc.png" /></p>
+<p><em>Figure 6 — Precision–recall curve: primary ranking metric for imbalanced churn.</em></p>
+<p><img alt="Precision-Recall Curve" src="Sprint2/reports/yellowbrick_precision_recall.png" /></p>
+<p>Ranking metrics are <strong>unchanged</strong> across threshold policies — only the operating point moves.</p>
+<h3 id="73-calibration">7.3 Calibration</h3>
+<p>We report calibration <strong>honestly:</strong> scores are <strong>ranks, not calibrated probabilities.</strong> Training used <code>scale_pos_weight</code>, which shifts the score distribution upward relative to the 11.8% base rate. A score of <code>0.70</code> means “top of the portfolio ranking,” not a 70% actuarial chance of churn.</p>
+<p><strong>Brier score was not computed</strong> and is not reported here. The brief lists Brier as a reasonable default for probability quality; we deliberately prioritised <strong>PR-AUC / ROC-AUC ranking</strong> and a capacity-limited operating point because Friction-Gate selects a top-k queue. Applying Platt scaling or isotonic regression was <strong>not</strong> shipped — recalibrating absolute levels can disturb the monotonic order the capacity dial depends on. If Sam later requires actuarial probabilities (e.g. for expected-loss pricing), calibration becomes a follow-on workstream, not a silent claim of this release.</p>
+<h3 id="74-sensitivity-threshold-policy-capacity-dial">7.4 Sensitivity — Threshold Policy (Capacity Dial)</h3>
+<p>Two policies on the <strong>same</strong> frozen test scores:</p>
+<table>
+<thead>
+<tr>
+<th>Policy</th>
+<th>Run ID</th>
+<th>Rule</th>
+<th>Threshold</th>
+<th>Test precision</th>
+<th>Test recall</th>
+<th>Test FP</th>
+<th>Test TP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Max F1 (first cut)</td>
+<td><code>7134cee0…</code></td>
+<td>argmax F1 on val</td>
+<td>0.475</td>
+<td>0.211</td>
+<td>0.9997</td>
+<td><strong>248,778</strong></td>
+<td>66,485</td>
+</tr>
+<tr>
+<td><strong>Ops (shipped)</strong></td>
+<td><strong><code>3f575754…</code></strong></td>
+<td><strong>val top-5% quantile</strong></td>
+<td><strong>0.70055</strong></td>
+<td><strong>0.229</strong></td>
+<td><strong>0.090</strong></td>
+<td><strong>20,127</strong></td>
+<td>5,964</td>
+</tr>
+</tbody>
+</table>
+<p><em>Context for Morgan:</em> Max-F1 optimises statistical recall but produces an <strong>unreviewable queue</strong>. The top-5% dial trades recall for <strong>12× fewer false positives</strong> while slightly improving precision — the only policy compatible with finite agent capacity. A 40% precision floor at 5% contact was <strong>mathematically infeasible</strong> on validation (precision plateaus ~0.23).</p>
+<p><em>Figure 7 — Confusion matrix at ops threshold: reviewable false-positive volume.</em></p>
+<p><img alt="Confusion Matrix at Ops Threshold" src="Sprint2/reports/yellowbrick_confusion_matrix.png" /></p>
+<h3 id="75-fairness-and-anti-discrimination-jamie-jr-req-0102">7.5 Fairness and Anti-Discrimination (Jamie — JR-REQ-01/02)</h3>
+<p>Meridian’s fairness posture is <strong>measurement plus governance</strong>, not a claim of zero disparity. Because the model triggers a <strong>positive intervention</strong> (retention offer) rather than denial of service, our objective is to <strong>constrain unsupervised harm</strong>, <strong>explain behaviour</strong>, and <strong>disclose residual gaps</strong> for Risk oversight — without deploying an automated fairness remediator we did not validate.</p>
+<p><strong>Protocol:</strong> Fairlearn <strong>Equalized Odds difference</strong> (primary fairness metric — <strong>not</strong> Demographic Parity as the headline claim) on a <strong>100,000-row</strong> test subsample at the <strong>same ops threshold</strong> (<code>t = 0.70055</code>) used in serving — not at the max-F1 cut where near-universal recall distorts slice metrics. Selection-rate gap by age is reported as a secondary residual, not as the fairness gate.</p>
+<p><strong>Results (filtered, min group n ≥ 500) — residual gaps, not “cleared”:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Slice</th>
+<th>Groups kept</th>
+<th>Equalized Odds diff</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Age (6 bands)</td>
+<td>6 / 6</td>
+<td><strong>≈ 0.156</strong></td>
+<td>Selection-rate gap ≈ 0.099 (residual)</td>
+</tr>
+<tr>
+<td>State</td>
+<td>38 / 55</td>
+<td><strong>≈ 0.318</strong></td>
+<td>3,548 sparse rows excluded (residual)</td>
+</tr>
+</tbody>
+</table>
+<p>An earlier unfiltered state EOD of <strong>1.0</strong> was <strong>rejected</strong> as a sparse-slice artifact — Jamie’s register requires honest group sizes, not alarming noise.</p>
+<p><strong>Six prevention layers (how discrimination is constrained):</strong></p>
+<ol>
+<li><strong>Measure at the serving cut</strong> — Fairlearn EO at <code>t ≈ 0.701</code> so board numbers match the contact policy customers experience (<code>Docs/Sprint2/reports/fairlearn_equalized_odds.json</code>).</li>
+<li><strong>Filter noise</strong> — Slices with <strong>n &lt; 500</strong> excluded from EO reporting; prevents fake “perfect unfairness” from tiny states.</li>
+<li><strong>Limit harm</strong> — Top ~<strong>5%</strong> capacity dial caps how many customers in any demographic enter outreach regardless of model zeal.</li>
+<li><strong>Explain with behaviour</strong> — SHAP shows balance/withdrawal/activity dominate; the model is not optimising a protected-class rule (consistent with ADR 004).</li>
+<li><strong>Govern with humans</strong> — Friction-Gate HITL: drafts only, <strong>Approve ≠ Sent</strong>, no <code>/send</code>, Compliance role cannot Approve (ADR 003, ADR 007), attention acknowledgement before Approve (JR-REQ-19).</li>
+<li><strong>Disclose residual gaps</strong> — Age EOD ≈ 0.16 and state EOD ≈ 0.32 are on the model card and in this report; Risk agreed periodic review and disclosure is sufficient for now and may still impose a hard EOD release gate later (JR-OPEN-01 — resolved in ADR 012).</li>
+</ol>
+<p><strong>What we did not claim:</strong> no Fairlearn <code>ThresholdOptimizer</code>, no production EOD blocker, demo RBAC ≠ Entra ID, and ZDR scrubbing addresses <strong>PII to the LLM</strong> — a separate control from demographic parity.</p>
+<p><strong>Drift monitoring:</strong> Evidently train-vs-test report at <code>Docs/Sprint2/data_drift_report.html</code> (Morgan macro/context).</p>
+<hr />
+<h2 id="8-references">8. References</h2>
+<h3 id="external-methodology">External Methodology</h3>
+<ol>
+<li>Chen, T., &amp; Guestrin, C. (2016). <em>XGBoost: A Scalable Tree Boosting System.</em> KDD.  </li>
+<li>Lundberg, S. M., &amp; Lee, S.-I. (2017). <em>A Unified Approach to Interpreting Model Predictions.</em> NeurIPS (SHAP).  </li>
+<li>Hardt, M., Price, E., &amp; Srebro, N. (2016). <em>Equality of Opportunity in Supervised Learning.</em> NeurIPS.  </li>
+<li>Weerts, H., et al. (2023). <em>Fairlearn: Assessing and Improving Fairness of AI Systems.</em> Journal of Machine Learning Research.  </li>
+<li>Saito, T., &amp; Rehmsmeier, M. (2015). <em>Precision-Recall-Gain Curves.</em> (PR-AUC motivation under imbalance.)</li>
+</ol>
+<h3 id="internal-provenance">Internal Provenance</h3>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Architecture Decision Records</td>
+<td><code>Docs/Architecture/ADRs/</code> (002, 003, 004, 005, 007, 008, 010, 013)</td>
+</tr>
+<tr>
+<td>Data Dictionary</td>
+<td><code>Docs/Data/Data_Dictionary.md</code></td>
+</tr>
+<tr>
+<td>Model card</td>
+<td><code>Docs/Model_Card_Template.md</code></td>
+</tr>
+<tr>
+<td>Ops run summary</td>
+<td><code>Docs/Sprint2/reports/sprint2_run_summary_v2.json</code></td>
+</tr>
+<tr>
+<td>Fairness narrative</td>
+<td><code>Docs/Sprint5/fairness_anti_discrimination_narrative.md</code></td>
+</tr>
+<tr>
+<td>Demo runbook</td>
+<td><code>Docs/Sprint4/demo_runbook.md</code></td>
+</tr>
+<tr>
+<td>GenAI prompt</td>
+<td><code>src/genai/prompts/retention_draft.prompty</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="appendix">Appendix</h2>
+<h3 id="a1-operating-point-canonical-json">A.1 Operating Point (Canonical JSON)</h3>
+<p>Source: <code>Docs/Sprint2/reports/sprint2_run_summary_v2.json</code> · run <code>3f575754ae9a42c5a21ea5e476c0af37</code></p>
+<pre><code class="language-json">{
+  &quot;test_window&quot;: { &quot;start&quot;: &quot;2017-09&quot;, &quot;end&quot;: &quot;2020-04&quot;, &quot;rows&quot;: 505863 },
+  &quot;threshold_rule&quot;: &quot;fallback_quantile_top5pct&quot;,
+  &quot;threshold&quot;: 0.700547993183136,
+  &quot;metrics&quot;: {
+    &quot;precision&quot;: 0.2285845693917443,
+    &quot;recall&quot;: 0.08968151333794472,
+    &quot;f1&quot;: 0.128821833183934,
+    &quot;roc_auc&quot;: 0.7234409965641873,
+    &quot;pr_auc&quot;: 0.21892221597538156,
+    &quot;true_positives&quot;: 5964,
+    &quot;false_positives&quot;: 20127,
+    &quot;false_negatives&quot;: 60538,
+    &quot;true_negatives&quot;: 419234
+  }
+}
+</code></pre>
+<h3 id="a2-threshold-sensitivity-before-after">A.2 Threshold Sensitivity (Before / After)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Max F1 (<code>7134cee0…</code>)</th>
+<th>Ops top-5% (<code>3f575754…</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Threshold</td>
+<td>0.475</td>
+<td>0.701</td>
+</tr>
+<tr>
+<td>Test FP</td>
+<td>248,778</td>
+<td>20,127</td>
+</tr>
+<tr>
+<td>Test TP</td>
+<td>66,485</td>
+<td>5,964</td>
+</tr>
+<tr>
+<td>Test precision</td>
+<td>0.211</td>
+<td>0.229</td>
+</tr>
+<tr>
+<td>Test recall</td>
+<td>0.9997</td>
+<td>0.090</td>
+</tr>
+</tbody>
+</table>
+<h3 id="a3-genai-guardrails-evaluation-notes">A.3 GenAI Guardrails — Evaluation Notes</h3>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rate cap ≤ 3.5%</td>
+<td>Pydantic validation tests in <code>tests/serving</code></td>
+</tr>
+<tr>
+<td>ZDR / PII scrub</td>
+<td><code>tests/genai/test_pii_scrubber.py</code></td>
+</tr>
+<tr>
+<td>No <code>/send</code></td>
+<td>OpenAPI + <code>tests/serving</code> route assertions</td>
+</tr>
+<tr>
+<td>HITL / attention ack</td>
+<td>JR-REQ-19 UI gate + API tests</td>
+</tr>
+<tr>
+<td>Azure retry / token log</td>
+<td><code>tests/genai/test_azure_retries.py</code>, <code>test_rag_engine.py</code> (ADR 013)</td>
+</tr>
+<tr>
+<td>RAG grounding</td>
+<td>Retrieve + cache tests; offline TF-IDF fallback</td>
+</tr>
+<tr>
+<td><strong>Regression suite</strong></td>
+<td><strong>47 passed</strong> (<code>pytest tests/serving tests/genai -q</code>, 2026-07-17)</td>
+</tr>
+</tbody>
+</table>
+<p>Prompts and responses are structured (JSON draft schema); stub path allows full demo without live Azure. When Azure is configured, drafts, RAG answers and reranking use the configured chat deployment (currently <code>gpt-5-mini</code>), and RAG retrieval embeds with <code>text-embedding-3-large</code>.</p>
+<h3 id="a4-technical-debt-and-next-work">A.4 Technical Debt and Next Work</h3>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SQLite on Azure</td>
+<td>Requires shared volume + <code>maxReplicas: 1</code>; migrate to PostgreSQL for HA multi-node</td>
+</tr>
+<tr>
+<td>RAG index</td>
+<td>Disk JSON cache (<code>Data/processed/rag_index_cache.json</code>); vector DB if corpus grows</td>
+</tr>
+<tr>
+<td>ACA deployment</td>
+<td>Scaffold only — WS-2 open pending hosting confirm</td>
+</tr>
+<tr>
+<td>Submission CSV</td>
+<td>Shipped: <code>Code/Sprint3/create_submission.py</code> → <code>submission_df14.csv</code> (17,599 rows; ADR 014); probabilities, not ops-cut labels</td>
+</tr>
+<tr>
+<td>PDF export</td>
+<td>Assessor copy: <code>scripts/export_document_pack.py</code> renders this markdown to <code>Docs/Final_Report_Official_print.html</code> and <code>churn_report_df14.pdf</code>, and refreshes the teaching-app and interview-prep copies</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

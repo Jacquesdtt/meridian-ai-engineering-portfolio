@@ -1,0 +1,73 @@
+# Sprint 2: Modeling & RAI — Execution Walkthrough
+
+**Status:** Modeling notebook executed end-to-end (2026-07-14)  
+**As of:** 2026-07-14  
+**Primary code:** `Code/Sprint2/01_modeling_and_rai.ipynb`  
+**Run summary:** [reports/sprint2_run_summary.json](reports/sprint2_run_summary.json)  
+**Model card:** [../Model_Card_Template.md](../Model_Card_Template.md)  
+**Final presentation / first-run story:** [ML_Learnings.md](ML_Learnings.md) (deep-dive) · live deck [../Presentations/generate_presentation.py](../Presentations/generate_presentation.py) (dual PPTX) · legacy Marp [../Sprint4/presentation.md](../Sprint4/presentation.md) · [../Sprint4/demo_runbook.md](../Sprint4/demo_runbook.md)
+
+This is the step-by-step execution narrative. Process → [ai_engineering_learnings.md](ai_engineering_learnings.md); stakeholder framing → [ai_bp_learnings.md](ai_bp_learnings.md).
+
+---
+
+## 1. Setup
+- Input: `Data/processed/training_data.csv` (Sprint 1; 2,263,608 × 27; pos 11.7601%).
+- Kernel: Python 3.13 (`py -3.13`); AppLocker — no `.venv` executables.
+- MLflow: SQLite URI `sqlite:///…/mlflow.db` (filesystem `./mlruns` blocked on current MLflow).
+- Yellowbrick on Py3.13 needs `setuptools` (provides `distutils`).
+
+---
+
+## 2. Temporal split (no shuffle)
+| Split | Months | Rows | Pos rate |
+|-------|--------|------|----------|
+| Fit | 2007-03 → 2016-08 | 1,568,631 | 11.21% |
+| Val | 2016-09 → 2017-08 | 189,114 | 12.58% |
+| Test | 2017-09 → 2020-04 | 505,863 | 13.15% |
+
+`state` one-hot fit on train only. `customer_id` / `Month` excluded from `X`.
+
+---
+
+## 3. Baselines → XGBoost + MLflow
+1. Always-negative and `gone_this_month` heuristic on test.
+2. XGBoost (`scale_pos_weight`, early stopping on val, `best_iteration=99`).
+3. Threshold = argmax F1 on **val** → **0.475**, frozen for test.
+4. Logged to experiment `meridian_churn_sprint2`, run `7134cee0766646498e002e5326e3c200`.
+
+| Model | PR-AUC | ROC-AUC |
+|-------|--------|---------|
+| Heuristic | 0.151 | 0.551 |
+| XGBoost | **0.219** | **0.723** |
+
+Beats both ranking bars. Confusion @ 0.475: TN 190,583 / FP 248,778 / FN 17 / TP 66,485 — threshold is recall-greedy (see model card).
+
+---
+
+## 4. Interpretation & RAI
+| Artifact | Path |
+|----------|------|
+| Yellowbrick (4 PNGs) | `Docs/Sprint2/reports/yellowbrick_*.png` + MLflow `yellowbrick/` |
+| SHAP summary + waterfalls | `Docs/Sprint2/reports/shap_*.png` + MLflow `shap/` |
+| Fairlearn slices / EOD | `reports/fairlearn_age_state_slices.csv`, `fairlearn_equalized_odds.json` |
+| Evidently drift | [`data_drift_report.html`](data_drift_report.html) (+ copy under `reports/`) |
+| dtreeviz | Skipped — NaNs in Lag3 (fail-soft) |
+
+Top SHAP: `Running_Balance_Rounded`, `Running_Balance`, deposit/roll/withdrawal sums.
+
+---
+
+## 5. How to re-run
+```cmd
+cd Code\Sprint2
+py -3.13 -m nbconvert --to notebook --execute --inplace 01_modeling_and_rai.ipynb
+```
+Or Restart Kernel → Run All in the IDE (Python 3.13). Expect several minutes for CSV load + XGBoost + SHAP sample.
+
+---
+
+## 6. Documentation cascade (this milestone)
+- Model card populated from run summary.
+- [sprint_debrief.md](sprint_debrief.md) delivery record; [sprint_retrospective.md](sprint_retrospective.md) process record.
+- Learnings updated; `.agents/MEMORY.md` next-step pointer.

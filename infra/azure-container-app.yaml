@@ -1,0 +1,30 @@
+# SUPERSEDED 2026-09-24 by azure.yaml + infra/main.bicep (ADR 016), which deployed
+# and was verified live, then torn down. Kept for history only; do not apply.
+#
+# Azure Container Apps — intent scaffold (anti-speculation: not a deploy runbook).
+#
+# RAG-03 / ADR 008: SQLite draft store MUST run with maxReplicas: 1.
+# Shared SMB/Azure Files + multiple replicas causes "database is locked" corruption.
+#
+# Apply only when hosting is confirmed; do not treat this file as evidence of a live deploy.
+
+properties:
+  configuration:
+    activeRevisionsMode: Single
+  template:
+    scale:
+      minReplicas: 0
+      maxReplicas: 1
+    containers:
+      - name: meridian-friction-gate-api
+        image: REPLACE_WITH_ACR_IMAGE
+        resources:
+          cpu: 0.5
+          memory: 1Gi
+        env:
+          - name: AZURE_OPENAI_ENDPOINT
+            secretRef: azure-openai-endpoint
+          - name: AZURE_OPENAI_API_KEY
+            secretRef: azure-openai-api-key
+          - name: AZURE_OPENAI_DEPLOYMENT
+            value: gpt-4o-mini

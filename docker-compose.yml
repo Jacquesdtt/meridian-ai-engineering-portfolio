@@ -1,0 +1,18 @@
+services:
+  fastapi:
+    build: .
+    ports:
+      # API_PORT lets the container run beside a host uvicorn already on 8000
+      - "${API_PORT:-8000}:8000"
+    env_file:
+      - .env
+    volumes:
+      # Shared SQLite volume (ADR 008) — single writer surface for draft_queue.db
+      - drafts_db_data:/app/Data/processed
+    # RAG-03 / ADR 008: never scale SQLite-backed API horizontally
+    deploy:
+      replicas: 1
+    restart: unless-stopped
+
+volumes:
+  drafts_db_data:

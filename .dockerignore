@@ -1,0 +1,28 @@
+.env
+.git/
+.agents/
+.cursor/
+mlruns/
+mlflow.db
+__pycache__/
+*.pyc
+*.csv
+tests/
+Docs/
+# Runtime inputs for /model/fairness and /rag/ask
+!Docs/Final_Report_Official.md
+!Docs/Sprint2/reports/fairlearn_equalized_odds.json
+# Prediction browser fallback cohort when no prediction_cohort.csv is mounted
+!Docs/Sprint4/fixtures/*.json
+Code/
+StartingFiles/
+Data/
+submission_df14.csv
+.venv/
+venv/
+.claude/
+educational_web_app/
+infra/
+scripts/
+*.pdf
+*.log

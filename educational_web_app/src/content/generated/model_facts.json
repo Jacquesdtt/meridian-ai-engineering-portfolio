@@ -1,0 +1,88 @@
+{
+  "_source": [
+    "Models/ops/serving_meta.json",
+    "Docs/Sprint2/reports/sprint2_run_summary_v2.json"
+  ],
+  "runId": "3f575754ae9a42c5a21ea5e476c0af37",
+  "firstRunId": "7134cee0766646498e002e5326e3c200",
+  "fitMonths": "2007-03:2016-08",
+  "testMonths": "2017-09 -> 2020-04",
+  "nFitRows": 1568631,
+  "featureCount": 80,
+  "stateOheCount": 57,
+  "numericFeatureCount": 23,
+  "rawFeatureCols": [
+    "state",
+    "age_years",
+    "start_balance",
+    "Months_Since_Creation",
+    "Running_Balance",
+    "Running_Balance_Rounded",
+    "Monthly_Transaction_Count",
+    "Monthly_Active_Txn_Count",
+    "Monthly_Amount_Sum",
+    "Monthly_Deposit_Sum",
+    "Monthly_Withdrawal_Sum",
+    "Deposit_Share_Of_Flow",
+    "Is_Inactive_Month",
+    "gone_this_month",
+    "Balance_MoM_Change",
+    "Active_Txn_Lag1",
+    "Active_Txn_Lag2",
+    "Active_Txn_Lag3",
+    "Amount_Lag1",
+    "Active_Txn_Roll3_Mean",
+    "Amount_Roll3_Mean",
+    "Balance_Roll3_Mean",
+    "Consecutive_Inactive_Months",
+    "Inactive_Share_Prior3"
+  ],
+  "threshold": {
+    "ops": 0.701,
+    "opsPrecise": 0.70055,
+    "rule": "fallback_quantile_top5pct",
+    "maxF1": 0.475
+  },
+  "test": {
+    "model": {
+      "pr_auc": 0.219,
+      "roc_auc": 0.723,
+      "precision": 0.229,
+      "recall": 0.09,
+      "accuracy": 0.841
+    },
+    "heuristic": {
+      "pr_auc": 0.151,
+      "roc_auc": 0.551,
+      "precision": 0.22,
+      "recall": 0.22,
+      "accuracy": 0.795
+    },
+    "maxF1Rule": {
+      "precision": 0.211,
+      "recall": 1.0,
+      "fp": 248778
+    },
+    "opsRule": {
+      "precision": 0.229,
+      "recall": 0.09,
+      "fp": 20127
+    }
+  },
+  "topShap": {
+    "Running_Balance_Rounded": 3.004,
+    "Running_Balance": 0.64,
+    "Monthly_Deposit_Sum": 0.022,
+    "Balance_Roll3_Mean": 0.022,
+    "Monthly_Withdrawal_Sum": 0.015
+  },
+  "fairness": {
+    "nSample": 100000,
+    "minGroupN": 500,
+    "eodAge": 0.156,
+    "eodState": 0.318,
+    "selectionRateDiffAge": 0.099,
+    "stateGroupsTotal": 55,
+    "stateGroupsKept": 38
+  }
+}

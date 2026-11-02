@@ -1,0 +1,58 @@
+[
+  {
+    "prompt_id": "v-calibration",
+    "rubric": ["The score is uncalibrated — it was never trained to match observed frequencies", "scale_pos_weight up-weights the minority class, shifting the output distribution", "The objective rewards ranking separation, not posterior accuracy", "Evidence: even the top 1% of validation scores is only ~30% precise", "The API field churn_probability is documented legacy naming debt, not a claim", "Correct phrasing: an uncalibrated ranking score, meaningful relative to other customers"],
+    "answer_id": "positive",
+    "answer": "The Meridian output is an uncalibrated ranking score, not a probability. scale_pos_weight up-weights the minority class, so it changes the output distribution, while the ranking objective rewards separation rather than posterior accuracy. Even the top one percent is only about 30 percent precise. The churn_probability API name is legacy naming debt. I would say the customer ranks high relative to other customers, not that they have an 80 percent chance of churn.",
+    "covered": [true, true, true, true, true, true]
+  },
+  {
+    "prompt_id": "v-calibration",
+    "rubric": ["The score is uncalibrated — it was never trained to match observed frequencies", "scale_pos_weight up-weights the minority class, shifting the output distribution", "The objective rewards ranking separation, not posterior accuracy", "Evidence: even the top 1% of validation scores is only ~30% precise", "The API field churn_probability is documented legacy naming debt, not a claim", "Correct phrasing: an uncalibrated ranking score, meaningful relative to other customers"],
+    "answer_id": "negative",
+    "answer": "The model gives each customer a score and the team can use that score to decide who to contact. Higher scores should normally mean greater concern, so the highest scores are reviewed first. The score is useful for ordering the queue and comparing customers. I would monitor the results over time and explain the decision to the business team.",
+    "covered": [false, false, false, false, false, true]
+  },
+  {
+    "prompt_id": "v-learning-rate",
+    "rubric": ["Underfitting: the ensemble stops short of the loss it would otherwise reach", "η scales each tree’s leaf weights before they are added — it is shrinkage, not a change to what the tree learned", "η and the number of rounds trade off; shrinking one without growing the other loses capacity", "Not regularisation-for-free: the symptom looks like a weak model, not an overfit one", "Boosting is additive — no epochs or minibatches; each round appends a tree to a sum"],
+    "answer_id": "positive",
+    "answer": "Reducing eta makes each tree contribution smaller because eta is the shrinkage applied to the tree's leaf weights. With the same number of rounds the additive ensemble takes too few small steps, so it underfits and stops short of the loss it could reach. Eta and rounds trade off. This is not free regularisation: the weak model is underfit. XGBoost appends trees to a sum; it does not use epochs or minibatches.",
+    "covered": [true, true, true, true, true]
+  },
+  {
+    "prompt_id": "v-learning-rate",
+    "rubric": ["Underfitting: the ensemble stops short of the loss it would otherwise reach", "η scales each tree’s leaf weights before they are added — it is shrinkage, not a change to what the tree learned", "η and the number of rounds trade off; shrinking one without growing the other loses capacity", "Not regularisation-for-free: the symptom looks like a weak model, not an overfit one", "Boosting is additive — no epochs or minibatches; each round appends a tree to a sum"],
+    "answer_id": "negative",
+    "answer": "Changing the learning rate changes how quickly training runs and can affect the final score. A smaller value is usually safer because it gives the model more control. I would compare validation results, use early stopping, and increase the number of iterations if the model is not good enough. The exact effect depends on the data and the other parameters.",
+    "covered": [false, false, false, false, false]
+  },
+  {
+    "prompt_id": "v-test-discipline",
+    "rubric": ["Repeated computation is safe: identical frozen code on identical data changes nothing", "The violation is a feedback loop: a test result influencing a change that is then re-checked on test", "The rule is one decision-making exposure, not look once", "The pipeline (model + preprocessor + threshold) is frozen before test evaluation", "Tuning feedback belongs on the validation window", "It applies to any decision — hyperparameters, threshold, features, or which run to ship"],
+    "answer_id": "positive",
+    "answer": "Running identical frozen scoring code twice is repeated computation and is safe because nothing changes. Leakage occurs when a test result feeds back into a new choice and that choice is checked on the test set again. The rule is one decision-making exposure: freeze the model, fitted preprocessor, and threshold before testing. Hyperparameter, threshold, feature, and run-selection feedback belongs on validation, not test.",
+    "covered": [true, true, true, true, true, true]
+  },
+  {
+    "prompt_id": "v-test-discipline",
+    "rubric": ["Repeated computation is safe: identical frozen code on identical data changes nothing", "The violation is a feedback loop: a test result influencing a change that is then re-checked on test", "The rule is one decision-making exposure, not look once", "The pipeline (model + preprocessor + threshold) is frozen before test evaluation", "Tuning feedback belongs on the validation window", "It applies to any decision — hyperparameters, threshold, features, or which run to ship"],
+    "answer_id": "negative",
+    "answer": "The test set should be kept separate from training so it gives an objective final number. I would avoid looking at it until the end, then record the AUC and other metrics in the report. If a rerun gives a different result I would investigate the code and data. The test number helps communicate whether the system is ready.",
+    "covered": [false, false, false, false, false, false]
+  },
+  {
+    "prompt_id": "v-rag-chunking",
+    "rubric": ["Chunking was too coarse: split on # and ## only → ~10 chapter-sized chunks up to ~6,000 chars", "top_k=3 then covered ~38% of the whole report", "Context dilution: the answer was buried in mostly irrelevant text", "The embeddings, similarity maths and top_k were never the problem", "Fix: split on H1–H6 + paragraph pack ≤1200 chars → 44 chunks, ~3.6% coverage", "Cache schema_version bumped so stale indexes are rejected rather than silently reused", "Lesson: chunk semantics set the floor on retrieval precision"],
+    "answer_id": "positive",
+    "answer": "Three chunks were still poor because the original splitter produced coarse chapter-sized chunks. Top-k counted chunks, but the three hits covered about 38 percent of the report, so the useful sentence was diluted by irrelevant context. The embeddings, cosine similarity, and top-k were not the problem. Splitting H1 through H6 and packing paragraphs into at most 1,200 characters created finer evidence units and reduced coverage. The cache schema version was bumped, and chunk semantics set the precision floor.",
+    "covered": [true, true, true, true, true, true, true]
+  },
+  {
+    "prompt_id": "v-rag-chunking",
+    "rubric": ["Chunking was too coarse: split on # and ## only → ~10 chapter-sized chunks up to ~6,000 chars", "top_k=3 then covered ~38% of the whole report", "Context dilution: the answer was buried in mostly irrelevant text", "The embeddings, similarity maths and top_k were never the problem", "Fix: split on H1–H6 + paragraph pack ≤1200 chars → 44 chunks, ~3.6% coverage", "Cache schema_version bumped so stale indexes are rejected rather than silently reused", "Lesson: chunk semantics set the floor on retrieval precision"],
+    "answer_id": "negative",
+    "answer": "Returning three chunks limits the amount of context sent to the language model and should make answers faster. I would tune the embedding model and similarity threshold, then compare the answers from different top-k values. More relevant documents and a better prompt could improve the retrieval. The final answer should cite the source material and avoid unsupported claims.",
+    "covered": [false, false, false, false, false, false, false]
+  }
+]

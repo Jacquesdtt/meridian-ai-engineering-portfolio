@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+# Azure Developer CLI project: deploys the FastAPI container (Dockerfile) to Azure
+# Container Apps. Streamlit stays on the host and calls this API (ADR 008, F8).
+# Infra lives in infra/*.bicep (min/max replicas 1 for SQLite; Azure OpenAI key read
+# from the existing AI Services resource at deploy time, never stored in the repo).
+name: meridian-churn
+services:
+  api:
+    project: .
+    language: docker
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      # Build with the local Docker daemon and push to ACR. Remote (ACR Tasks) build is
+      # refused on this subscription: TasksOperationsNotAllowed (2026-09-24).
+      remoteBuild: false

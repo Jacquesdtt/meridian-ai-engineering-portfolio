@@ -1,0 +1,35 @@
+[project]
+name = "meridian-churn"
+version = "0.1.0"
+description = "Meridian Savings Bank customer churn prediction"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "pandas",
+    "xgboost",
+    "scikit-learn",
+    "shap",
+    "dtreeviz",
+    "streamlit",
+    "fastapi",
+    "mlflow",
+    "promptflow",
+    "prompty<2",  # 2.x rejects retention_draft.prompty ("kind" discriminator); lock pins 0.1.50
+    "jupyter",
+    "ipykernel",
+    "matplotlib",
+    "seaborn",
+    "pydantic",
+    "pydantic-settings",
+    "yellowbrick",
+    "fairlearn",
+    "evidently",
+    "setuptools",  # Yellowbrick still imports distutils; needed on Python 3.13+
+]
+
+[tool.uv]
+# AppLocker blocks .venv\Scripts\python.exe in user-writable dirs (ADR-001).
+# Install into global Python 3.13 instead: uv pip sync --system --python 3.13 requirements.lock
+constraint-dependencies = [
+    "numba>=0.66.0",
+    "llvmlite>=0.48.0",
+]

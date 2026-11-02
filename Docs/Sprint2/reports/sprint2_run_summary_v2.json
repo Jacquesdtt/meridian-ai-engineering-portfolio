@@ -1,0 +1,94 @@
+{
+  "run_id": "3f575754ae9a42c5a21ea5e476c0af37",
+  "first_run_id": "7134cee0766646498e002e5326e3c200",
+  "source": "Code/Sprint2/01_modeling_and_rai.ipynb Run All",
+  "test_months": "2017-09 -> 2020-04",
+  "threshold": 0.700547993183136,
+  "threshold_rule": "fallback_quantile_top5pct",
+  "xgboost": {
+    "label": "xgboost",
+    "accuracy": 0.8405398299539598,
+    "precision": 0.2285845693917443,
+    "recall": 0.08968151333794472,
+    "f1": 0.128821833183934,
+    "roc_auc": 0.7234409965641873,
+    "pr_auc": 0.21892221597538156
+  },
+  "baseline_heuristic": {
+    "label": "gone_this_month_heuristic",
+    "accuracy": 0.7949108750788257,
+    "precision": 0.2201938246562993,
+    "recall": 0.2203693122011368,
+    "f1": 0.22028153347813342,
+    "roc_auc": 0.5511216077189414,
+    "pr_auc": 0.15101613842604478
+  },
+  "beats_heuristic_pr_auc": true,
+  "beats_heuristic_roc_auc": true,
+  "before_after": {
+    "before": {
+      "run_id": "7134cee0766646498e002e5326e3c200",
+      "threshold_rule": "max_f1_val",
+      "threshold": 0.475,
+      "test_precision": 0.2108874178067201,
+      "test_recall": 0.9997443685904184,
+      "test_fp": 248778,
+      "test_pr_auc": 0.21892221597538156,
+      "test_roc_auc": 0.7234409965641873
+    },
+    "after": {
+      "run_id": "3f575754ae9a42c5a21ea5e476c0af37",
+      "threshold_rule": "fallback_quantile_top5pct",
+      "threshold": 0.700547993183136,
+      "test_precision": 0.2285845693917443,
+      "test_recall": 0.08968151333794472,
+      "test_fp": 20127,
+      "test_pr_auc": 0.21892221597538156,
+      "test_roc_auc": 0.7234409965641873
+    }
+  },
+  "top_shap": {
+    "Running_Balance_Rounded": 3.0039350986480713,
+    "Running_Balance": 0.640326976776123,
+    "Monthly_Deposit_Sum": 0.022346999496221542,
+    "Balance_Roll3_Mean": 0.021980000659823418,
+    "Monthly_Withdrawal_Sum": 0.014615999534726143
+  },
+  "fairlearn": {
+    "n_sample": 100000,
+    "min_group_n": 500,
+    "selection_rate_diff_age": 0.0994008779918849,
+    "equalized_odds_difference_age": 0.15599544740011842,
+    "equalized_odds_ratio_age": 0.3062263860715076,
+    "equalized_odds_difference_state": 0.3181609195402299,
+    "equalized_odds_ratio_state": 0.07733333333333334,
+    "age_filter": {
+      "n_groups_total": 6,
+      "n_groups_kept": 6,
+      "n_rows_excluded": 0,
+      "min_group_n": 500
+    },
+    "state_filter": {
+      "n_groups_total": 55,
+      "n_groups_kept": 38,
+      "n_rows_excluded": 3548,
+      "min_group_n": 500
+    },
+    "threshold": 0.700547993183136
+  },
+  "artifacts": {
+    "yellowbrick": [
+      "yellowbrick_classification_report.png",
+      "yellowbrick_rocauc.png",
+      "yellowbrick_precision_recall.png",
+      "yellowbrick_confusion_matrix.png"
+    ],
+    "shap": [
+      "shap_summary.png",
+      "shap_waterfall_high_risk.png",
+      "shap_waterfall_low_risk.png"
+    ],
+    "drift_html": "Docs/Sprint2/data_drift_report.html",
+    "fairlearn_csv": "Docs/Sprint2/reports/fairlearn_age_state_slices.csv"
+  }
+}

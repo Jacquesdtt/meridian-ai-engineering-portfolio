@@ -1,0 +1,6 @@
+{
+  "name": "Meridian Savings Churn — Educational Tour",
+  "description": "Static interactive training site for Meridian Savings Churn architecture, ML, Friction-Gate, and AppLocker-safe RAG. No live LLM calls.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

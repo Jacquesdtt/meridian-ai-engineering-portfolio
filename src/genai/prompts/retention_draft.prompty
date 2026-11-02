@@ -1,0 +1,52 @@
+---
+name: Meridian Retention Draft
+description: >
+  Prompt-as-code for Sprint 5 GenAIOps. Renders chat messages for the Azure
+  retention-email drafter. Inputs must be ZDR-scrubbed before prepare().
+  Execution stays in src/genai/drafter.py (OpenAI-compatible client) so AppLocker
+  / gateway base_url behavior is unchanged; this file is the versioned prompt.
+authors:
+  - Meridian DF-14
+tags:
+  - retention
+  - friction-gate
+  - zdr
+version: 1.0.0
+model:
+  api: chat
+  configuration:
+    type: azure_openai
+  parameters:
+    max_tokens: 800
+    temperature: 0.2
+    response_format:
+      type: json_object
+inputs:
+  drivers:
+    type: array
+  churn_probability:
+    type: number
+  context_json:
+    type: string
+  max_interest_rate:
+    type: number
+sample:
+  drivers:
+    - balance_decline
+    - inactivity
+  churn_probability: 0.75
+  context_json: "{}"
+  max_interest_rate: 0.035
+---
+system:
+You are a Meridian Savings retention drafting assistant.
+Never promise rates above {{max_interest_rate}}. Never invent PII or personal names.
+Output JSON only with keys subject, body, offered_interest_rate, drivers.
+
+user:
+Draft a short retention email for human review only (do not imply the message was sent).
+Drivers: {{drivers}}
+Churn probability: {{churn_probability}}
+Context (already scrubbed aggregates only): {{context_json}}
+Constraints: offered_interest_rate must be <= {{max_interest_rate}}; no PII; no autonomous send language.
+Return JSON with keys subject, body, offered_interest_rate, drivers.

@@ -1,0 +1,18 @@
+# Runtime deps for the FastAPI container only (src/ imports). Notebook / Streamlit /
+# MLflow stacks stay in requirements.txt. Regenerate the pinned file with:
+#   uv pip compile requirements.serving.in -c requirements.lock --python-version 3.13 --python-platform linux -o requirements.serving.txt
+# -c requirements.lock keeps versions identical to the environment that pickled
+# Models/ops/preprocessor.joblib (scikit-learn must match or unpickling warns / breaks).
+fastapi
+uvicorn
+httpx
+openai
+tenacity
+joblib
+numpy
+pandas
+scikit-learn
+xgboost-cpu==3.3.0  # same version as the lock; CPU-only wheel skips ~300 MB nvidia-nccl on Linux
+pydantic
+pydantic-settings
+prompty<2

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meridian Savings — Project & Learning Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+  <style>
+    :root {
+      --bg: #0E1419;
+      --surface: #151D25;
+      --surface-elevated: #1C2631;
+      --border: #2A3643;
+      --border-focus: #3E5266;
+      --text: #E4EAF0;
+      --muted: #8E9BAA;
+      --blue: #388BFD;
+      --blue-soft: rgba(56, 139, 253, 0.12);
+      --green: #2EA043;
+      --green-soft: rgba(46, 160, 67, 0.15);
+      --amber: #D29922;
+      --amber-soft: rgba(210, 153, 34, 0.15);
+      --purple: #BC8CFF;
+      --purple-soft: rgba(188, 140, 255, 0.12);
+      --mono: "IBM Plex Mono", Consolas, monospace;
+      --sans: "IBM Plex Sans", system-ui, sans-serif;
+      --display: "Archivo", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.6;
+      padding: 40px 24px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+    header {
+      margin-bottom: 36px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-family: var(--mono);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: var(--blue-soft);
+      color: var(--blue);
+      border: 1px solid rgba(56, 139, 253, 0.25);
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-family: var(--display);
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: #FFFFFF;
+    }
+    .lead {
+      color: var(--muted);
+      font-size: 1.1rem;
+      margin-top: 10px;
+      max-width: 720px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-focus);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.3);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+    .tag-blue { background: var(--blue-soft); color: var(--blue); }
+    .tag-green { background: var(--green-soft); color: var(--green); }
+    .tag-amber { background: var(--amber-soft); color: var(--amber); }
+    .tag-purple { background: var(--purple-soft); color: var(--purple); }
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #6e7681;
+    }
+    .dot.live {
+      background: #2ea043;
+      box-shadow: 0 0 8px rgba(46, 160, 67, 0.6);
+    }
+    .dot.down {
+      background: #da3633;
+    }
+
+    .card h2 {
+      font-family: var(--display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 8px;
+    }
+    .card p {
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+    .card-footer {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--blue);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+    .card:hover .card-footer {
+      text-decoration: underline;
+    }
+    .section-title {
+      font-family: var(--mono);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .stat-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+    .stat-value {
+      font-family: var(--display);
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin: 4px 0;
+    }
+    .stat-desc {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .info-panel {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 30px;
+    }
+    .info-panel h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #FFFFFF;
+      margin-bottom: 10px;
+    }
+    .info-panel ul {
+      padding-left: 20px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .info-panel li { margin-bottom: 6px; }
+    .info-panel code {
+      font-family: var(--mono);
+      background: var(--bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: var(--text);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">Local Environment Active</div>
+      <h1>Meridian Savings Innovation Platform</h1>
+      <p class="lead">
+        Unified portal for the Meridian churn model (DF14): the interactive teaching tour, the Friction-Gate demo application, the serving API, and the interview and assessment guides.
+      </p>
+    </header>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-label">Historical AUM at Risk</div>
+        <div class="stat-value">~$7.3M</div>
+        <div class="stat-desc">Primary business driver (PRD §2)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Shipped Ops Threshold</div>
+        <div class="stat-value">t ≈ 0.701</div>
+        <div class="stat-desc">Top-5% retention team queue cut</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Model Discrimination</div>
+        <div class="stat-value">PR-AUC 0.219</div>
+        <div class="stat-desc">+45% lift vs heuristic (0.151)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Human Review Gate</div>
+        <div class="stat-value">Zero Send</div>
+        <div class="stat-desc">Approved ≠ Sent (ADR 003)</div>
+      </div>
+    </div>
+
+    <div class="section-title">Core Applications & Teaching Hub</div>
+    <div class="grid">
+      <!-- Educational Web App -->
+      <a href="http://localhost:3005" target="_blank" class="card">
+        <div>
+          <div class="card-header">
+            <span class="tag tag-blue">Teaching SPA</span>
+            <div class="status-indicator">
+              <span class="dot" id="dot-edu"></span>
+              <span id="text-edu">Checking...</span>
+            </div>
+          </div>
+          <h2>Educational Tour SPA</h2>
+          <p>
+            Interactive 14-module curriculum with stepped lessons, threshold simulators, CATWOE/POPIT/RASCI frameworks, hybrid-RAG and Docker smoke-test lessons, and Explain-it answers marked by the API (marker benchmarked at 87.5% on labelled answers).
+          </p>
+        </div>
+        <div class="card-footer">Open Educational App (Port 3005) →</div>
+      </a>
+
+      <!-- Streamlit Friction Gate UI -->
+      <a href="http://localhost:8501" target="_blank" class="card">
+        <div>
+          <div class="card-header">
+            <span class="tag tag-amber">Demo UI</span>
+            <div class="status-indicator">
+              <span class="dot" id="dot-st"></span>
+              <span id="text-st">Checking...</span>
+            </div>
+          </div>
+          <h2>Friction-Gate App</h2>
+          <p>
+            Streamlit retention UI with Glass-Box RBAC (Retention Agent, Compliance Viewer, Data Scientist), Attention Acknowledgment, Morgan's Business View, Sam's What-If and PR/ROC curves, audit trail, and the Methodology Q&amp;A bot. Every role and page verified on 2026-09-24.
+          </p>
+        </div>
+        <div class="card-footer">Open Friction-Gate UI (Port 8501) →</div>
+      </a>
+
+      <!-- FastAPI Serving Backend -->
+      <a href="http://127.0.0.1:8000/docs" target="_blank" class="card">
+        <div>
+          <div class="card-header">
+            <span class="tag tag-green">FastAPI Backend</span>
+            <div class="status-indicator">
+              <span class="dot" id="dot-api"></span>
+              <span id="text-api">Checking...</span>
+            </div>
+          </div>
+          <h2>Serving API & Swagger</h2>
+          <p>
+            FastAPI single enforcement point: scoring at the ops threshold, draft store, audit events, fairness, hybrid RAG (<code>/rag/ask</code>) and the viva marker. Runs on the host or in Docker (image smoke-tested 2026-09-24).
+          </p>
+        </div>
+        <div class="card-footer">Open Swagger Docs (Port 8000) →</div>
+      </a>
+    </div>
+
+    <div class="section-title">Curriculum Guides & Assessment Artifacts</div>
+    <div class="grid">
+      <!-- Standard Interview Prep Guide -->
+      <a href="http://localhost:3005/guides/interview_prep_ai901.html" target="_blank" class="card">
+        <div>
+          <div class="card-header">
+            <span class="tag tag-blue">Study Guide</span>
+            <span class="tag tag-blue">37 min read</span>
+          </div>
+          <h2>AI-901 Interview Prep Guide</h2>
+          <p>
+            Predict-then-reveal section openers, architectural SVG diagrams, spoken "Say it like this" interview soundbites, "Be precise" risk notes, and a closing 10-question self-test.
+          </p>
+        </div>
+        <div class="card-footer">Launch Prep Guide (HTML) →</div>
+      </a>
+
+      <!-- Foundry Architecture Guide -->
+      <a href="http://localhost:3005/guides/interview_prep_ai901_foundry_design.html" target="_blank" class="card">
+        <div>
+          <div class="card-header">
+            <span class="tag tag-purple">Design Spec</span>
+            <span class="tag tag-purple">49 min read</span>
+          </div>
+          <h2>Foundry Design Edition</h2>
+          <p>
+            The interview guide plus the designed production path: keyless access to Microsoft Foundry through the Foundry SDK, Entra ID tokens and managed identity. Designed, not built.
+          </p>
+        </div>
+        <div class="card-footer">Launch Foundry Spec (HTML) →</div>
+      </a>
+
+      <!-- Official Print Report -->
+      <a href="http://localhost:3005/guides/Final_Report_Official_print.html" target="_blank" class="card">
+        <div>
+          <div class="card-header">
+            <span class="tag tag-green">Official Handover</span>
+            <span class="tag tag-green">Print Clean</span>
+          </div>
+          <h2>Official Project Report</h2>
+          <p>
+            The official project report: executive summary, data and churn definition, XGBoost model and threshold, serving and GenAI controls, Docker status, and governance registers.
+          </p>
+        </div>
+        <div class="card-footer">View Handover Report (HTML) →</div>
+      </a>
+    </div>
+
+    <div class="info-panel">
+      <h3>Quick PowerShell Execution & Troubleshooting</h3>
+      <ul>
+        <li><strong>One-Click Launcher:</strong> Run <code>.\launch_all.ps1</code> in PowerShell to verify or launch all 3 background services simultaneously.</li>
+        <li><strong>Run Backend:</strong> <code>uv run python -m uvicorn src.serving.app:app --port 8000</code></li>
+        <li><strong>Or run Backend in Docker:</strong> <code>docker compose up -d --build</code> (set <code>API_PORT=8001</code> if a host API already uses 8000)</li>
+        <li><strong>Run Friction Gate:</strong> <code>uv run python -m streamlit run Code\Sprint3\friction_gate_app.py --server.port 8501</code></li>
+        <li><strong>Run Educational Tour:</strong> <code>cd educational_web_app; npm run dev:portal</code></li>
+        <li><strong>Run Full Tests:</strong> <code>uv run --with pytest python -m pytest tests -q</code> (127 passed, 2026-09-24) &amp; <code>cd educational_web_app; npm test</code></li>
+      </ul>
+    </div>
+
+    <footer>
+      <span>Meridian Savings Bank — Innovator Project DF14</span>
+      <span>AppLocker-Safe · Localhost Serving · Zero Autonomous Send</span>
+    </footer>
+  </div>
+
+  <script>
+    async function checkHealth(url, dotId, textId, label) {
+      const dot = document.getElementById(dotId);
+      const text = document.getElementById(textId);
+      try {
+        const res = await fetch(url, { method: 'GET', mode: 'no-cors', cache: 'no-store' });
+        dot.className = 'dot live';
+        text.textContent = 'Active (Live)';
+      } catch (err) {
+        dot.className = 'dot down';
+        text.textContent = 'Offline';
+      }
+    }
+
+    function refreshStatuses() {
+      checkHealth('http://localhost:3005/', 'dot-edu', 'text-edu', 'Edu SPA');
+      checkHealth('http://localhost:8501/', 'dot-st', 'text-st', 'Streamlit');
+      checkHealth('http://127.0.0.1:8000/health', 'dot-api', 'text-api', 'FastAPI');
+    }
+
+    refreshStatuses();
+    setInterval(refreshStatuses, 5000);
+  </script>
+</body>
+</html>

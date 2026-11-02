@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Project Data (DO NOT COMMIT RAW OR SENSITIVE DATA)
+StartingFiles/*.csv
+data/
+*.csv
+
+# MLflow
+mlruns/
+
+# IDE
+.vscode/
+.idea/
+*.log
+.claude/
+
+
+mlflow.db
+mlartifacts/
+Data/processed/draft_queue.db
+*.db-journal
+
+Data/processed/rag_index_cache.json
+*.db-wal
+*.db-shm
+
+# Accidental root AI Studio / Vite scaffold (canonical teaching app: educational_web_app/)
+/package.json
+/package-lock.json
+/index.html
+/metadata.json
+/tsconfig.json
+/vite.config.ts
+/src/App.tsx
+/src/main.tsx
+/src/index.css
+/node_modules/
+/dist/
+
+# Azure Developer CLI per-machine environment state
+.azure/

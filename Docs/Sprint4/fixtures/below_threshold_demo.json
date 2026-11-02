@@ -1,0 +1,33 @@
+{
+  "demo_id": "below_threshold_midbook",
+  "description": "Mid-book inactive row — proves ops capacity gate (expect NOT flagged).",
+  "expected_flagged": false,
+  "expected_probability_approx": 0.21,
+  "ops_threshold": 0.700547993183136,
+  "features": {
+    "state": "California",
+    "age_years": 42,
+    "start_balance": 1000.0,
+    "Months_Since_Creation": 24,
+    "Running_Balance": 50.0,
+    "Running_Balance_Rounded": 0.0,
+    "Monthly_Transaction_Count": 1,
+    "Monthly_Active_Txn_Count": 0,
+    "Monthly_Amount_Sum": 0.0,
+    "Monthly_Deposit_Sum": 0.0,
+    "Monthly_Withdrawal_Sum": 0.0,
+    "Deposit_Share_Of_Flow": 0.0,
+    "Is_Inactive_Month": 1,
+    "gone_this_month": 1,
+    "Balance_MoM_Change": -500.0,
+    "Active_Txn_Lag1": 0.0,
+    "Active_Txn_Lag2": 0.0,
+    "Active_Txn_Lag3": null,
+    "Amount_Lag1": 0.0,
+    "Active_Txn_Roll3_Mean": 0.0,
+    "Amount_Roll3_Mean": 0.0,
+    "Balance_Roll3_Mean": 200.0,
+    "Consecutive_Inactive_Months": 2,
+    "Inactive_Share_Prior3": 1.0
+  }
+}

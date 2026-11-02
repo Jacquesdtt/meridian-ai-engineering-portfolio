@@ -1,0 +1,22 @@
+{
+  "n_sample": 100000,
+  "min_group_n": 500,
+  "selection_rate_diff_age": 0.0994008779918849,
+  "equalized_odds_difference_age": 0.15599544740011842,
+  "equalized_odds_ratio_age": 0.3062263860715076,
+  "equalized_odds_difference_state": 0.3181609195402299,
+  "equalized_odds_ratio_state": 0.07733333333333334,
+  "age_filter": {
+    "n_groups_total": 6,
+    "n_groups_kept": 6,
+    "n_rows_excluded": 0,
+    "min_group_n": 500
+  },
+  "state_filter": {
+    "n_groups_total": 55,
+    "n_groups_kept": 38,
+    "n_rows_excluded": 3548,
+    "min_group_n": 500
+  },
+  "threshold": 0.700547993183136
+}

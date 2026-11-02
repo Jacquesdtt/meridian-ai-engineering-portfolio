@@ -1,0 +1,949 @@
+<meta charset="utf-8">
+<title>Meridian Interview Prep</title>
+<meta name="description" content="Interview prep for the Meridian Savings churn and GenAI system: how it works, what I built, and how it maps to Azure AI-901.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#F4F6F8; --surface:#FFFFFF; --sunk:#EAEEF2; --ink:#15202B; --muted:#56636F; --rule:#D5DCE3;
+  --accent:#1E5AA8; --accent-soft:#E3EDF9; --accent-ink:#123C73;
+  --ok:#2A7A4B; --ok-soft:#E1F2E7; --warn:#9A6200; --warn-soft:#FBEFD9; --no:#A33A2F; --no-soft:#F8E4E1;
+  --code:#EEF2F6;
+  --f-display:"Archivo","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1419; --surface:#151D25; --sunk:#1B2530; --ink:#E4EAF0; --muted:#98A5B2; --rule:#2A3643;
+    --accent:#7DB0F0; --accent-soft:#18304D; --accent-ink:#B9D5F7;
+    --ok:#6CC592; --ok-soft:#173526; --warn:#E3B45C; --warn-soft:#3A2D12; --no:#EE8D82; --no-soft:#3D1D1A;
+    --code:#1A232D; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1419; --surface:#151D25; --sunk:#1B2530; --ink:#E4EAF0; --muted:#98A5B2; --rule:#2A3643;
+  --accent:#7DB0F0; --accent-soft:#18304D; --accent-ink:#B9D5F7;
+  --ok:#6CC592; --ok-soft:#173526; --warn:#E3B45C; --warn-soft:#3A2D12; --no:#EE8D82; --no-soft:#3D1D1A;
+  --code:#1A232D; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding-inline:20px;padding-block:28px 80px}
+h1,h2,h3,h4{font-family:var(--f-display);text-wrap:balance;line-height:1.18;margin:0}
+h1{font-size:clamp(2rem,5vw,2.9rem);font-weight:800;font-stretch:88%;letter-spacing:-.01em}
+h2{font-size:1.7rem;font-weight:750;font-stretch:90%;margin-top:4px}
+h3{font-size:1.2rem;font-weight:700;margin-top:34px;margin-bottom:8px}
+h4{font-size:1rem;font-weight:700;margin-top:20px;margin-bottom:4px}
+p{margin:10px 0}
+p,li{max-width:70ch}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+code{background:var(--code);padding:1px 5px;border-radius:4px}
+pre{background:var(--code);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--f-mono);font-size:13px;line-height:1.55;margin:12px 0}
+pre code{background:none;padding:0;font-size:inherit}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:1.12rem;color:var(--muted);margin-top:12px}
+header.top{padding-bottom:22px;border-bottom:1px solid var(--rule)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:10px;overflow:hidden;margin-top:22px}
+.facts div{background:var(--surface);padding:12px 14px}
+.facts b{display:block;font-family:var(--f-display);font-size:1.45rem;font-weight:750;font-stretch:90%;font-variant-numeric:tabular-nums;color:var(--accent-ink)}
+.facts span{font-size:13px;color:var(--muted);line-height:1.35;display:block}
+nav.toc{margin-top:18px;display:flex;flex-wrap:wrap;gap:6px 8px}
+nav.toc a{font-size:13.5px;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:999px;padding:3px 11px}
+nav.toc a:hover{border-color:var(--accent);color:var(--accent)}
+section{padding-top:44px}
+section > .eyebrow{display:block;margin-bottom:2px}
+.say{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:14px 0}
+.say::before{content:"Say it like this";display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:4px}
+.say p{margin:6px 0}
+.care{border-left:3px solid var(--warn);background:var(--warn-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:14px 0}
+.care::before{content:"Be precise";display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--warn);margin-bottom:4px}
+.simple{border:1px dashed var(--rule);background:var(--surface);padding:12px 16px;border-radius:8px;margin:14px 0}
+.simple::before{content:"In plain English";display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.tbl{overflow-x:auto;margin:12px 0;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{font:inherit;text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--rule)}
+th{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--sunk)}
+tr:last-child td{border-bottom:none}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.fig{margin:16px 0 8px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:14px;overflow-x:auto}
+.fig svg{display:block;width:100%;height:auto;min-width:640px}
+.fig.narrow svg{min-width:480px}
+.cap{font-size:13px;color:var(--muted);margin:6px 2px 0}
+.pill{display:inline-block;font-family:var(--f-mono);font-size:11px;letter-spacing:.04em;padding:1px 8px;border-radius:999px;white-space:nowrap;vertical-align:1px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.part{background:var(--warn-soft);color:var(--warn)}
+.pill.no{background:var(--no-soft);color:var(--no)}
+.steps{counter-reset:s;list-style:none;padding:0;margin:12px 0}
+.steps li{counter-increment:s;position:relative;padding:8px 0 8px 40px;border-bottom:1px solid var(--rule)}
+.steps li:last-child{border-bottom:none}
+.steps li::before{content:counter(s);position:absolute;left:0;top:9px;width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);font-family:var(--f-mono);font-size:13px;display:grid;place-items:center}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:12px 0}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:14px 16px}
+.panel h4{margin-top:0}
+.panel ul{margin:6px 0;padding-left:18px}
+details.qa{background:var(--surface);border:1px solid var(--rule);border-radius:10px;margin:10px 0}
+details.qa summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style:none}
+details.qa summary::-webkit-details-marker{display:none}
+details.qa summary::before{content:"+";font-family:var(--f-mono);color:var(--accent);display:inline-block;width:18px}
+details.qa[open] summary::before{content:"–"}
+details.qa .ans{padding:0 16px 12px 34px}
+/* Predict-then-reveal retrieval prompts (distinct from the Q&A rehearsal blocks) */
+details.predict{background:var(--accent-soft);border:1px solid var(--accent);border-radius:8px;margin:14px 0;padding:10px 16px}
+details.predict > summary{cursor:pointer;font-weight:600;list-style:none;color:var(--ink)}
+details.predict > summary::-webkit-details-marker{display:none}
+details.predict > summary::before{content:"Predict first";display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:4px}
+details.predict > summary::after{content:" — reveal";font-family:var(--f-mono);font-size:11px;color:var(--accent-ink);white-space:nowrap}
+details.predict[open] > summary::after{content:" — answer below"}
+details.predict .ans{margin-top:8px;padding-top:8px;border-top:1px solid var(--accent);color:var(--ink)}
+details.predict .ans p{margin:6px 0}
+/* Closing self-test */
+section#self-test{counter-reset:q}
+details.quiz{background:var(--sunk);border:1px solid var(--rule);border-left:3px solid var(--ok);border-radius:0 10px 10px 0;margin:10px 0;counter-increment:q}
+details.quiz > summary{cursor:pointer;padding:10px 16px;font-weight:600;list-style:none}
+details.quiz > summary::-webkit-details-marker{display:none}
+details.quiz > summary::before{content:"Q" counter(q) " · ";font-family:var(--f-mono);font-size:12px;color:var(--ok)}
+details.quiz .ans{padding:2px 16px 12px 16px}
+details.quiz .ans::before{content:"Answer";display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+details.quiz .ans p{margin:4px 0}
+dl.gloss{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:8px 16px;margin:12px 0}
+dl.gloss dt{font-weight:600}
+dl.gloss dd{margin:0;color:var(--ink)}
+@media (max-width:560px){dl.gloss{grid-template-columns:1fr}dl.gloss dd{margin-bottom:8px}}
+footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--rule);font-size:13px;color:var(--muted)}
+/* SVG diagram tokens */
+.d-bx{fill:var(--surface);stroke:var(--rule);stroke-width:1.2}
+.d-acc{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.2}
+.d-sunk{fill:var(--sunk);stroke:var(--rule);stroke-width:1}
+.d-dash{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 4}
+.d-ok{fill:var(--ok-soft);stroke:var(--ok);stroke-width:1.2}
+.d-warn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.2}
+.d-no{fill:var(--no-soft);stroke:var(--no);stroke-width:1.2}
+.d-t1{fill:var(--ink);font-family:var(--f-body);font-size:14px;font-weight:600}
+.d-t2{fill:var(--muted);font-family:var(--f-body);font-size:12px}
+.d-mono{fill:var(--muted);font-family:var(--f-mono);font-size:11px}
+.d-band{fill:var(--muted);font-family:var(--f-mono);font-size:11px;letter-spacing:.08em}
+.d-ar{stroke:var(--muted);stroke-width:1.5;fill:none}
+.d-ar-dash{stroke:var(--muted);stroke-width:1.5;fill:none;stroke-dasharray:5 4}
+.d-head{fill:var(--muted)}
+.d-bar-acc{fill:var(--accent)}
+.d-bar-mut{fill:var(--rule)}
+.d-bar-no{fill:var(--no)}
+.d-bar-ok{fill:var(--ok)}
+.d-grid{stroke:var(--rule);stroke-width:1}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+/* ---------- Interview-day handout: print ---------- */
+@media print{
+  :root, :root[data-theme="dark"], :root:not([data-theme="light"]){
+    --ground:#FFFFFF; --surface:#FFFFFF; --sunk:#F2F5F8; --ink:#15202B; --muted:#44505B; --rule:#B8C2CB;
+    --accent:#1E5AA8; --accent-soft:#E9F0F9; --accent-ink:#123C73;
+    --ok:#276E44; --ok-soft:#E6F2EA; --warn:#7A4E00; --warn-soft:#FAF0DC; --no:#94352B; --no-soft:#F8E7E4;
+    --code:#F2F5F8; color-scheme:light;
+  }
+  @page{size:A4 portrait;margin:14mm}
+  html{scroll-behavior:auto}
+  body{background:#fff;font-size:10.5pt;line-height:1.45}
+  .wrap{max-width:none;margin:0;padding:0}
+  p,li{max-width:none}
+  nav.toc,.legend{display:none}
+  header.top{padding-bottom:10px}
+  h1{font-size:20pt}
+  h2{font-size:14pt}
+  h3{font-size:11.5pt;margin-top:14px}
+  h4{font-size:10.5pt}
+  h1,h2,h3,h4{break-after:avoid;page-break-after:avoid}
+  section{padding-top:16px}
+  .lede{font-size:11pt}
+  .facts{grid-template-columns:repeat(3,1fr)}
+  .facts b{font-size:12pt}
+  .two{grid-template-columns:1fr 1fr;gap:10px}
+  .fig{overflow:visible;padding:8px}
+  .fig svg,.fig.narrow svg{min-width:0;max-width:100%}
+  .tbl{overflow:visible}
+  table{font-size:9pt}
+  thead{display:table-header-group}
+  pre{font-size:8.5pt;white-space:pre-wrap;word-wrap:break-word}
+  .panel,.fig,.facts,figure,pre,.say,.care,.simple,.plan,dl.gloss{break-inside:avoid;page-break-inside:avoid}
+  tr,td,th{break-inside:avoid;page-break-inside:avoid}
+  details{display:block;break-inside:avoid;page-break-inside:avoid}
+  details > *{display:block !important}
+  details:not([open]) > *:not(summary){display:block !important}
+  details > summary{list-style:none;cursor:auto}
+  details.predict > summary::after{content:"" !important;display:none}
+  details.qa summary::before,details.qa[open] summary::before{content:"" !important;display:none}
+  a[href]{color:var(--accent-ink);text-decoration:none}
+  a[href]::after{content:none !important}
+}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <span class="eyebrow">Technical interview prep · Avanade · AI-901 focus</span>
+  <h1>Meridian Savings: churn prediction with guarded GenAI</h1>
+  <p class="lede">How the system works, what I built, and how it maps to Microsoft Azure AI Fundamentals (AI-901). Every claim here was checked against the code and docs in this repo on 16 September 2026, with the model, RAG, serving, Docker and test details updated on 24 September 2026.</p>
+  <p class="eyebrow">Full read · about 37 min · every section carries its own estimate</p>
+  <div class="facts" role="list">
+    <div role="listitem"><b>0.219</b><span>PR-AUC on the future test window, vs 0.151 for the rule-of-thumb baseline</span></div>
+    <div role="listitem"><b>Top 5%</b><span>Contact cut (score ≥ 0.701) sized to what the team can review</span></div>
+    <div role="listitem"><b>20,127</b><span>False positives at that cut, down from 248,778 at the max-F1 cut</span></div>
+    <div role="listitem"><b>3.5%</b><span>Hard cap on any interest rate the LLM offers, enforced in code</span></div>
+    <div role="listitem"><b>127 · 16</b><span>Automated tests passing · architecture decision records</span></div>
+  </div>
+  <nav class="toc" aria-label="Contents">
+    <a href="#pitch">Pitch</a><a href="#problem">Problem</a><a href="#arch">Architecture</a><a href="#model">Predictive model</a><a href="#genai">GenAI layer</a><a href="#gov">Governance</a><a href="#ai901">AI-901 map</a><a href="#honest">Don't overclaim</a><a href="#qa">Interview Q&amp;A</a><a href="#cheat">Cheat sheet</a><a href="#self-test">Test yourself</a>
+  </nav>
+</header>
+
+<!-- ============================ 1. PITCH ============================ -->
+<section id="pitch">
+  <span class="eyebrow">1 · The pitch · 3 min</span>
+  <h2>Explain it in 30 seconds, then in 2 minutes</h2>
+
+  <div class="say">
+    <p>“Meridian Savings was losing money to silent churn: customers drain their savings account to zero and stop using it. I built a system that ranks every customer by how likely they are to do that <em>next month</em>, using XGBoost. The top 5% go into a review queue, and Azure OpenAI drafts a retention email for each one.</p>
+    <p>The GenAI part is fenced in. Personal data is stripped out before the model sees anything. Code, not the prompt, caps the interest rate at 3.5%. A human must approve every draft, and approving doesn't send anything. I also built a RAG chatbot that answers questions about the method, using only the final report as its source. I designed all of it around Microsoft's six Responsible AI principles.”</p>
+  </div>
+
+  <h3>The 2-minute version: five beats</h3>
+  <ol class="steps">
+    <li><strong>Pin down the problem.</strong> The brief left “churn” undefined on purpose. I agreed a precise label with the Head of Data Science: next month the balance rounds to $0 <em>and</em> there is no real activity.</li>
+    <li><strong>Build a fair test.</strong> I turned 6.4M raw transactions into one row per customer per month (2.26M rows). I split the data by time, training on the past and testing on the future, so the model can't cheat by seeing the future.</li>
+    <li><strong>Beat a real baseline, not accuracy.</strong> XGBoost beat a sensible rule-of-thumb baseline on PR-AUC (0.219 vs 0.151) and ROC-AUC (0.723 vs 0.551). Accuracy is misleading here: predicting “nobody churns” scores about 87%.</li>
+    <li><strong>Choose who to contact based on capacity.</strong> A max-F1 cut-off would have flagged about 249k customer-months for review. Setting the cut-off at the top 5% of scores reduced false positives to about 20k without changing how well the model ranks.</li>
+    <li><strong>Add GenAI with guardrails and a human gate.</strong> The system writes drafts only: PII is scrubbed, the rate is capped by Pydantic, there's no <code>/send</code> route, and every approval requires an attention acknowledgement and is written to an audit trail. A RAG bot answers methodology questions.</li>
+  </ol>
+
+  <h3>What I personally did</h3>
+  <p>This was a solo AI-engineering project built from a 10-working-day training brief. Trainers roleplayed three stakeholders. I owned everything end to end:</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Sprint</th><th>What I delivered</th></tr></thead>
+    <tbody>
+      <tr><td class="num">0 · 6–7 Jul</td><td>Repo structure, requirements from 3 stakeholders, first ADRs (e.g. working around a locked-down corporate Windows laptop), rules for the AI coding assistants</td></tr>
+      <tr><td class="num">1 · 7–10 Jul</td><td>Data integrity checks, churn label (ADR 004), leakage-safe feature table, empirical leak screen</td></tr>
+      <tr><td class="num">2 · 13–14 Jul</td><td>XGBoost with a time-based split, MLflow tracking, SHAP explanations, Fairlearn fairness, Evidently drift report, threshold policy</td></tr>
+      <tr><td class="num">3 · 15–16 Jul</td><td>Portable model export, FastAPI scoring API, SQLite review queue, Streamlit “Friction-Gate” UI, GenAI email drafter</td></tr>
+      <tr><td class="num">4 · 16–17 Jul</td><td>Final report, model card, demo runbook and fixtures, handover deck</td></tr>
+      <tr><td class="num">5 · July</td><td>Prompt-as-code (<code>.prompty</code>), role-based access plus audit trail, RAG Q&amp;A bot, live Azure OpenAI path, retries plus token logging, Docker</td></tr>
+      <tr><td class="num">Sep</td><td>Corrections pass: cross-checked every doc claim against the code and fixed the ones that overstated what was built. Hybrid RAG with rerank (ADR 015). Built and smoke-tested the API container, which caught three packaging and model-parameter bugs</td></tr>
+    </tbody>
+  </table></div>
+  <p>I also ran red-team reviews on my own work: I attacked a design, wrote a revision plan, and only then changed the code. That is how the stricter guardrails in §6 came about.</p>
+</section>
+
+<!-- ============================ 2. PROBLEM ============================ -->
+<section id="problem">
+  <span class="eyebrow">2 · The problem · 2 min</span>
+  <h2>A bank losing savings deposits without noticing</h2>
+
+  <details class="predict"><summary>Counting raw transaction rows makes every month at this bank look active. Why?</summary><div class="ans">
+    <p>The bank pads quiet months with $0 “placeholder” transactions — 523,679 of 6,421,943 raw transactions, or 8.15%. Activity is therefore measured using only non-zero transactions (<code>Monthly_Active_Txn_Count</code>).</p></div></details>
+
+  <p>Meridian Savings is a US retail bank. Its savings account only pays interest in months where deposits beat withdrawals. The bank uses those deposits as funding, so when balances quietly drain away, the bank loses liquidity. The historical assets under management (AUM) at risk came to about <strong>$7.3M</strong>.</p>
+
+  <div class="two">
+    <div class="panel"><h4>Sam · Head of Data Science</h4><ul><li>Agree an exact churn definition</li><li>A sound, auditable model he can own</li><li>MLflow runs and SHAP for review</li></ul></div>
+    <div class="panel"><h4>Morgan · Product Manager</h4><ul><li>Who to contact, and how many</li><li>Money at risk, in business terms</li><li>High / Medium / Low risk language</li></ul></div>
+    <div class="panel"><h4>Jamie · Risk &amp; Compliance</h4><ul><li>Proof the model is fair</li><li>No autonomous AI contacting customers</li><li>An audit trail of every decision</li></ul></div>
+  </div>
+
+  <h3>The data, and the trap in it</h3>
+  <div class="tbl"><table>
+    <tbody>
+      <tr><td>Customers</td><td class="num">138,640</td></tr>
+      <tr><td>Customer-month rows (after aggregating transactions)</td><td class="num">2,263,608</td></tr>
+      <tr><td>Time span</td><td class="num">2007 → May 2020</td></tr>
+      <tr><td>Churn rate (positive class)</td><td class="num">11.76%</td></tr>
+      <tr><td>Raw transactions that are $0 placeholders</td><td class="num">523,679 of 6,421,943 (8.15%)</td></tr>
+    </tbody>
+  </table></div>
+  <p>The trap: the bank pads quiet months with <strong>$0 “placeholder” transactions</strong>, so counting raw transaction rows makes every month look active. I measured activity using only non-zero transactions (<code>Monthly_Active_Txn_Count</code>).</p>
+
+  <h3>The churn label (ADR 004)</h3>
+  <figure class="fig narrow" aria-labelledby="cap-label">
+    <svg viewBox="0 0 760 190" role="img" aria-label="Features come from month t; the label is whether month t+1 has a zero balance and no activity">
+      <defs><marker id="ah1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" class="d-head"/></marker></defs>
+      <rect x="20" y="40" width="130" height="70" rx="8" class="d-sunk"/>
+      <text x="85" y="72" text-anchor="middle" class="d-t1">t − 3 … t − 1</text>
+      <text x="85" y="92" text-anchor="middle" class="d-t2">lags, rolling means</text>
+      <rect x="170" y="40" width="250" height="70" rx="8" class="d-acc"/>
+      <text x="295" y="68" text-anchor="middle" class="d-t1">Month t · features</text>
+      <text x="295" y="90" text-anchor="middle" class="d-t2">balance, flows, inactivity</text>
+      <path d="M420,75 H468" class="d-ar" marker-end="url(#ah1)"/>
+      <rect x="470" y="40" width="270" height="70" rx="8" class="d-warn"/>
+      <text x="605" y="68" text-anchor="middle" class="d-t1">Month t+1 · label</text>
+      <text x="605" y="90" text-anchor="middle" class="d-t2">balance rounds to $0 AND 0 active txns</text>
+      <text x="20" y="145" class="d-mono">Is_Churned(t) = 1  iff  Running_Balance_Rounded(t+1) == 0  AND  Monthly_Active_Txn_Count(t+1) == 0</text>
+      <text x="20" y="168" class="d-mono">only for accounts ≥ 2 months old · high-balance dormant accounts are NOT churn</text>
+    </svg>
+  </figure>
+  <p class="cap" id="cap-label">Features stop at month <em>t</em> and the label lives in month <em>t+1</em>, so the model can never see the month it is predicting.</p>
+  <div class="simple">To predict next month, the model may only look at this month and earlier. If a feature secretly contained next month's information, the model would look brilliant in testing and be useless in real life. That is called <strong>data leakage</strong>.</div>
+  <p>Why one month and not two? Sam wanted enough lead time for the retention team to act. Also, most exit streaks last only one month, and a two-month rule drops the positive rate to about 2.6%.</p>
+</section>
+
+<!-- ============================ 3. ARCHITECTURE ============================ -->
+<section id="arch">
+  <span class="eyebrow">3 · Architecture · 1 min</span>
+  <h2>The whole system on one page</h2>
+
+  <details class="predict"><summary>At serving time, which component talks to MLflow?</summary><div class="ans">
+    <p>None of them. MLflow's database isn't in git, so serving never talks to MLflow: training exports three files to <code>Models/ops/</code> — the XGBoost booster, the fitted one-hot encoder and <code>serving_meta.json</code> — and the online half loads that folder at startup.</p></div></details>
+
+  <figure class="fig" aria-labelledby="cap-arch">
+    <svg viewBox="0 0 1000 470" role="img" aria-label="Architecture: offline training exports a model folder; FastAPI and Streamlit share service code that uses SQLite and calls Azure OpenAI models in a Foundry resource">
+      <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" class="d-head"/></marker></defs>
+      <text x="20" y="28" class="d-band">OFFLINE · TRAIN ONCE, FREEZE</text>
+      <rect x="20" y="42" width="200" height="66" rx="8" class="d-bx"/><text x="120" y="70" text-anchor="middle" class="d-t1">Raw CSVs</text><text x="120" y="90" text-anchor="middle" class="d-t2">customers · transactions</text>
+      <rect x="270" y="42" width="200" height="66" rx="8" class="d-bx"/><text x="370" y="70" text-anchor="middle" class="d-t1">EDA + features</text><text x="370" y="90" text-anchor="middle" class="d-t2">Sprint 1 notebooks</text>
+      <rect x="520" y="42" width="200" height="66" rx="8" class="d-bx"/><text x="620" y="70" text-anchor="middle" class="d-t1">XGBoost + MLflow</text><text x="620" y="90" text-anchor="middle" class="d-t2">SHAP · Fairlearn · Evidently</text>
+      <rect x="770" y="42" width="210" height="66" rx="8" class="d-acc"/><text x="875" y="70" text-anchor="middle" class="d-t1">Models/ops/ (in git)</text><text x="875" y="90" text-anchor="middle" class="d-t2">booster · preprocessor · meta</text>
+      <path d="M220,75 H268" class="d-ar" marker-end="url(#ah2)"/><path d="M470,75 H518" class="d-ar" marker-end="url(#ah2)"/><path d="M720,75 H768" class="d-ar" marker-end="url(#ah2)"/>
+
+      <text x="20" y="160" class="d-band">ONLINE · SERVE, DRAFT, REVIEW</text>
+      <rect x="20" y="180" width="200" height="104" rx="8" class="d-sunk"/>
+      <text x="120" y="206" text-anchor="middle" class="d-t1">People (demo roles)</text>
+      <text x="120" y="228" text-anchor="middle" class="d-t2">Retention agent</text>
+      <text x="120" y="246" text-anchor="middle" class="d-t2">Compliance viewer</text>
+      <text x="120" y="264" text-anchor="middle" class="d-t2">Data scientist</text>
+      <rect x="270" y="176" width="200" height="54" rx="8" class="d-bx"/><text x="370" y="199" text-anchor="middle" class="d-t1">Streamlit Friction-Gate</text><text x="370" y="218" text-anchor="middle" class="d-t2">role-gated pages</text>
+      <rect x="270" y="238" width="200" height="54" rx="8" class="d-bx"/><text x="370" y="261" text-anchor="middle" class="d-t1">FastAPI</text><text x="370" y="280" text-anchor="middle" class="d-t2">/score · /drafts · /audit</text>
+      <rect x="520" y="190" width="200" height="90" rx="8" class="d-acc"/><text x="620" y="220" text-anchor="middle" class="d-t1">Shared code (src/)</text><text x="620" y="241" text-anchor="middle" class="d-t2">scoring · drafter · RAG</text><text x="620" y="259" text-anchor="middle" class="d-t2">RBAC · Pydantic schemas</text>
+      <rect x="770" y="190" width="210" height="90" rx="8" class="d-bx"/><text x="875" y="222" text-anchor="middle" class="d-t1">SQLite (WAL mode)</text><text x="875" y="243" text-anchor="middle" class="d-t2">drafts + audit_events</text><text x="875" y="261" text-anchor="middle" class="d-t2">one file, one replica</text>
+      <path d="M220,215 H268" class="d-ar" marker-end="url(#ah2)"/><path d="M220,255 H268" class="d-ar" marker-end="url(#ah2)"/>
+      <path d="M470,203 H495 V225 H518" class="d-ar" marker-end="url(#ah2)"/><path d="M470,265 H495 V245 H518" class="d-ar" marker-end="url(#ah2)"/>
+      <text x="494" y="168" text-anchor="middle" class="d-mono">in-process</text>
+      <path d="M720,235 H768" class="d-ar" marker-end="url(#ah2)"/>
+      <path d="M875,108 V140 H620 V188" class="d-ar" marker-end="url(#ah2)"/><text x="748" y="134" text-anchor="middle" class="d-mono">loaded at startup</text>
+
+      <text x="20" y="330" class="d-band">AZURE</text>
+      <rect x="270" y="342" width="710" height="112" rx="10" class="d-sunk"/>
+      <text x="290" y="366" class="d-t1">Microsoft Foundry resource · OpenAI-compatible /openai/v1 endpoint</text>
+      <rect x="290" y="380" width="210" height="58" rx="8" class="d-bx"/><text x="395" y="404" text-anchor="middle" class="d-t1">gpt-5-mini</text><text x="395" y="423" text-anchor="middle" class="d-t2">email drafts · RAG answers</text>
+      <rect x="520" y="380" width="210" height="58" rx="8" class="d-bx"/><text x="625" y="404" text-anchor="middle" class="d-t1">text-embedding-3-large</text><text x="625" y="423" text-anchor="middle" class="d-t2">RAG vectors</text>
+      <rect x="750" y="380" width="210" height="58" rx="8" class="d-dash"/><text x="855" y="404" text-anchor="middle" class="d-t1">No Azure configured?</text><text x="855" y="423" text-anchor="middle" class="d-t2">stub drafter + BM25 search</text>
+      <path d="M620,280 V378" class="d-ar-dash" marker-end="url(#ah2)"/><text x="628" y="314" class="d-mono">HTTPS · retries · key fallback</text>
+      <rect x="20" y="342" width="200" height="112" rx="10" class="d-dash"/>
+      <text x="120" y="372" text-anchor="middle" class="d-t1">Packaging</text>
+      <text x="120" y="394" text-anchor="middle" class="d-t2">API image: smoke-tested</text>
+      <text x="120" y="414" text-anchor="middle" class="d-t2">Container Apps manifest:</text>
+      <text x="120" y="432" text-anchor="middle" class="d-t2">scaffold, not deployed</text>
+    </svg>
+  </figure>
+  <p class="cap" id="cap-arch">The system splits in two: an offline half trains the model and freezes it into a folder, and an online half loads that folder to score customers, draft emails and run the review queue, calling Azure only for the GenAI parts. Solid boxes are built and tested; dashed boxes are fallbacks or scaffolding.</p>
+
+  <h3>Reading the diagram</h3>
+  <ul>
+    <li><strong>Frozen model folder.</strong> MLflow's database isn't in git, so serving never talks to MLflow. Instead I export three files to <code>Models/ops/</code>: the XGBoost booster, the fitted one-hot encoder, and <code>serving_meta.json</code> (threshold, run ID, feature names, top SHAP drivers). The server refuses to start if the booster's feature count doesn't match the metadata (ADR 005).</li>
+    <li><strong>Streamlit calls FastAPI for everything.</strong> Every score, draft, decision, audit read and RAG question goes through one small client over HTTP, so FastAPI is the single enforcement point and the only writer to SQLite (F8, the Sep 2026 follow-on to ADR 006). Where AppLocker blocks localhost traffic, <code>FRICTION_GATE_MODE=inprocess</code> runs the same FastAPI app through an in-process test client instead of a socket, so no rule is duplicated. API tests use in-memory <code>httpx.ASGITransport</code>.</li>
+    <li><strong>SQLite in WAL mode, single replica.</strong> Two writers on a network file share can corrupt SQLite, so Docker Compose and the Container Apps manifest both pin one replica (ADR 008). Postgres is the documented next step for scale.</li>
+    <li><strong>Azure is optional at runtime.</strong> Without an endpoint configured, the system uses a deterministic stub drafter and BM25 keyword search, so demos and tests never depend on the network.</li>
+  </ul>
+</section>
+
+<!-- ============================ 4. MODEL ============================ -->
+<section id="model">
+  <span class="eyebrow">4 · The predictive model · 4 min</span>
+  <h2>Classic ML does the deciding, not the LLM</h2>
+
+  <details class="predict"><summary>Accuracy on this dataset would be about 87%. Why is that a reason to ignore it?</summary><div class="ans">
+    <p>Because ~87% is what you score by predicting “nobody churns”, catching zero churners — only about 12% of rows are positive. PR-AUC is the honest metric here, and on the test window XGBoost scores 0.219 against 0.151 for the <code>gone_this_month</code> rule.</p></div></details>
+
+  <div class="simple">The LLM never decides who is at risk. A normal machine-learning model (XGBoost) produces a score from numbers, and the LLM only turns that into polite words. That split is deliberate: tabular prediction is a job for gradient-boosted trees, and a regulator can audit a tree model with SHAP.</div>
+
+  <h3>Features: 24 columns in, 80 model inputs</h3>
+  <p>Each row is one customer in one month. The 24 raw columns include balance and rounded balance, deposit and withdrawal totals, share of flow that is deposits, month-over-month balance change, activity lags (1–3 months back), 3-month rolling means, consecutive inactive months, account age, customer age and state. One-hot encoding the 55 state values (fitted on the training months only) turns them into <strong>80 inputs</strong>.</p>
+  <p><strong>Two leak checks.</strong> First, every rolling or lag feature stops at month <em>t</em>. Second, I ran an empirical screen: fit a quick Random Forest, and if any single feature took more than ~50% of the importance, treat it as a likely leak. The top feature (<code>Running_Balance_Rounded</code>) scored 0.273, so it passed.</p>
+
+  <h3>Split by time, never shuffle</h3>
+  <figure class="fig narrow" aria-labelledby="cap-split">
+    <svg viewBox="0 0 760 150" role="img" aria-label="Chronological split: fit 2007-03 to 2016-08, validation 2016-09 to 2017-08, test 2017-09 to 2020-04">
+      <defs><marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" class="d-head"/></marker></defs>
+      <text x="20" y="36" class="d-t1">Fit · 2007-03 → 2016-08</text>
+      <text x="566" y="36" text-anchor="middle" class="d-t1">Val</text>
+      <text x="667" y="36" text-anchor="middle" class="d-t1">Test</text>
+      <rect x="20" y="46" width="518" height="40" rx="4" class="d-acc"/>
+      <rect x="540" y="46" width="52" height="40" rx="4" class="d-warn"/>
+      <rect x="594" y="46" width="146" height="40" rx="4" class="d-ok"/>
+      <text x="279" y="71" text-anchor="middle" class="d-t2">114 months · 1,568,631 rows · 11.2% churn</text>
+      <text x="566" y="106" text-anchor="middle" class="d-mono">12 mo · 189k</text>
+      <text x="667" y="106" text-anchor="middle" class="d-mono">32 mo · 506k</text>
+      <path d="M20,132 H736" class="d-ar" marker-end="url(#ah3)"/>
+      <text x="380" y="126" text-anchor="middle" class="d-mono">time →  (test ends 2020-04)</text>
+    </svg>
+  </figure>
+  <p class="cap" id="cap-split">Training stops at 2016-08 and the test window runs 2017-09 → 2020-04, so every test row sits in the model's future; the threshold is chosen on validation only, then frozen for test.</p>
+  <div class="care">This is <strong>one</strong> time-based split, not time-series cross-validation with multiple folds. Don't say “CV folds”.</div>
+
+  <h3>Why XGBoost, and how it was trained</h3>
+  <div class="two">
+    <div class="panel"><h4>Why this algorithm</h4><ul>
+      <li>Handles missing values natively: early accounts have no 3-month lag, so I didn't have to invent numbers</li>
+      <li>Tolerates extreme balance outliers (±1e10) without scaling</li>
+      <li>Works with SHAP for explanations Risk can read</li>
+    </ul></div>
+    <div class="panel"><h4>Training recipe</h4><ul>
+      <li><code>binary:logistic</code>, <code>max_depth</code> 6, learning rate 0.08, subsample 0.8</li>
+      <li>Up to 400 trees, early stopping after 40 rounds; best iteration was 99</li>
+      <li><code>scale_pos_weight</code> = negatives ÷ positives, to handle the 1-in-9 imbalance</li>
+      <li>Fixed hyperparameters, not a search</li>
+    </ul></div>
+  </div>
+
+  <h3>How good is it? Compare against a real baseline</h3>
+  <figure class="fig narrow" aria-labelledby="cap-prauc">
+    <svg viewBox="0 0 760 210" role="img" aria-label="PR-AUC on test: always-negative 0.132, gone_this_month rule 0.151, XGBoost 0.219">
+      <line x1="230" y1="20" x2="230" y2="150" class="d-grid"/><line x1="314" y1="20" x2="314" y2="150" class="d-grid"/><line x1="398" y1="20" x2="398" y2="150" class="d-grid"/><line x1="482" y1="20" x2="482" y2="150" class="d-grid"/><line x1="566" y1="20" x2="566" y2="150" class="d-grid"/><line x1="650" y1="20" x2="650" y2="150" class="d-grid"/>
+      <text x="220" y="48" text-anchor="end" class="d-t2">Always predict “no churn”</text>
+      <rect x="230" y="32" width="222" height="24" class="d-bar-mut"/><text x="460" y="49" class="d-mono">0.132</text>
+      <text x="220" y="90" text-anchor="end" class="d-t2">gone_this_month rule</text>
+      <rect x="230" y="74" width="254" height="24" class="d-bar-mut"/><text x="492" y="91" class="d-mono">0.151</text>
+      <text x="220" y="132" text-anchor="end" class="d-t1">XGBoost</text>
+      <rect x="230" y="116" width="368" height="24" class="d-bar-acc"/><text x="606" y="133" class="d-mono">0.219</text>
+      <text x="230" y="172" text-anchor="middle" class="d-mono">0</text><text x="314" y="172" text-anchor="middle" class="d-mono">0.05</text><text x="398" y="172" text-anchor="middle" class="d-mono">0.10</text><text x="482" y="172" text-anchor="middle" class="d-mono">0.15</text><text x="566" y="172" text-anchor="middle" class="d-mono">0.20</text><text x="650" y="172" text-anchor="middle" class="d-mono">0.25</text>
+      <text x="440" y="198" text-anchor="middle" class="d-t2">PR-AUC on the test window (2017-09 → 2020-04) · higher is better</text>
+    </svg>
+  </figure>
+  <p class="cap" id="cap-prauc">XGBoost's 0.219 PR-AUC beats both the <code>gone_this_month</code> rule (0.151) and the always-negative floor (0.132); ROC-AUC tells the same story, 0.723 vs 0.551.</p>
+  <div class="simple"><strong>PR-AUC</strong> asks: “Of the people I flag, how many really churn, across every possible cut-off?” With only 12% positives, that's the honest metric. <strong>Accuracy</strong> would reward flagging nobody (~87% accurate, zero churners caught). The <code>gone_this_month</code> rule (“they look gone right now”) is a tough, realistic baseline because it mirrors the label.</div>
+  <div class="care">The PRD's aspirational ROC-AUC &gt; 0.85 was <strong>not</strong> reached. The definition of done that shipped was “beat the heuristic on PR-AUC and ROC-AUC, and produce a reviewable queue”.</div>
+
+  <h3>The capacity dial: who actually gets contacted</h3>
+  <figure class="fig narrow" aria-labelledby="cap-thr">
+    <svg viewBox="0 0 760 250" role="img" aria-label="False and true positives at two thresholds: max F1 at 0.475 gives 248,778 false positives and 66,485 true positives; top 5% at 0.701 gives 20,127 false positives and 5,964 true positives">
+      <line x1="200" y1="28" x2="200" y2="176" class="d-grid"/><line x1="288" y1="28" x2="288" y2="176" class="d-grid"/><line x1="376" y1="28" x2="376" y2="176" class="d-grid"/><line x1="464" y1="28" x2="464" y2="176" class="d-grid"/><line x1="552" y1="28" x2="552" y2="176" class="d-grid"/><line x1="640" y1="28" x2="640" y2="176" class="d-grid"/>
+      <text x="190" y="52" text-anchor="end" class="d-t1">Max F1</text><text x="190" y="70" text-anchor="end" class="d-mono">t = 0.475</text>
+      <rect x="200" y="36" width="438" height="20" class="d-bar-no"/><text x="646" y="51" class="d-mono">248,778 FP</text>
+      <rect x="200" y="60" width="117" height="20" class="d-bar-acc"/><text x="325" y="75" class="d-mono">66,485 TP</text>
+      <text x="190" y="126" text-anchor="end" class="d-t1">Top 5% (shipped)</text><text x="190" y="144" text-anchor="end" class="d-mono">t = 0.701</text>
+      <rect x="200" y="110" width="35" height="20" class="d-bar-no"/><text x="243" y="125" class="d-mono">20,127 FP</text>
+      <rect x="200" y="134" width="11" height="20" class="d-bar-acc"/><text x="219" y="149" class="d-mono">5,964 TP</text>
+      <text x="200" y="194" text-anchor="middle" class="d-mono">0</text><text x="288" y="194" text-anchor="middle" class="d-mono">50k</text><text x="376" y="194" text-anchor="middle" class="d-mono">100k</text><text x="464" y="194" text-anchor="middle" class="d-mono">150k</text><text x="552" y="194" text-anchor="middle" class="d-mono">200k</text><text x="640" y="194" text-anchor="middle" class="d-mono">250k</text>
+      <rect x="200" y="216" width="12" height="12" class="d-bar-no"/><text x="218" y="226" class="d-t2">false positives (wasted reviews)</text>
+      <rect x="430" y="216" width="12" height="12" class="d-bar-acc"/><text x="448" y="226" class="d-t2">true positives (real churners caught)</text>
+    </svg>
+  </figure>
+  <p class="cap" id="cap-thr">Moving the cut-off from max-F1 (0.475) to the top 5% (0.701) drops false positives from 248,778 to 20,127 on the same model and the same scores; precision went from 21.1% to 22.9%, and recall from 99.97% to 9.0%.</p>
+  <div class="say"><p>“I separated two questions. First, does the model <em>rank</em> customers better than a realistic baseline? Yes, on a time-based holdout. Second, who should actually be contacted? On validation data only, I tried to maximise recall with a 40% precision floor and a 5% contact cap. The floor was impossible: even the top 1% was only about 24% precise. So instead of faking it, I documented that and set the threshold by team capacity, at the top 5% of scores. That cut false positives from 249k to 20k without changing ranking quality.”</p></div>
+  <div class="care">Scores are <strong>ranks, not calibrated probabilities</strong>. <code>scale_pos_weight</code> pushes scores upward, so 0.70 means “top of the portfolio”, not “70% chance of churn”. No Brier score or calibration was shipped. Isotonic calibration is future work.</div>
+
+  <h3>Explainability with SHAP</h3>
+  <p>SHAP splits a prediction into how much each feature pushed the score up or down. Globally (mean |SHAP| on a test sample) the top drivers are <code>Running_Balance_Rounded</code> (3.00), <code>Running_Balance</code> (0.64), then deposits, the 3-month balance mean and withdrawals (≈0.02 each). Demographics are not primary drivers. The report also has per-customer waterfall plots for a high-risk and a low-risk customer.</p>
+  <div class="care">I <em>attempted</em> dtreeviz, but it failed on the lag-3 NaNs and was skipped, so SHAP is the only explainer that ran. The email drafter receives the <strong>frozen global top-5</strong> SHAP driver names from <code>serving_meta.json</code>, not a per-customer explanation.</div>
+
+  <h3>MLOps: tracking and provenance</h3>
+  <p><strong>MLflow</strong> tracked the runs with a SQLite backend (ADR 009): the default file store created thousands of tiny files that corporate antivirus scanning slowed to a crawl. Each run logs parameters, the split, metrics against the baseline, the threshold rule, and the SHAP, Fairlearn and Evidently reports. The served run is <code>3f575754…</code>, and its ID is returned by <code>/score</code>, shown in <code>/health</code>, and stored on every draft, so any email draft traces back to the training run behind it.</p>
+  <div class="care">Nothing is registered in the MLflow <strong>Model Registry</strong> (no aliases or stages), and only the booster was logged, not the encoder. Registering <code>meridian-churn</code> with a <code>champion</code> alias is the documented next step.</div>
+</section>
+
+<!-- ============================ 5. GENAI ============================ -->
+<section id="genai">
+  <span class="eyebrow">5 · The GenAI layer · 4 min</span>
+  <h2>Two GenAI features, both on a short leash</h2>
+
+  <details class="predict"><summary>The prompt tells the model never to promise a rate above 3.5%. Suppose it does anyway — what happens?</summary><div class="ans">
+    <p>The prompt is never the enforcement point. After the call, the subject and body are scrubbed again, the rate is clamped with <code>min(rate, MAX_RATE)</code>, and the result must pass a Pydantic model whose rate field must be 0 ≤ r ≤ 0.035. That same model re-validates human edits, so an agent can't type 5% either.</p></div></details>
+
+  <p>Azure OpenAI is used for exactly two things: <strong>drafting retention emails</strong> (<code>src/genai/drafter.py</code>) and a <strong>methodology Q&amp;A bot</strong> using RAG (<code>src/genai/rag_engine.py</code>). Both call models deployed in a Microsoft Foundry resource through its OpenAI-compatible <code>/openai/v1</code> endpoint.</p>
+
+  <h3>A. Retention email drafts: the full request path</h3>
+  <figure class="fig" aria-labelledby="cap-draft">
+    <svg viewBox="0 0 1000 380" role="img" aria-label="Draft path: re-score on server, check threshold, scrub PII, render prompty, call gpt-5-mini, sanitize and validate, store as pending review, human decides, approved is not sent">
+      <defs><marker id="ah4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" class="d-head"/></marker></defs>
+      <rect x="20" y="40" width="210" height="64" rx="8" class="d-sunk"/><text x="125" y="66" text-anchor="middle" class="d-t1">1 · Agent asks for a draft</text><text x="125" y="86" text-anchor="middle" class="d-t2">sends feature row + role</text>
+      <rect x="270" y="40" width="210" height="64" rx="8" class="d-bx"/><text x="375" y="66" text-anchor="middle" class="d-t1">2 · Server re-scores</text><text x="375" y="86" text-anchor="middle" class="d-t2">client's score is ignored</text>
+      <rect x="520" y="40" width="210" height="64" rx="8" class="d-warn"/><text x="625" y="66" text-anchor="middle" class="d-t1">3 · Score ≥ 0.701?</text><text x="625" y="86" text-anchor="middle" class="d-t2">the capacity gate</text>
+      <rect x="770" y="40" width="210" height="64" rx="8" class="d-bx"/><text x="875" y="66" text-anchor="middle" class="d-t1">4 · Scrub PII</text><text x="875" y="86" text-anchor="middle" class="d-t2">3 safe fields + SHAP names</text>
+      <path d="M230,72 H268" class="d-ar" marker-end="url(#ah4)"/><path d="M480,72 H518" class="d-ar" marker-end="url(#ah4)"/><path d="M730,72 H768" class="d-ar" marker-end="url(#ah4)"/>
+      <text x="749" y="62" text-anchor="middle" class="d-mono">yes</text>
+      <path d="M625,104 V132" class="d-ar-dash"/><text x="634" y="128" class="d-mono">no → HTTP 422, nothing drafted</text>
+      <path d="M875,104 V168" class="d-ar" marker-end="url(#ah4)"/>
+
+      <rect x="770" y="170" width="210" height="64" rx="8" class="d-bx"/><text x="875" y="196" text-anchor="middle" class="d-t1">5 · Render .prompty</text><text x="875" y="216" text-anchor="middle" class="d-t2">system + user messages</text>
+      <rect x="520" y="170" width="210" height="64" rx="8" class="d-acc"/><text x="625" y="196" text-anchor="middle" class="d-t1">6 · gpt-5-mini</text><text x="625" y="216" text-anchor="middle" class="d-t2">JSON mode · retries</text>
+      <rect x="270" y="170" width="210" height="64" rx="8" class="d-bx"/><text x="375" y="196" text-anchor="middle" class="d-t1">7 · Sanitize + validate</text><text x="375" y="216" text-anchor="middle" class="d-t2">scrub · clamp rate · Pydantic</text>
+      <rect x="20" y="170" width="210" height="64" rx="8" class="d-bx"/><text x="125" y="196" text-anchor="middle" class="d-t1">8 · Save to SQLite</text><text x="125" y="216" text-anchor="middle" class="d-t2">pending_review + audit row</text>
+      <path d="M770,202 H732" class="d-ar" marker-end="url(#ah4)"/><path d="M520,202 H482" class="d-ar" marker-end="url(#ah4)"/><path d="M270,202 H232" class="d-ar" marker-end="url(#ah4)"/>
+      <text x="625" y="256" text-anchor="middle" class="d-mono">Azure error → deterministic stub draft (stub_fallback)</text>
+      <path d="M125,234 V298" class="d-ar" marker-end="url(#ah4)"/>
+
+      <rect x="20" y="300" width="210" height="64" rx="8" class="d-sunk"/><text x="125" y="326" text-anchor="middle" class="d-t1">9 · Human decides once</text><text x="125" y="346" text-anchor="middle" class="d-t2">edit · approve (ack) · reject</text>
+      <rect x="270" y="300" width="210" height="64" rx="8" class="d-ok"/><text x="375" y="326" text-anchor="middle" class="d-t1">Approved ≠ Sent</text><text x="375" y="346" text-anchor="middle" class="d-t2">no /send route exists</text>
+      <path d="M230,332 H268" class="d-ar" marker-end="url(#ah4)"/>
+      <rect x="520" y="300" width="460" height="64" rx="8" class="d-dash"/>
+      <text x="536" y="324" class="d-mono">missing role header → 400 · wrong role → 403 + “denied” audit</text>
+      <text x="536" y="346" text-anchor="start" class="d-mono">approve w/o attention_ack → 422 · 500 pending → 429</text>
+    </svg>
+  </figure>
+  <p class="cap" id="cap-draft">Every guardrail — server re-scoring, the 0.701 gate, PII scrubbing, the rate clamp and the human decision — sits in the request path, where a UI can't skip it, not just in the prompt.</p>
+
+  <h4>The prompt is a versioned file (prompt-as-code)</h4>
+  <p><code>src/genai/prompts/retention_draft.prompty</code> is Microsoft's Prompty format: YAML front matter (model settings, typed inputs, a sample) plus a system and user template. The code calls <code>prompty.load</code> and <code>prompty.prepare</code> to render the chat messages. If rendering fails, it falls back to an embedded copy of the prompt, so drafts still work.</p>
+<pre><code>model:
+  api: chat
+  parameters: { max_tokens: 800, temperature: 0.2, response_format: { type: json_object } }
+---
+system:
+You are a Meridian Savings retention drafting assistant.
+Never promise rates above {{max_interest_rate}}. Never invent PII or personal names.
+Output JSON only with keys subject, body, offered_interest_rate, drivers.
+
+user:
+Draft a short retention email for human review only (do not imply the message was sent).
+Drivers: {{drivers}}  ·  Churn probability: {{churn_probability}}
+Context (already scrubbed aggregates only): {{context_json}}</code></pre>
+
+  <h4>Don't trust the model's output: validate it in code</h4>
+<pre><code>def sanitize_llm_draft(data, *, fallback_drivers):
+    rate = float(data.get("offered_interest_rate", MAX_RATE))
+    return RetentionDraftBody(                       # Pydantic model: rate must be 0 ≤ r ≤ 0.035
+        subject=scrub_text(str(data.get("subject", "Retention offer")))[:120],
+        body=scrub_text(str(data.get("body", "")))[:4000],   # scrub OUTPUT too
+        offered_interest_rate=min(rate, MAX_RATE),            # clamp to 3.5%
+        drivers=list(fallback_drivers)[:5],                   # ignore LLM's drivers; use server's
+    )</code></pre>
+  <p>The same Pydantic model re-validates on human edits (<code>PATCH</code>), so an agent can't type 5% either.</p>
+
+  <div class="two">
+    <div class="panel"><h4>What the LLM receives</h4><ul>
+      <li>The frozen top-5 SHAP driver names</li>
+      <li>The churn score (rounded)</li>
+      <li>Three safe aggregates: rounded balance, <code>gone_this_month</code>, <code>Is_Inactive_Month</code></li>
+      <li>The 3.5% cap</li>
+    </ul></div>
+    <div class="panel"><h4>What it never receives</h4><ul>
+      <li>Customer ID, name, email, phone, DOB, SSN or account number: those keys are dropped</li>
+      <li>Emails, phone numbers, SSN-like and date-like strings, and 8+ digit IDs are regex-redacted</li>
+      <li>The reviewer's identity: <code>review_key</code> is an opaque ID that rejects anything email-like</li>
+    </ul></div>
+  </div>
+
+  <h4>Three paths, always recorded</h4>
+  <div class="tbl"><table>
+    <thead><tr><th><code>drafter_source</code></th><th>When</th><th>Why it matters</th></tr></thead>
+    <tbody>
+      <tr><td><code>azure</code></td><td>Endpoint configured and the call succeeded</td><td>Real GenAI draft</td></tr>
+      <tr><td><code>stub_fallback</code></td><td>Azure configured, but the call failed after retries</td><td>The review queue never breaks, and Compliance can see a fallback happened</td></tr>
+      <tr><td><code>stub</code></td><td>No endpoint (offline demo, tests, fresh clone)</td><td>Deterministic and compliant, with no network needed</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>B. Methodology Q&amp;A bot (RAG)</h3>
+  <figure class="fig" aria-labelledby="cap-rag">
+    <svg viewBox="0 0 1000 290" role="img" aria-label="RAG: chunk the report, embed chunks, cache; rank the question by BM25 and embedding cosine, fuse with RRF, LLM rerank to top 3, answer grounded with gpt-5-mini; BM25 alone offline">
+      <defs><marker id="ah5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" class="d-head"/></marker></defs>
+      <text x="20" y="26" class="d-band">BUILD THE INDEX · ONCE, THEN CACHED</text>
+      <rect x="20" y="40" width="210" height="64" rx="8" class="d-sunk"/><text x="125" y="66" text-anchor="middle" class="d-t1">Final report (markdown)</text><text x="125" y="86" text-anchor="middle" class="d-t2">the only source document</text>
+      <rect x="270" y="40" width="210" height="64" rx="8" class="d-bx"/><text x="375" y="66" text-anchor="middle" class="d-t1">Chunk</text><text x="375" y="86" text-anchor="middle" class="d-t2">split on # headers, ≤1200 chars</text>
+      <rect x="520" y="40" width="210" height="64" rx="8" class="d-acc"/><text x="625" y="66" text-anchor="middle" class="d-t1">Embed each chunk</text><text x="625" y="86" text-anchor="middle" class="d-t2">text-embedding-3-large</text>
+      <rect x="770" y="40" width="210" height="64" rx="8" class="d-bx"/><text x="875" y="66" text-anchor="middle" class="d-t1">JSON cache on disk</text><text x="875" y="86" text-anchor="middle" class="d-t2">keyed: file time · model · schema</text>
+      <path d="M230,72 H268" class="d-ar" marker-end="url(#ah5)"/><path d="M480,72 H518" class="d-ar" marker-end="url(#ah5)"/><path d="M730,72 H768" class="d-ar" marker-end="url(#ah5)"/>
+      <path d="M875,104 V132 H625 V168" class="d-ar" marker-end="url(#ah5)"/>
+
+      <text x="20" y="160" class="d-band">ANSWER A QUESTION</text>
+      <rect x="20" y="170" width="210" height="64" rx="8" class="d-sunk"/><text x="125" y="196" text-anchor="middle" class="d-t1">User question</text><text x="125" y="216" text-anchor="middle" class="d-t2">“Why is the cut 0.701?”</text>
+      <rect x="270" y="170" width="210" height="64" rx="8" class="d-bx"/><text x="375" y="196" text-anchor="middle" class="d-t1">Rank two ways</text><text x="375" y="216" text-anchor="middle" class="d-t2">BM25 keywords · embedding cosine</text>
+      <rect x="520" y="170" width="210" height="64" rx="8" class="d-bx"/><text x="625" y="196" text-anchor="middle" class="d-t1">Fuse + rerank</text><text x="625" y="216" text-anchor="middle" class="d-t2">RRF, then LLM rerank → top 3</text>
+      <rect x="770" y="170" width="210" height="64" rx="8" class="d-acc"/><text x="875" y="196" text-anchor="middle" class="d-t1">gpt-5-mini answers</text><text x="875" y="216" text-anchor="middle" class="d-t2">only from those chunks</text>
+      <path d="M230,202 H268" class="d-ar" marker-end="url(#ah5)"/><path d="M480,202 H518" class="d-ar" marker-end="url(#ah5)"/><path d="M730,202 H768" class="d-ar" marker-end="url(#ah5)"/>
+      <text x="500" y="270" text-anchor="middle" class="d-mono">Offline, or an embedding call fails → BM25 keyword ranking alone over the same chunks</text>
+    </svg>
+  </figure>
+  <p class="cap" id="cap-rag">The bot answers only from the top 3 chunks of the final report: the system prompt says to answer strictly from that context, or reply “I cannot answer this based on the available documentation.”</p>
+  <div class="simple"><strong>RAG (retrieval-augmented generation)</strong> means: before asking the LLM a question, find the most relevant passages from your own documents and paste them into the prompt with the instruction “answer only from this”. The model answers from your facts instead of its memory, which reduces hallucination.</div>
+
+  <h4>Decisions worth talking about</h4>
+  <ul>
+    <li><strong>No vector database.</strong> Chroma and FAISS need native DLLs that AppLocker blocked. With one report as the corpus, BM25 and cosine similarity over a few dozen chunks in pure Python are fast enough and easy to unit-test (ADR 010, ADR 015).</li>
+    <li><strong>Chunk size is a quality lever.</strong> My first version split only on top-level headings, so some “chunks” were whole ~6,000-character chapters, and three of them looked like the entire report. Splitting on every heading level and packing paragraphs to ≤1,200 characters fixed it. A <code>schema_version</code> in the cache forces a rebuild when the chunker changes.</li>
+    <li><strong>Cache the embeddings.</strong> Re-embedding the report on every app restart burned the shared tokens-per-minute quota and caused 429 errors.</li>
+    <li><strong>Resilience (ADR 013).</strong> Chat and embedding calls retry with exponential backoff (1–20 s, up to 5 attempts) on 429, timeout, connection and 5xx errors, using <code>tenacity</code>. A 401 on key 1 retries with key 2. Every call logs prompt, completion and total tokens for cost visibility.</li>
+  </ul>
+  <div class="care">RAG is used <strong>only</strong> for the methodology bot. The email drafter is not RAG-grounded. Since ADR 015 (Sep 2026) retrieval is hybrid (BM25 + embeddings fused with Reciprocal Rank Fusion) with an LLM rerank, but there are no citation IDs and no groundedness evaluation yet. The production path is Azure AI Search with a purpose-built reranker plus groundedness evaluation.</div>
+</section>
+
+<!-- ============================ 6. GOVERNANCE ============================ -->
+<section id="gov">
+  <span class="eyebrow">6 · Governance &amp; engineering · 4 min</span>
+  <h2>“Friction as a feature”: making the human step real</h2>
+
+  <details class="predict"><summary>What does the API demand before it accepts an approval, and what can the reviewer do afterwards?</summary><div class="ans">
+    <p>Approving requires <code>attention_ack=true</code>, or the API returns 422. Afterwards, nothing: approved or rejected drafts can't be edited or re-opened, the only states are <code>pending_review</code>, <code>approved</code> and <code>rejected</code>, and there is no <code>sent</code> state.</p></div></details>
+
+  <p>Risk's biggest fear was an AI emailing customers promises the bank never approved. So the architecture makes autonomy impossible rather than merely discouraged (ADR 003). It also works against <strong>rubber-stamping</strong>, where reviewers click Approve out of habit.</p>
+
+  <div class="two">
+    <div class="panel"><h4>Hard controls (enforced by the API)</h4><ul>
+      <li>Drafts start as <code>pending_review</code>. The only other states are <code>approved</code> and <code>rejected</code>. There is no <code>sent</code> state.</li>
+      <li>Approving requires <code>attention_ack=true</code>, or the API returns 422</li>
+      <li>Decide once: approved or rejected drafts can't be edited or re-opened</li>
+      <li>A soft cap of 500 pending drafts returns 429, a capacity discipline</li>
+      <li>Each draft write and its audit row commit in one transaction</li>
+    </ul></div>
+    <div class="panel"><h4>Soft nudges (UI)</h4><ul>
+      <li>A “read carefully” banner when the score is well above the cut: ≥ max(t + 0.10, 0.80)</li>
+      <li>A warning if Approve is clicked within 8 seconds of opening. It warns only, so people don't learn to click around it.</li>
+      <li>Approve events log <code>attention_ack</code>, <code>high_stakes</code> and seconds open, for Compliance sampling</li>
+    </ul></div>
+  </div>
+
+  <h3>Role-based access (demo “Glass-Box” RBAC, ADR 007)</h3>
+  <p>The Streamlit role picker and the FastAPI <code>X-Demo-Role</code> header use the <strong>same</strong> permission matrix from <code>src/serving/rbac.py</code>, so the UI and API can't disagree.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Permission</th><th>Retention agent</th><th>Compliance viewer</th><th>Data scientist</th></tr></thead>
+    <tbody>
+      <tr><td>Score a customer</td><td>✔</td><td>—</td><td>✔</td></tr>
+      <tr><td>Create a draft</td><td>✔</td><td>—</td><td>✔</td></tr>
+      <tr><td>View review queue</td><td>✔</td><td>✔</td><td>✔</td></tr>
+      <tr><td>Edit a draft</td><td>✔</td><td>—</td><td>—</td></tr>
+      <tr><td>Approve / Reject</td><td>✔</td><td>—</td><td>—</td></tr>
+      <tr><td>Glass-box (threshold, run ID, SHAP)</td><td>✔</td><td>✔</td><td>✔</td></tr>
+      <tr><td>Audit trail</td><td>✔</td><td>✔</td><td>✔</td></tr>
+    </tbody>
+  </table></div>
+  <div class="care">This is a <strong>demo</strong>: the header is spoofable by design. Risk accepted it for the prototype (ADR 012). Production would use Microsoft Entra ID sign-in with app roles.</div>
+
+  <h3>Fairness: measured, disclosed and constrained, but not “solved”</h3>
+  <p>I used Fairlearn's <strong>Equalized Odds difference</strong>: the largest gap between groups in true-positive or false-positive rate. I measured it on a 100,000-row test sample <em>at the real 0.701 cut</em>, because that's the policy customers actually experience.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Slice</th><th>Groups kept (n ≥ 500)</th><th>Equalized Odds diff</th></tr></thead>
+    <tbody>
+      <tr><td>Age (6 bands)</td><td class="num">6 of 6</td><td class="num">≈ 0.156</td></tr>
+      <tr><td>State</td><td class="num">38 of 55</td><td class="num">≈ 0.318</td></tr>
+    </tbody>
+  </table></div>
+  <p>A first unfiltered run showed a state value of <strong>1.0</strong>. That was an artifact of tiny states and near-100% recall at the max-F1 cut, so I added a minimum group size instead of reporting noise. Risk agreed that <strong>periodic review plus disclosure</strong> is right for now, rather than an automatic release gate (ADR 012).</p>
+  <div class="care">The residual gaps are real. At the ops cut, the 65+ band has a much higher selection rate (~14.6%) than most bands (~4.6–4.9%). Whether that reflects true churn prevalence or model bias is open future work. Say “disclosed and monitored”, never “fair”.</div>
+  <p>How harm is limited anyway: the intervention is a <em>positive</em> retention offer, not a denial of service; the top-5% cap limits volume for every group; SHAP shows behaviour (balance, flows), not demographics, driving scores; a human approves every draft; and the gaps appear on the model card.</p>
+
+  <h3>Engineering under real enterprise constraints</h3>
+  <p>The laptop ran <strong>AppLocker</strong> and endpoint security: it blocked <code>.venv</code> executables, native DLL installs, localhost HTTP and child Python processes. Several design choices came directly from that, and each is recorded in an ADR:</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Constraint</th><th>Decision</th><th>ADR</th></tr></thead>
+    <tbody>
+      <tr><td>venv executables blocked</td><td>Global <code>py -3.13 -m …</code> launcher with user-scope installs. Docker later restored isolation for the API.</td><td class="num">001</td></tr>
+      <tr><td>Antivirus scans thousands of MLflow files</td><td>SQLite MLflow backend</td><td class="num">009</td></tr>
+      <tr><td>Localhost HTTP flaky</td><td>Streamlit calls FastAPI over HTTP by default; <code>FRICTION_GATE_MODE=inprocess</code> runs the same API without a socket; API tests use in-memory ASGI transport</td><td class="num">006</td></tr>
+      <tr><td>Streamlit multipage spawns subprocesses</td><td>Single-file routing driven by the role picker</td><td class="num">011</td></tr>
+      <tr><td>Vector DB native dependencies</td><td>Pure-Python hybrid RAG (BM25 + cosine, RRF) with a JSON cache</td><td class="num">010 · 015</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Quality evidence</h3>
+  <p><strong>127 pytest tests pass</strong> (re-run 24 Sep 2026). They cover the API contract, RBAC and HTTP status codes, the rate cap, PII scrubbing, <code>.prompty</code> rendering, Azure key fallback and injected 429 retries, per-model token parameters for reasoning models, RAG chunking, hybrid ranking and cache invalidation, the viva marker, SQLite WAL, and the grading-CSV validator. There are 48 serving tests, 52 GenAI tests, 13 submission tests and 2 config tests. No test needs a live Azure endpoint or an open port.</p>
+
+  <h3>How I worked with AI coding assistants</h3>
+  <p>I used AI pair-programmers (Antigravity for heavy generation, Cursor for review) and treated managing them as an engineering discipline:</p>
+  <ul>
+    <li><strong>Rules as a single source of truth.</strong> <code>AGENTS.md</code> holds the project constraints (no leakage, AppLocker-safe commands, ADR triggers). <code>.cursorrules</code> is compiled from it.</li>
+    <li><strong>Docs before code.</strong> When something was challenged, I wrote an attack note and a signed-off revision plan before touching <code>src/</code>. When I once skipped that step, I backfilled it and tightened the rule.</li>
+    <li><strong>A human runs the notebooks.</strong> The agent edits cells, I run them, and saved outputs are the source of truth, not the agent's side scripts.</li>
+    <li><strong>An anti-speculation rule.</strong> Nothing gets documented as deployed unless it is. That is why the Container Apps and Foundry-agent work is clearly marked as open.</li>
+  </ul>
+</section>
+
+<!-- ============================ 7. AI-901 ============================ -->
+<section id="ai901">
+  <span class="eyebrow">7 · AI-901 mapping · 7 min</span>
+  <h2>How the project maps to Azure AI Fundamentals</h2>
+
+  <details class="predict"><summary>Which Responsible AI principle does the Pydantic 3.5% cap belong to, and what gap sits beside it?</summary><div class="ans">
+    <p><strong>Reliability &amp; safety</strong> — alongside the out-of-time test, boot refusal on feature mismatch, retries with backoff, the stub fallback, no <code>/send</code>, single-replica SQLite and 127 tests. The gap to admit: no scheduled drift monitoring, only a one-off Evidently report, and no custom Foundry guardrail configuration.</p></div></details>
+
+  <p>AI-901 is the current exam for <strong>Microsoft Certified: Azure AI Fundamentals</strong> (it succeeds AI-900). The skills outline dated 15 April 2026 has two domains: <em>Identify AI concepts and capabilities</em> (40–45%) and <em>Implement AI solutions by using Microsoft Foundry</em> (55–60%). I started this project partly to prepare for it. Here is an honest map of where the project goes deep, where it touches, and where it doesn't reach.</p>
+
+  <div class="say"><p>“I used the project to turn the AI-901 syllabus into working code. The Responsible AI principles became concrete controls, like PII scrubbing, a code-enforced rate cap, a human approval gate, SHAP explanations and fairness metrics. The generative AI concepts became a prompt file, two model deployments in a Foundry resource, a RAG pipeline with embeddings, and retry and token telemetry. The parts I didn't build, like Foundry agents, speech and vision, I can explain, and I know how I'd add them.”</p></div>
+
+  <h3>Coverage at a glance</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>AI-901 skill</th><th>In this project</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr><th colspan="3">Domain 1 · Identify AI concepts and capabilities (40–45%)</th></tr>
+      <tr><td>Six Responsible AI principles</td><td><span class="pill ok">Built · deep</span></td><td>See the table below: every principle has a control</td></tr>
+      <tr><td>How generative AI models work</td><td><span class="pill ok">Applied</span></td><td>Tokens, embeddings, system/user roles, JSON mode, grounding</td></tr>
+      <tr><td>Pick a model by capability</td><td><span class="pill ok">Applied</span></td><td>gpt-5-mini is the current configured chat deployment; text-embedding-3-large for search; XGBoost for tabular risk</td></tr>
+      <tr><td>Deployment options &amp; configuration parameters</td><td><span class="pill part">Partial</span></td><td>Deployment names, endpoint, key rotation, <code>max_tokens</code>, <code>response_format</code>; temperature gap (below)</td></tr>
+      <tr><td>Workloads: generative &amp; agentic</td><td><span class="pill part">Generative only</span></td><td>Drafts and RAG built; Foundry agent planned but blocked</td></tr>
+      <tr><td>Text analysis (entities, key phrases, sentiment, summaries)</td><td><span class="pill part">Touches</span></td><td>PII entity redaction, done with regex rather than Azure AI Language</td></tr>
+      <tr><td>Speech · computer vision · information extraction</td><td><span class="pill no">Not in project</span></td><td>No audio, image or document data in the brief</td></tr>
+      <tr><th colspan="3">Domain 2 · Implement AI solutions by using Microsoft Foundry (55–60%)</th></tr>
+      <tr><td>Effective system and user prompts</td><td><span class="pill ok">Built · deep</span></td><td><code>retention_draft.prompty</code>, plus a RAG system prompt with a refusal rule</td></tr>
+      <tr><td>Deploy a model and interact with it</td><td><span class="pill ok">Built</span></td><td>gpt-5-mini + text-embedding-3-large deployments; live path re-verified 24 Sep 2026 (Azure drafts, hybrid RAG)</td></tr>
+      <tr><td>Lightweight chat client</td><td><span class="pill part">Partial</span></td><td>OpenAI SDK on the Foundry <code>/openai/v1</code> endpoint, not the Foundry SDK</td></tr>
+      <tr><td>Single agent + agent client</td><td><span class="pill no">Not built</span></td><td>Workstream WS-3 blocked by credentials and corporate policy; documented, not faked</td></tr>
+      <tr><td>Text / speech / vision / Content Understanding apps</td><td><span class="pill no">Not in project</span></td><td>Extension ideas below</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Responsible AI: six principles, six sets of controls</h3>
+  <p>This is the strongest part of the story. For each principle, know the one-line meaning, what you built and the gap you'd admit.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Principle</th><th>What it means</th><th>What I built</th><th>Gap I'd admit</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Fairness</strong></td><td>Similar people get similar treatment; no group is systematically disadvantaged</td><td>Fairlearn Equalized Odds by age and state at the live 0.701 cut; a minimum group size to avoid noise; a top-5% cap limits volume per group; results on the model card</td><td>No mitigation algorithm; residual gaps (age ≈ 0.16, state ≈ 0.32) are disclosed, not gated</td></tr>
+      <tr><td><strong>Reliability &amp; safety</strong></td><td>Works as intended, including when things go wrong</td><td>Out-of-time test; boot refusal on feature mismatch; retries with backoff; stub fallback; Pydantic 3.5% cap; no <code>/send</code>; single-replica SQLite; 127 tests</td><td>No scheduled drift monitoring (only a one-off Evidently report); no custom Foundry guardrail configuration</td></tr>
+      <tr><td><strong>Privacy &amp; security</strong></td><td>Protect personal data; secure the system</td><td>Scrub PII <em>before</em> the prompt and <em>after</em> the completion; blocked keys; opaque reviewer IDs; secrets in <code>.env</code> or Container Apps <code>secretRef</code>; Azure doesn't use prompts to train models</td><td>API keys, not Entra ID / managed identity; regex, not Azure AI Language PII detection</td></tr>
+      <tr><td><strong>Inclusiveness</strong></td><td>Designed for and usable by a diverse range of people</td><td>Role-specific views for technical and non-technical users; plain-language labels (e.g. “a risk rank, not a probability”); High / Medium / Low business language</td><td>No formal accessibility testing; English-only drafts</td></tr>
+      <tr><td><strong>Transparency</strong></td><td>People can understand how the system works and its limits</td><td>SHAP global and per-customer plots; Glass-box page (threshold, rule, run ID, drivers); model card; the RAG bot explains the method; <code>drafter_source</code> and <code>run_id</code> on every draft</td><td>Emails cite global drivers, not a per-customer explanation</td></tr>
+      <tr><td><strong>Accountability</strong></td><td>Humans remain responsible for the system's outcomes</td><td>Human approval on every draft; audit trail for create / edit / approve / reject / denied; ADRs record decisions; Risk sign-off (ADR 012); a named model owner</td><td>Demo roles aren't real identities; the audit log isn't tamper-evident</td></tr>
+    </tbody>
+  </table></div>
+  <div class="care">The old docs call the PII scrubber “ZDR” (zero data retention). Describe it as <strong>data minimisation</strong>. True no-retention on Azure is a service setting: <em>modified abuse monitoring</em>, which requires Microsoft approval. I didn't configure that.</div>
+
+  <h3>Generative AI concepts, pointed at real code</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Concept</th><th>Where it shows up</th></tr></thead>
+    <tbody>
+      <tr><td><strong>System vs user messages</strong></td><td>The system message sets the rules (cap, no PII, JSON only). The user message carries the task and the scrubbed data. In the RAG bot, retrieved context sits in the system message and the question in the user message.</td></tr>
+      <tr><td><strong>Tokens</strong></td><td><code>max_tokens</code> 800 for drafts and 500 for RAG answers on classic chat models. On <code>gpt-5-mini</code> the code sends <code>max_completion_tokens</code> 3000 and 2500 instead, because hidden reasoning tokens count inside that limit (<code>chat_limit_params()</code>). Every call logs prompt, completion and total tokens</td></tr>
+      <tr><td><strong>Structured output</strong></td><td><code>response_format={"type": "json_object"}</code> forces valid JSON; Pydantic then enforces the fields and limits (JSON mode is not a schema, ADR 002)</td></tr>
+      <tr><td><strong>Embeddings</strong></td><td>Text becomes a vector of numbers so similar meaning sits close together; cosine similarity is one of the two rankings (with BM25 keywords) used to pick report chunks for a question</td></tr>
+      <tr><td><strong>Grounding / hallucination control</strong></td><td>RAG with an explicit “say you can't answer” rule; drafts get only server-controlled facts</td></tr>
+      <tr><td><strong>Temperature</strong></td><td>The <code>.prompty</code> declares 0.2 (consistent, low-creativity wording)</td></tr>
+      <tr><td><strong>Model choice</strong></td><td>The current configured chat deployment is gpt-5-mini, a reasoning model. It rejects <code>max_tokens</code> and a custom temperature, so the code sends <code>max_completion_tokens</code> per model (<code>chat_limit_params()</code>). The embedding model is a different capability entirely. For tabular risk, a tree model is more suitable and explainable than an LLM.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="care"><strong>Known gap:</strong> <code>drafter.py</code> does not send <code>temperature</code>, so the 0.2 declared in <code>.prompty</code> is not applied. The current gpt-5-mini deployment accepts only its default temperature. Treat the prompt value as documentation rather than a live setting.</div>
+
+  <h3>Foundry: what I built vs the “textbook” path</h3>
+  <div class="two">
+    <div class="panel"><h4>What the repo does</h4>
+<pre><code># src/genai/azure_client.py (simplified)
+client = OpenAI(
+    api_key=key,          # KEY 1, then KEY 2 on 401
+    base_url="https://&lt;resource&gt;.services.ai.azure.com/openai/v1",
+)
+client.chat.completions.create(
+    model=deployment,     # the deployment name
+    messages=messages,
+    response_format={"type": "json_object"},
+    max_tokens=800,
+)</code></pre>
+    </div>
+    <div class="panel"><h4>Foundry SDK version (next step, not in repo)</h4>
+<pre><code>from azure.ai.projects import AIProjectClient
+from azure.identity import DefaultAzureCredential
+
+with (
+    DefaultAzureCredential() as cred,
+    AIProjectClient(endpoint=project_endpoint,
+                    credential=cred) as project,
+    project.get_openai_client() as client,
+):
+    r = client.responses.create(
+        model="gpt-5-mini", input="…")</code></pre>
+    </div>
+  </div>
+  <ul>
+    <li><strong>Deployment name ≠ model name.</strong> In Foundry you deploy a model under a name, and code calls that name. The current environment sets <code>AZURE_OPENAI_DEPLOYMENT=gpt-5-mini</code>. The source also has a legacy default for installations that omit this setting; it is not used by the current environment.</li>
+    <li><strong>Two keys exist so you can rotate without downtime.</strong> My client tries KEY 1, then KEY 2 on a 401.</li>
+    <li><strong>What Microsoft recommends</strong> and I'd change: Entra ID auth (<code>DefaultAzureCredential</code>, managed identity in Container Apps) instead of keys; the Foundry SDK project endpoint; and the Responses API for new work. I used Chat Completions through the OpenAI SDK because it worked through the corporate gateway and was easy to mock in tests.</li>
+    <li><strong>Built-in guardrails.</strong> Models sold by Azure run content filtering (now called Guardrails) on prompts and completions by default. My code-level controls sit on top of that and don't replace it.</li>
+  </ul>
+
+  <h3>How I'd extend into the AI-901 areas the project doesn't cover</h3>
+  <p class="cap">These are design ideas for discussion, not built. The brief had no audio, image or document data.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>AI-901 area</th><th>Realistic extension for Meridian</th></tr></thead>
+    <tbody>
+      <tr><td>Agents (Foundry Agent Service)</td><td>A single “retention assistant” agent: instructions taken from the <code>.prompty</code>, a file-search tool over the report (replacing my hand-rolled RAG), and a function tool that calls <code>/score</code>. It would still produce drafts only, with human approval.</td></tr>
+      <tr><td>Text analysis (Azure AI Language)</td><td>Replace regex PII with Language PII entity detection; run sentiment analysis on complaint notes as an extra churn signal</td></tr>
+      <tr><td>Information extraction (Content Understanding)</td><td>Pull structured fields from account-closure letters or forms into the feature pipeline</td></tr>
+      <tr><td>Speech (Azure Speech)</td><td>Transcribe retention calls, then summarise and score them; text-to-speech for accessible outputs</td></tr>
+      <tr><td>RAG at scale</td><td>Azure AI Search with hybrid keyword + vector retrieval and reranking; groundedness and relevance evaluations in Foundry</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============================ 8. HONEST ============================ -->
+<section id="honest">
+  <span class="eyebrow">8 · Don't overclaim · 1 min</span>
+  <h2>Phrases to avoid, and what to say instead</h2>
+  <p>Interviewers who probe will find the edges. Stating them first reads as seniority. Each row below was checked against the code or the corrections register (<code>Docs/Engineering/Corrections_and_Future_Work.md</code>).</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Don't say</th><th>Say instead</th></tr></thead>
+    <tbody>
+      <tr><td>“I used temporal cross-validation folds”</td><td>One chronological fit / validation / test split</td></tr>
+      <tr><td>“I compared models on a Pareto frontier”</td><td>One XGBoost recipe. The two MLflow runs differ only in the threshold rule.</td></tr>
+      <tr><td>“XGBoost and LightGBM”</td><td>XGBoost only</td></tr>
+      <tr><td>“Registered in the MLflow Model Registry”</td><td>Tracked in MLflow, exported from run <code>3f575754</code> to a portable folder; registry is next</td></tr>
+      <tr><td>“SHAP and dtreeviz explain it”</td><td>SHAP. dtreeviz was attempted and skipped because of NaNs.</td></tr>
+      <tr><td>“Each email explains that customer's risk”</td><td>Drafts get the frozen <em>global</em> top-5 driver names</td></tr>
+      <tr><td>“RAG retrieves past emails for the drafts”</td><td>RAG powers only the methodology Q&amp;A bot</td></tr>
+      <tr><td>“A 0.75 score is a 75% churn probability”</td><td>Scores are uncalibrated risk ranks</td></tr>
+      <tr><td>“We hit the 0.85 AUC and 40% precision targets”</td><td>Neither. It beat the heuristic, and the precision floor was shown to be infeasible and documented.</td></tr>
+      <tr><td>“The model is fair”</td><td>Fairness is measured at the live cut, disclosed and constrained; gaps remain</td></tr>
+      <tr><td>“Zero data retention”</td><td>PII minimisation before and after the LLM call</td></tr>
+      <tr><td>“Temperature is locked at 0.2”</td><td>Declared in the <code>.prompty</code>, but not currently sent with the API call</td></tr>
+      <tr><td>“Deployed on Azure Container Apps”</td><td>The API is Dockerised and smoke-tested locally (24 Sep 2026), and the Container Apps manifest is a scaffold; Azure OpenAI calls were verified live</td></tr>
+      <tr><td>“I built a Foundry agent”</td><td>Planned, but blocked by credentials and corporate policy, and documented as open</td></tr>
+      <tr><td>“Enterprise RBAC / SSO”</td><td>Demo roles with the same matrix in UI and API; Entra ID is next</td></tr>
+      <tr><td>“Medium-risk customers get automated emails”</td><td>The Business View cohort figures and trend chart are illustrative; nothing is ever sent automatically</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============================ 9. Q&A ============================ -->
+<section id="qa">
+  <span class="eyebrow">9 · Interview Q&amp;A · 6 min</span>
+  <h2>Likely questions, with answers you can defend</h2>
+  <p class="cap">Tap a question to open it. Practise the first sentence of each answer out loud: it's the headline.</p>
+
+  <details class="qa"><summary>Why XGBoost and not an LLM or a neural network?</summary><div class="ans">
+    <p>It's tabular, numeric panel data, which is where gradient-boosted trees are strongest. XGBoost handles missing lag values and extreme balances natively, trains in minutes, and works with SHAP, so Risk can audit it. An LLM would be slower, costlier, non-deterministic and far harder to explain for a yes/no risk score. I used the LLM where language is the product: writing the email.</p></div></details>
+
+  <details class="qa"><summary>How did you prevent data leakage?</summary><div class="ans">
+    <p>Three layers. <strong>Design:</strong> features stop at month <em>t</em> and the label is month <em>t+1</em>. <strong>Evaluation:</strong> I split by time (train 2007–2016, validate 2016–17, test 2017–2020) and chose the threshold on validation only. <strong>Empirical check:</strong> a quick Random Forest leak screen flags any feature with more than ~50% importance; the top one was 0.273. I also excluded customer IDs and raw month strings so the model can't memorise.</p></div></details>
+
+  <details class="qa"><summary>Why PR-AUC instead of accuracy or ROC-AUC?</summary><div class="ans">
+    <p>Only ~12% of rows are churn, so accuracy rewards predicting nobody churns (~87%). ROC-AUC is built on the false-positive rate, which stays flatteringly small when negatives vastly outnumber positives. PR-AUC focuses on precision among flagged customers, which is what a retention team pays for. I reported both and required both to beat a real baseline: 0.219 vs 0.151 PR-AUC, and 0.723 vs 0.551 ROC-AUC.</p></div></details>
+
+  <details class="qa"><summary>How did you choose the cut-off?</summary><div class="ans">
+    <p>I separated ranking quality from contact policy. Max-F1 gave a threshold of 0.475, which flagged most of the test table: 249k false positives. On validation I tried to meet a 40% precision floor within a 5% contact cap, but precision plateaus around 23–24% even at the top 1%, so the floor was infeasible. I documented that and used the top-5% validation quantile (0.701), which cut false positives to 20k with the same ranking metrics. Lowering it to chase recall only makes sense if review capacity grows.</p></div></details>
+
+  <details class="qa"><summary>How do you stop the LLM promising a bad interest rate or leaking data?</summary><div class="ans">
+    <p>I never rely on the prompt alone. Before the call, the server re-scores the customer and refuses unless they're above the cut. Blocked fields are dropped and PII patterns are redacted, and the model only sees driver names, a score and three aggregates. After the call, the subject and body are scrubbed again, the rate is clamped to 3.5%, and the result must pass a Pydantic model whose rate field is capped at 0.035. That same model re-validates human edits. The draft is stored as pending review, and there's no send endpoint at all.</p></div></details>
+
+  <details class="qa"><summary>Explain your RAG bot. Why no vector database?</summary><div class="ans">
+    <p>It answers methodology questions from the final report. I chunk the markdown by headings into pieces of at most 1,200 characters, embed them with text-embedding-3-large, and cache the vectors on disk. For each question I rank chunks two ways, BM25 keyword scoring and embedding cosine similarity, fuse the two rankings with Reciprocal Rank Fusion, let the chat model rerank the shortlist, and pass the top 3 to the chat deployment with an instruction to answer only from that context or say it can't. There's no vector DB because the corpus is one report and AppLocker blocked the native libraries. At scale I'd move to Azure AI Search and a purpose-built reranker instead of the LLM rerank. One lesson: chunk size matters. My first chunks were whole chapters, so “top 3” was basically the entire report.</p></div></details>
+
+  <details class="qa"><summary>What happens when Azure OpenAI is throttled or down?</summary><div class="ans">
+    <p>Transient errors (429, timeouts, connection errors, 5xx) retry with exponential backoff, up to 5 attempts, using Tenacity. A 401 on the primary key retries with the secondary key. If it still fails, the drafter returns a deterministic compliant stub marked <code>stub_fallback</code>, so the review queue keeps working and Compliance can see what happened. The RAG bot returns a safe message instead of crashing. Token usage is logged on every successful call.</p></div></details>
+
+  <details class="qa"><summary>Walk me through Responsible AI in your project.</summary><div class="ans">
+    <p><strong>Fairness:</strong> Equalized Odds by age and state at the live threshold, disclosed. <strong>Reliability:</strong> out-of-time testing, fallbacks, retries, 127 tests. <strong>Privacy:</strong> PII scrubbed before and after the model. <strong>Inclusiveness:</strong> plain-language, role-specific views. <strong>Transparency:</strong> SHAP, a glass-box page and a model card. <strong>Accountability:</strong> a human approves every draft, with an audit trail and recorded decisions. Then name one gap, such as demo roles instead of Entra ID.</p></div></details>
+
+  <details class="qa"><summary>Your fairness numbers show gaps. Is the model biased?</summary><div class="ans">
+    <p>I can't claim it isn't. At the live cut, the Equalized Odds difference is about 0.16 by age and 0.32 by state, and the 65+ band is selected more often. What I can show: I measured at the threshold customers actually experience, filtered out tiny groups that produced a fake 1.0, and confirmed through SHAP that behaviour drives the scores. The intervention is a retention offer, not a denial, volume is capped, and a human reviews each case. Risk agreed on disclosure plus periodic review. The next step is to test whether the age skew reflects real churn prevalence and to agree a numeric fairness gate with Risk.</p></div></details>
+
+  <details class="qa"><summary>How would you take this to production on Azure?</summary><div class="ans">
+    <ul>
+      <li><strong>Identity:</strong> Entra ID sign-in with app roles replacing demo roles; managed identity for calls to Foundry; secrets in Key Vault</li>
+      <li><strong>Hosting:</strong> Container Apps with a managed database (e.g. Azure Database for PostgreSQL) instead of SQLite, so the API can scale past one replica</li>
+      <li><strong>GenAI:</strong> Foundry SDK project endpoint, the Responses API, custom guardrails, the temperature fix, and evaluations for groundedness and relevance</li>
+      <li><strong>RAG:</strong> Azure AI Search, hybrid retrieval with reranking</li>
+      <li><strong>MLOps:</strong> register the model with a <code>champion</code> alias, log the full pipeline, calibrate scores, schedule drift monitoring, and add tracing</li>
+    </ul></div></details>
+
+  <details class="qa"><summary>Tell me about a mistake or a hard lesson.</summary><div class="ans">
+    <p>A good one is a <strong>silent failure</strong>. <code>prompty</code> 2.x couldn't render my prompt file, and because I'd built a graceful fallback, the drafter quietly used the embedded prompt instead. Nothing crashed. I only caught it when a test failed during a clean re-install. I pinned <code>prompty&lt;2</code>. The lesson: every fallback needs a test or a signal, otherwise resilience hides regressions. Backup story: my first threshold (max-F1) looked statistically great but would have flooded reviewers with 249k false positives.</p></div></details>
+
+  <details class="qa"><summary>How did you handle stakeholders?</summary><div class="ans">
+    <p>The churn definition wasn't in the brief, so I prepared options with data (one- vs two-month rules, rounding, grace period) and agreed it with Sam, then recorded it in ADR 004. I ran two red-team rounds on the serving layer from Jamie's Risk perspective, and they produced concrete changes: a required role header, immutable decisions, an approval acknowledgement and frozen LLM drivers. For Morgan, I translated scores into capacity and at-risk AUM. Each stakeholder's concern maps to a control in the code.</p></div></details>
+
+  <details class="qa"><summary>Why does this matter for a Microsoft-focused consultancy?</summary><div class="ans">
+    <p>Client environments look like mine did: locked-down laptops, security policies and compliance stakeholders who say no. I delivered inside those constraints, recorded every trade-off in an ADR, used Azure OpenAI through Foundry, applied Microsoft's Responsible AI principles as code, and kept the documentation honest about what was and wasn't deployed. That's the difference between a demo and something a regulated client can trust.</p></div></details>
+</section>
+
+<!-- ============================ 10. CHEAT SHEET ============================ -->
+<section id="cheat">
+  <span class="eyebrow">10 · Cheat sheet · 2 min</span>
+  <h2>Numbers and terms to have ready</h2>
+  <div class="two">
+    <div class="tbl" style="margin:0"><table>
+      <thead><tr><th>Data &amp; model</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>Customers · customer-months</td><td class="num">138,640 · 2,263,608</td></tr>
+        <tr><td>Churn rate</td><td class="num">11.76%</td></tr>
+        <tr><td>$0 placeholder transactions</td><td class="num">8.15%</td></tr>
+        <tr><td>Raw columns → model inputs</td><td class="num">24 → 80</td></tr>
+        <tr><td>PR-AUC (model vs rule)</td><td class="num">0.219 vs 0.151</td></tr>
+        <tr><td>ROC-AUC (model vs rule)</td><td class="num">0.723 vs 0.551</td></tr>
+        <tr><td>Ops threshold</td><td class="num">0.70055 (top 5%)</td></tr>
+        <tr><td>Precision · recall at cut</td><td class="num">22.9% · 9.0%</td></tr>
+        <tr><td>False positives (max-F1 → ops)</td><td class="num">248,778 → 20,127</td></tr>
+        <tr><td>EOD age · state</td><td class="num">≈0.156 · ≈0.318</td></tr>
+        <tr><td>AUM at risk (historical)</td><td class="num">≈ $7.27M</td></tr>
+      </tbody>
+    </table></div>
+    <div class="tbl" style="margin:0"><table>
+      <thead><tr><th>GenAI &amp; engineering</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>Chat model · embedding model</td><td class="num">gpt-5-mini · text-embedding-3-large</td></tr>
+        <tr><td>Rate cap</td><td class="num">3.5% (0.035)</td></tr>
+        <tr><td>Draft max tokens · RAG max tokens</td><td class="num">800 · 500 (gpt-5-mini: 3,000 · 2,500)</td></tr>
+        <tr><td>RAG chunk size · top_k</td><td class="num">≤1,200 chars · 3</td></tr>
+        <tr><td>Retries</td><td class="num">≤5 attempts, 1–20 s backoff</td></tr>
+        <tr><td>Pending draft cap</td><td class="num">500</td></tr>
+        <tr><td>High-stakes cue</td><td class="num">≥ max(t+0.10, 0.80)</td></tr>
+        <tr><td>Fast-approve warning</td><td class="num">&lt; 8 s</td></tr>
+        <tr><td>Tests · ADRs</td><td class="num">68 passing · 14</td></tr>
+        <tr><td>Served MLflow run</td><td class="num">3f575754…</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <h3>Glossary in plain English</h3>
+  <dl class="gloss">
+    <dt>Churn (here)</dt><dd>Next month the balance rounds to $0 and there are no real transactions.</dd>
+    <dt>Data leakage</dt><dd>Future information sneaking into training, which makes test scores look better than real life.</dd>
+    <dt>PR-AUC</dt><dd>How precise your flags are across all cut-offs; the right lens when positives are rare.</dd>
+    <dt>ROC-AUC</dt><dd>The chance the model ranks a random churner above a random non-churner.</dd>
+    <dt>Threshold / cut-off</dt><dd>The score above which a customer enters the review queue; here set by capacity.</dd>
+    <dt>SHAP</dt><dd>Splits one prediction into each feature's push up or down, based on game theory.</dd>
+    <dt>Equalized Odds diff.</dt><dd>The largest gap between groups in true-positive or false-positive rate. 0 means equal.</dd>
+    <dt>Calibration</dt><dd>Whether a score of 0.7 really means 70% of such customers churn. Not done here.</dd>
+    <dt>MLflow</dt><dd>Records each training run's settings, metrics and files so results are reproducible.</dd>
+    <dt>RAG</dt><dd>Retrieve your own relevant text first, then ask the LLM to answer from it.</dd>
+    <dt>Embedding</dt><dd>A list of numbers representing meaning; similar texts get similar vectors.</dd>
+    <dt>Cosine similarity</dt><dd>How closely two vectors point the same way; used to rank chunks.</dd>
+    <dt>TF-IDF</dt><dd>Keyword scoring that favours words that are frequent in a chunk but rare overall. The original offline fallback, replaced by BM25 in ADR 015.</dd>
+    <dt>Prompty</dt><dd>Microsoft's file format for prompts: settings, inputs and system/user templates, versioned like code.</dd>
+    <dt>Deployment (Foundry)</dt><dd>A named instance of a model in your resource. Code calls the deployment name.</dd>
+    <dt>HITL</dt><dd>Human in the loop: a person must approve before anything consequential happens.</dd>
+    <dt>Pydantic</dt><dd>Python validation that rejects data outside defined types and limits.</dd>
+    <dt>RBAC</dt><dd>Role-based access control: what each role is allowed to do.</dd>
+    <dt>ADR</dt><dd>Architecture Decision Record: a short note of a decision, alternatives and trade-offs.</dd>
+    <dt>SQLite WAL</dt><dd>A journal mode that lets readers and a writer work at the same time with fewer locks.</dd>
+    <dt>429</dt><dd>HTTP “too many requests”: you hit the rate or token quota, so back off and retry.</dd>
+    <dt>AppLocker</dt><dd>Windows policy that blocks unapproved executables; it shaped many decisions here.</dd>
+  </dl>
+</section>
+
+<!-- ============================ 11. SELF-TEST ============================ -->
+<section id="self-test">
+  <span class="eyebrow">11 · Test yourself · 2 min</span>
+  <h2>Ten questions to answer before you close this page</h2>
+  <p class="cap">Say the answer out loud, then open the block to check it. Every answer is already somewhere above.</p>
+
+  <details class="quiz"><summary>PR-AUC on the test window: the model versus the baseline rule?</summary><div class="ans">
+    <p>0.219 for XGBoost versus 0.151 for the <code>gone_this_month</code> rule. Always predicting “no churn” scores 0.132.</p></div></details>
+
+  <details class="quiz"><summary>ROC-AUC on the test window: the model versus the baseline rule?</summary><div class="ans">
+    <p>0.723 for XGBoost versus 0.551 for the rule. The PRD's aspirational ROC-AUC &gt; 0.85 was not reached.</p></div></details>
+
+  <details class="quiz"><summary>What is the shipped threshold, and what does it actually represent?</summary><div class="ans">
+    <p>0.70055 — the top 5% of validation scores, a capacity cut sized to what the team can review. Scores are uncalibrated risk ranks, so 0.70 means “top of the portfolio”, not “70% chance of churn”.</p></div></details>
+
+  <details class="quiz"><summary>How many false positives at the max-F1 cut, and how many at the shipped cut?</summary><div class="ans">
+    <p>248,778 false positives at the max-F1 threshold of 0.475, down to 20,127 at the top-5% threshold of 0.701 — with no change in ranking quality.</p></div></details>
+
+  <details class="quiz"><summary>Name the three windows of the temporal split, with dates.</summary><div class="ans">
+    <p>Fit 2007-03 → 2016-08 (114 months, 1,568,631 rows), validation 2016-09 → 2017-08 (12 months), test 2017-09 → 2020-04 (32 months). One chronological split, not CV folds.</p></div></details>
+
+  <details class="quiz"><summary>What is the interest-rate cap, and where is it enforced?</summary><div class="ans">
+    <p>3.5% (0.035). Code, not the prompt: the rate is clamped with <code>min(rate, MAX_RATE)</code> and a Pydantic model requires 0 ≤ r ≤ 0.035. The same model re-validates human edits.</p></div></details>
+
+  <details class="quiz"><summary>How much AUM was at risk?</summary><div class="ans">
+    <p>About $7.3M of historical assets under management (≈ $7.27M).</p></div></details>
+
+  <details class="quiz"><summary>What did the empirical leak screen measure, and what did the top feature score?</summary><div class="ans">
+    <p>A quick Random Forest importance screen: any single feature taking more than ~50% of the importance is treated as a likely leak. The top feature, <code>Running_Balance_Rounded</code>, scored 0.273, so it passed.</p></div></details>
+
+  <details class="quiz"><summary>Name two hard human-in-the-loop rules the API enforces.</summary><div class="ans">
+    <p>Approving requires <code>attention_ack=true</code> or the API returns 422; and approved is not sent, because no <code>/send</code> route and no <code>sent</code> state exist. Also: decisions are final, and a soft cap of 500 pending drafts returns 429.</p></div></details>
+
+  <details class="quiz"><summary>What are the Equalized Odds differences, by which slices, and at what cut?</summary><div class="ans">
+    <p>≈ 0.156 by age (6 of 6 bands kept) and ≈ 0.318 by state (38 of 55 kept), measured on a 100,000-row test sample at the real 0.701 cut. Say “disclosed and monitored”, never “fair”.</p></div></details>
+</section>
+
+<footer>
+  <p><strong>Sources checked:</strong> <code>src/</code> (serving, genai, core), <code>Code/Sprint3/friction_gate_app.py</code>, <code>Models/ops/serving_meta.json</code>, <code>Docs/Final_Report_Official.md</code>, ADRs 001–015, <code>Docs/Sprint2/ML_Learnings.md</code>, <code>Docs/Sprint2/reports/fairlearn_equalized_odds.json</code>, <code>Docs/Engineering/Corrections_and_Future_Work.md</code>, and the <a href="https://learn.microsoft.com/credentials/certifications/resources/study-guides/ai-901">AI-901 study guide</a> (skills measured as of 15 April 2026).</p>
+  <p>Test count as last recorded in the repo (127 passed, 24 Sep 2026). Re-run <code>python -m pytest tests -q</code> before quoting it live.</p>
+</footer>
+</div>
