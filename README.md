@@ -10,9 +10,11 @@ This is a solo course project and engineering demonstration. The bank scenario
 and stakeholder roles provide project context. It has no production customers
 and makes no claim of measured retention gains.
 
-**Start here:** [Case study and CV summary](Docs/Portfolio/CASE_STUDY.md) ·
+**Start here:** [Case study](Docs/Portfolio/CASE_STUDY.md) ·
 [Five-minute demo](Docs/Portfolio/DEMO_GUIDE.md) ·
 [Evidence and validation](Docs/Portfolio/EVIDENCE.md)
+
+**Project page:** [Meridian in plain language](https://meridian-ai-engineering.vercel.app).
 
 ## What to review
 
@@ -126,9 +128,9 @@ See the dated [evidence record](Docs/Portfolio/EVIDENCE.md) and
 | [Code/](Code/) | Notebooks, export scripts, and Streamlit UI |
 | [educational_web_app/](educational_web_app/) | React/TypeScript project tour and tests |
 | [infra/](infra/) | Azure deployment files |
-| [Docs/Portfolio/](Docs/Portfolio/) | Employer case study, demo, evidence, and sharing guide |
+| [Docs/Portfolio/](Docs/Portfolio/) | Case study, demo, validation, and source history |
 | [Official report](Docs/Final_Report_Official.md) | Detailed project report |
 | [Architecture decisions](Docs/Architecture/ADRs/) | Design choices and trade-offs |
 
 [Setup](CLONE_GUIDE.md) · [Technical debt](Docs/Engineering/Technical_Debt_and_Limitations.md) ·
-[Sharing and rollback](Docs/Portfolio/SHARING_AND_ROLLBACK.md)
+[Source and version history](Docs/Portfolio/SHARING_AND_ROLLBACK.md)

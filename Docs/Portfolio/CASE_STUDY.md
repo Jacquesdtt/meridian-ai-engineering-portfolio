@@ -58,25 +58,6 @@ scoring and review without the original course data.
    approve it with acknowledgement, and inspect the audit history.
 3. Inspect the [evidence record](EVIDENCE.md) for dated checks and their limits.
 
-## Copy-ready portfolio summary
-
-> Built Meridian, an AI-assisted customer retention prototype with XGBoost,
-> FastAPI, Streamlit, and Azure OpenAI. Connected churn ranking to constrained
-> draft generation, human approval, and SQLite audit records. Added SHAP
-> explanations and report-grounded Q&A. Evaluated the model on a chronological
-> test split and documented the capacity, recall, fairness, and deployment limits.
-
-## CV bullets
-
-- Built a churn-scoring and human-review workflow with FastAPI, Streamlit,
-  Pydantic validation, SQLite audit events, and per-customer TreeSHAP explanations.
-- Evaluated XGBoost on a chronological test split: PR-AUC 0.219 versus a 0.151
-  heuristic baseline; selected a validation-based threshold and documented
-  the resulting 22.9% precision and 9.0% recall.
-- Integrated Azure OpenAI drafts and report-grounded Q&A, with versioned prompts,
-  structured output, retries, local fallbacks, and a verified deployment exercise
-  on Azure Container Apps.
-
 ## Next production steps
 
 Add authenticated identity, Python/container CI, a repeatable data pipeline,

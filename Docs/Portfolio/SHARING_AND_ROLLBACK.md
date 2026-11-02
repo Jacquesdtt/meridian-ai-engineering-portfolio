@@ -1,14 +1,13 @@
-# Sharing and version history
+# Source and version history
 
-Share [the public portfolio](https://github.com/Jacquesdtt/meridian-ai-engineering-portfolio).
-Employers can read the README, case study, demo guide, source, tests, and model
-evidence without a GitHub account. Use **Code > Download ZIP** to download a copy.
-The application requires local setup; this repository is not a hosted demo.
+The [source repository](https://github.com/Jacquesdtt/meridian-ai-engineering-portfolio)
+contains the application, tests, saved model, and project records. The
+[project page](https://meridian-ai-engineering.vercel.app) explains the workflow
+and results. Running the application requires the [local setup](../../CLONE_GUIDE.md).
 
-The public repository starts with a fresh snapshot of the employer package.
-It contains no private development history. See [PUBLICATION.md](PUBLICATION.md)
-for provenance and public preparation details.
+Use Git history to compare versions and inspect engineering changes. The
+[validation record](EVIDENCE.md) and [maintenance report](CLEANUP_2026-11-02.md)
+identify the scope and limits of the recorded checks.
 
-The original development repository and checkpoint remain separate and private.
-Private checkpoint tags and branch names are not available in this repository.
-Use this public repository's Git history to inspect or recover published versions.
+Raw course data, credentials, runtime databases, and installed dependencies are
+excluded. See [source provenance](PUBLICATION.md) for the repository scope.

@@ -1,30 +1,29 @@
-# Public portfolio publication
+# Source provenance
 
 Date: 2 November 2026.
 
-Source: employer package from development commit
-`18566aea5df9ea8f3c318a7e714c52dbc4dd71e2`.
+The initial public source was based on development commit
+`18566aea5df9ea8f3c318a7e714c52dbc4dd71e2`. It preserved the application code,
+model artifacts, fixtures, and dependencies at that point.
 
-This repository is a fresh public snapshot. The original development repository
-and its history remain private. The initial snapshot preserved application code, model artifacts, fixtures, and
-dependencies from that package. The later [cleanup](CLEANUP_2026-11-02.md) records
-code, dependency, documentation, and generated-report corrections. The model and
-its evaluation results are unchanged.
+The later [maintenance report](CLEANUP_2026-11-02.md) records code, dependency,
+documentation, and generated-report corrections. The trained model and saved
+evaluation results are unchanged.
 
-Public preparation:
+## Included and external inputs
 
-- Clear saved outputs and execution counts from three notebooks. Preserve code
-  and narrative cells. Saved model evaluation remains in the reports.
-- Omit four original course handouts. Keep the submission validator and explain
-  external inputs in `StartingFiles/README.md`.
-- Use the public repository URL in clone and sharing instructions.
-- Replace the operator's recorded public IP address with a placeholder in
-  historical deployment documents.
-- Exclude credentials, raw CSVs, training exports, runtime databases, installed
-  dependencies, and local agent/editor configuration.
+- Application code, saved model artifacts, fixtures, tests, and reports are included.
+- Notebook code and narrative cells are retained; saved outputs and execution
+  counts were cleared from three notebooks. Saved evaluation results remain in
+  the reports.
+- Original course handouts and raw data are external inputs. See
+  [StartingFiles/README.md](../../StartingFiles/README.md) for the required files.
+- Credentials, runtime databases, training exports, installed dependencies, and
+  local editor configuration are excluded.
+- A recorded operator IP address was replaced with a placeholder in historical
+  deployment documents.
 
-Historical reports and architecture records describe the original development
-work. Some link to private agent notes or course handouts that are not included
-here. Start with the root README and `Docs/Portfolio/`.
-
-See [EVIDENCE.md](EVIDENCE.md) for model results and dated validation limits.
+Historical reports describe the original development work. Some references
+point to external notes or course handouts that are not included here. Start
+with the [README](../../README.md), [case study](CASE_STUDY.md), and
+[validation record](EVIDENCE.md).

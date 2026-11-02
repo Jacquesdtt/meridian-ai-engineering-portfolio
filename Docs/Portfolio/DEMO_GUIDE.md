@@ -1,4 +1,4 @@
-# Employer demo guide
+# Demo guide
 
 Use the committed illustrative fixtures. They are not an evaluation set.
 No training data or Azure account is required for the local path.
@@ -46,7 +46,7 @@ local sockets are blocked; a separate API server is then unnecessary.
 demo, create an empty file named `.env` at the repository root. Leave any
 existing configuration intact. Run `docker compose up -d --build` and open
 `http://127.0.0.1:8000/docs`. Docker starts only the API. Streamlit and the tour
-are separate. This pass does not claim a fresh Docker or Azure deployment check.
+are separate. Docker and Azure deployment checks are historical; see the evidence record.
 
 ## Five-minute walkthrough
 
@@ -79,7 +79,7 @@ Invoke-RestMethod -Uri http://127.0.0.1:8000/score -Method Post -ContentType 'ap
 If `API_ACCESS_KEY` is configured, add the matching `X-API-Key` header. Keep real
 keys out of recordings and portfolio files.
 
-## Explain the limits
+## Limitations
 
 - The model improves ranking over a heuristic; retained customers and revenue
   gains have not been measured.

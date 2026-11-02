@@ -2,7 +2,7 @@
 
 This guide provides step-by-step instructions for cloning and setting up this repository on another machine (Windows, macOS, or Linux).
 
-## Employer demo: minimum Python setup
+## Local demo: minimum Python setup
 
 For the project tour, use Node.js 24 and the [README](README.md). Python is
 required only for model scoring, retention review, and backend tests.

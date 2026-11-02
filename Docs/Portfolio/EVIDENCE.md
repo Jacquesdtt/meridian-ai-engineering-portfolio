@@ -1,13 +1,13 @@
-# Portfolio evidence record
+# Validation record
 
-**Packaging date: 2 November 2026.**
+**Validation date: 2 November 2026.**
 
 The initial packaging checks below predate the later public cleanup. See the
 [cleanup validation](CLEANUP_2026-11-02.md) for the corrected code, dependency
 update, 159 backend tests, and 27 frontend tests.
 
 This record separates saved model results, earlier runtime checks, and checks
-run during packaging. Code tests do not establish model quality, customer
+run on 2 November 2026. Code tests do not establish model quality, customer
 impact, or production readiness.
 
 ## Saved model evaluation
@@ -43,7 +43,7 @@ Source: [ops run summary](../Sprint2/reports/sprint2_run_summary_v2.json), run
 | 24 September 2026 | [Sprint debrief](../Sprint5/sprint_debrief.md), [benchmark cases](../../tests/genai/viva_benchmark.json) | Recorded 87.5% agreement across 48 rubric-point labels. Small historical LLM benchmark, not a current accuracy guarantee. |
 | 20 October 2026 | [Learning-app validation](../../educational_web_app/docs/validation_2026-10-20.md) | 127 Python tests, 26 frontend tests, typecheck/build, browser flow, and local timings. Live marker returned Azure 401. No learner participants. |
 
-## Packaging checks: 2 November 2026
+## Initial validation: 2 November 2026
 
 | Check | Result |
 |---|---|
@@ -51,24 +51,16 @@ Source: [ops run summary](../Sprint2/reports/sprint2_run_summary_v2.json), run
 | Frontend typecheck, tests, and build | `npm run lint`, `npm test`, `npm run build`: passed; 26 tests in 5 files. Build retains the chunk-size advisory (1,088.77 kB JS; 336.54 kB gzip estimate). |
 | Backend tests | 127 passed in 8.39 s using the existing `tests/` suite. 22 warnings: pytest/anyio and Starlette deprecations plus unclosed SQLite connection resource warnings. |
 | Committed-model fixtures and workflow | In-process API smoke passed using the real committed model and a temporary database. Scores: 0.207409 (not flagged), 0.750928 (flagged). Stub draft, capacity refusal, acknowledgement, permission denial, approval, terminal immutability, audit reads, two-row fixture cohort, and SHAP checked. No send route exists in OpenAPI. |
-| Portfolio links, metrics, and Git diff | Local targets in README, setup guide, and all four portfolio documents exist. Metadata and run-summary IDs/thresholds match. Teaching-fact export produced no diff. Source diff reviewed; no application, model, dependency, or infrastructure files changed. |
-| Employer archive preflight | ZIP integrity and required-file checks passed: 415 entries, about 18.6 MB. Local agent/editor config, credentials, raw CSVs, databases, installed packages, and Git history are excluded. Extracted source passed all 127 backend tests (22 warnings, 7.70 s). |
+| Documentation and metric checks | Local targets in README, setup guide, and all four portfolio documents exist. Metadata and run-summary IDs/thresholds match. Teaching-fact export produced no diff. Source diff reviewed; no application, model, dependency, or infrastructure files changed. |
 
 Environment: Windows, Node.js 24.15.0, npm 11.12.0, CPython 3.13.15.
-Python serving dependencies came from `requirements.serving.txt`, with pytest
-9.2.0 and Streamlit 1.66.1 added for validation. Key versions: scikit-learn
-1.9.0, xgboost-cpu 3.3.0, FastAPI 0.139.0. Packages were installed with `uv`
-into a temporary target directory and exposed through `PYTHONPATH`; no global
-Python packages or tracked dependency files were changed. Python checks used
-the installed 3.13 interpreter directly because `py -3.13` did not resolve it.
-The successful suite invocation used `pytest.main(['tests', '-q', '-p',
-'no:cacheprovider'])` through that interpreter. Initial validation processes
-stalled; restarted instrumented runs completed. The smoke harness was corrected
-to accept the API's documented 201 creation response; application code was unchanged.
+Serving checks used `requirements.serving.txt`, pytest 9.2.0, and Streamlit
+1.66.1. Dependencies were installed in an isolated target directory. No global
+Python packages or tracked dependency files were changed.
 
 Current checks did not include a browser session, production network load,
 Docker execution, or live LLM responses. Earlier browser evidence remains dated
 in the October report. The SQLite warnings are retained as a maintenance limit.
 
 No training run, live Azure call, cloud deployment, learner trial, or new
-business-outcome measurement is part of this packaging pass.
+business-outcome measurement is part of this validation.
