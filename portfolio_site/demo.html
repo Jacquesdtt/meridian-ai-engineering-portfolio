@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17201b">
+  <meta name="description" content="Try Meridian's customer review workflow. Explore sample cases, review a draft, and record a decision in a simple browser demo.">
+  <title>Try Meridian — Interactive dashboard demo</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/demo.css">
+  <script src="/demo.js" defer></script>
+</head>
+<body class="demo-page">
+  <a class="skip" href="#workspace">Skip to demo</a>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="/">JACQUES DU TOIT <span>/ MERIDIAN</span></a>
+      <a class="back-link" href="/">↖ Back to the case study</a>
+    </div>
+  </header>
+  <main class="shell demo-shell">
+    <div class="demo-intro">
+      <div><p class="eyebrow">THE DASHBOARD / A HANDS-ON DEMO</p>
+        <h1>A small decision.<br><em>Try it for yourself.</em></h1>
+        <p>Explore a case, shape a draft, make the call.<br class="desktop-break"> See where the technology helps, and where you take over.</p>
+      </div>
+      <div class="demo-context"><span class="demo-badge"><span aria-hidden="true">●</span> Demo data</span><p>A browser simulation of the Streamlit workflow. Fixed sample scores and template drafts. Everything stays in this tab.</p><p class="time-note">About 2 minutes · No setup</p></div>
+    </div>
+
+    <section class="workspace" id="workspace" aria-label="Interactive Meridian dashboard">
+      <div class="workspace-bar"><div class="workspace-title"><span class="meridian-mark" aria-hidden="true">m.</span><div><strong>Meridian</strong><span>Customer review workspace</span></div></div><button class="quiet-button" id="reset-demo" type="button">↻ Start fresh</button></div>
+      <div class="workspace-layout">
+        <aside class="workspace-sidebar" aria-label="Demo controls">
+          <label class="field-label" for="role">YOUR VIEW</label>
+          <select id="role"><option value="agent">Retention agent</option><option value="compliance">Compliance viewer</option></select>
+          <p id="role-description" class="muted small">Explore cases, edit drafts, and record decisions.</p>
+          <nav class="workspace-nav" aria-label="Dashboard views">
+            <button type="button" id="view-customers" aria-current="page"><span><span class="nav-symbol" aria-hidden="true">◫</span> Sample cases</span><span>3</span></button>
+            <button type="button" id="view-review"><span><span class="nav-symbol" aria-hidden="true">▤</span> Review queue</span><span id="queue-count">0</span></button>
+            <button type="button" id="view-audit"><span><span class="nav-symbol" aria-hidden="true">≡</span> Audit trail</span><span id="audit-count">0</span></button>
+          </nav>
+          <div class="sidebar-foot"><span class="eyebrow">A PERSON STAYS IN CONTROL</span><p>Approval records your decision. It never sends an email.</p><button class="quiet-button" id="guide-toggle" type="button" aria-expanded="true" aria-controls="guide">Hide tips</button></div>
+        </aside>
+        <div class="workspace-main">
+          <ol class="demo-progress" aria-label="Your review journey">
+            <li id="step-explore" aria-current="step"><span>1</span> Explore a case</li>
+            <li id="step-review"><span>2</span> Review a draft</li>
+            <li id="step-record"><span>3</span> Record a decision</li>
+          </ol>
+          <aside id="guide" class="guide"><span class="guide-icon" aria-hidden="true">↗</span><p id="guide-text"></p></aside>
+          <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+
+          <section id="customers-panel" aria-labelledby="customers-heading">
+            <div class="panel-heading"><div><p class="eyebrow">01 / FIND THE FOCUS</p><h2 id="customers-heading" tabindex="-1">Who needs a closer look?</h2></div><span class="small muted">3 sample monthly cases</span></div>
+            <div id="case-list" class="case-list" aria-label="Choose a sample case"></div>
+            <article id="case-detail" class="case-detail"></article>
+          </section>
+
+          <section id="review-panel" aria-labelledby="review-heading" hidden></section>
+          <section id="audit-panel" aria-labelledby="audit-heading" hidden></section>
+        </div>
+      </div>
+      <div class="workspace-footer"><span>ILLUSTRATIVE WORKFLOW · NO LIVE MODEL OR AI CALLS</span><span id="session-status">A fresh space to explore</span></div>
+    </section>
+
+    <details class="demo-limits"><summary>A little context about this demo</summary><div><p>The queue cut (0.70055) and rate limit (3.5%) follow the project. Cases 01 and 02 use approximate scores and account values from the two committed demo fixtures. Case 03 is invented. All cases are illustrative, not real customers or an evaluation set.</p><p>Scores rank monthly cases; they are not calibrated chances of leaving. Account signals are descriptive, not live SHAP explanations. Drafts use a local template, and the audit trail exists only for this tab. Reloading or choosing “Start fresh” clears it. The view switch illustrates permissions, not authentication.</p><p>The full application also includes model explanations, portfolio analysis, and report Q&amp;A. <a href="https://github.com/Jacquesdtt/meridian-ai-engineering-portfolio/blob/main/Docs/Portfolio/DEMO_GUIDE.md">Explore the full application guide ↗</a></p></div></details>
+    <noscript><p class="guide">Enable JavaScript to use the demo. You can also <a href="/">read the case study</a>.</p></noscript>
+    <div class="demo-end"><span>A SMALL PART OF A BIGGER SYSTEM</span><a href="/#how-it-works">See how the pieces connect ↗</a></div>
+  </main>
+</body>
+</html>

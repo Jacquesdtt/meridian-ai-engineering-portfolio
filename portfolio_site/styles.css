@@ -156,10 +156,12 @@ footer a:hover { text-decoration: underline; }
   .brand span { margin-left: 0; font-size: 9px; }
   nav { gap: 15px; font-size: 9px; }
   nav>a:first-child { display: none; }
+  .topbar nav a { white-space: nowrap; }
+  .topbar nav a[href="#results"] { display: none; }
   .nav-source { padding: 8px 10px; }
   .hero-grid { padding-top: 42px; gap: 39px; }
   h1 { font-size: clamp(53px, 14.5vw, 73px); margin-top: 23px; margin-bottom: 25px; }
-  h1 em { font-size: .79em; }
+  h1 em { display: inline-block; max-width: 100%; padding-right: .1em; font-size: clamp(34px, 10.8vw, 56px); line-height: 1.15; letter-spacing: -.045em; white-space: normal; }
   .intro { font-size: 17px; line-height: 1.75; }
   .hero-description { font-size: 13px; margin-top: 15px; }
   .actions { gap: 12px; margin-top: 27px; }

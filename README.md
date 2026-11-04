@@ -17,6 +17,8 @@ and makes no claim of measured retention gains.
 **Project page:** [Meridian in plain language](https://meridian-ai-engineering.vercel.app).
 The [page source](portfolio_site/) is static HTML and CSS with no build step.
 Its Vercel release is separate from this repository's GitHub push.
+The page links to the main portfolio at
+https://jacques-du-toit-portfolio.vercel.app/. Keep the return link when publishing.
 
 ## What to review
 
